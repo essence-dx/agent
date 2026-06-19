@@ -7,7 +7,7 @@ exclude = ["plugins/image-gen-fal"]
 version = "0.8.0-beta-2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/millercarla211-ctrl/dx-agents"
+repository = "https://github.com/millercarla211-ctrl/dx-agent"
 rust-version = "1.87"
 
 [workspace.dependencies]
@@ -30,13 +30,13 @@ aardvark-sys = { path = "crates/aardvark-sys", version = "0.1.0" }
 directories = "6.0"
 
 [package]
-name = "dx-agents"
+name = "dx-agent"
 # Publishing blocked during microkernel workspace transition — see #5811.
 # All 14 workspace sub-crates are publish = false and therefore unresolvable
 # on crates.io. Flip or remove this once the multi-crate publish topology is
 # designed per RFC #5579.
 publish = false
-default-run = "dx-agents"
+default-run = "dx-agent"
 version.workspace = true
 edition.workspace = true
 authors = ["theonlyhennygod"]
@@ -59,12 +59,12 @@ include = [
 ]
 
 [[bin]]
-name = "dx-agents"
+name = "dx-agent"
 path = "src/main.rs"
 
 [[bin]]
-name = "dx-agents-acp-bridge"
-path = "src/bin/dx-agents-acp-bridge.rs"
+name = "dx-agent-acp-bridge"
+path = "src/bin/dx-agent-acp-bridge.rs"
 required-features = ["acp-bridge"]
 
 [lib]
