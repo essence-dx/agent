@@ -1,0 +1,23 @@
+pkgbase = dx-agents
+	pkgdesc = DX Agents command-line AI runtime
+	pkgver = 0.6.9
+	pkgrel = 1
+	url = https://github.com/millercarla211-ctrl/dx-agents
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	license = Apache-2.0
+	makedepends = cargo
+	makedepends = git
+	makedepends = nodejs
+	makedepends = npm
+	depends = gcc-libs
+	depends = openssl
+	provides = dx-agents
+	provides = zerocode
+	conflicts = dx-agents
+	conflicts = zerocode
+	source = dx-agents-0.6.9.tar.gz::https://github.com/millercarla211-ctrl/dx-agents/archive/refs/tags/v0.6.9.tar.gz
+	sha256sums = SKIP
+
+pkgname = dx-agents

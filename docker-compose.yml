@@ -1,0 +1,71 @@
+# DX Agents Docker Compose Example
+# 
+# Quick start:
+#   1. Copy this file and set your API key
+#   2. Run: docker compose up -d
+#   3. Access gateway at http://localhost:42617
+#
+# For more info: https://github.com/millercarla211-ctrl/dx-agents
+
+services:
+  dx-agents:
+    image: ghcr.io/millercarla211-ctrl/dx-agents:latest
+    # For ARM64 environments where the distroless image exits immediately,
+    # switch to the Debian compatibility image instead:
+    # image: ghcr.io/millercarla211-ctrl/dx-agents:debian
+    # Or build locally (distroless, no shell):
+    # build: .
+    # Or build the Debian variant (includes bash, git, curl):
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.debian
+    container_name: dx-agents
+    restart: unless-stopped
+    
+    environment:
+      # V0.8.0: single env-var override surface — the schema-mirror grammar
+      # `DX_AGENTS_<dotted_path_with_double_underscores>=<value>`. Each `__`
+      # is a path separator. Legacy `API_KEY`, `ANTHROPIC_API_KEY`,
+      # `OPENAI_API_KEY`, `PROVIDER`, `ZEROCLAW_MODEL` (etc.) fallbacks were
+      # eradicated; `ZEROCLAW_*` remains a compatibility prefix only.
+      #
+      # Pick a typed-family alias and set its api_key + model:
+      - DX_AGENTS_providers__models__openrouter__default__api_key=${OPENROUTER_API_KEY:-}
+      # - DX_AGENTS_providers__models__openrouter__default__model=anthropic/claude-sonnet-4-20250514
+      # - DX_AGENTS_providers__models__anthropic__default__api_key=${ANTHROPIC_API_KEY:-}
+      # - DX_AGENTS_providers__models__openai__default__api_key=${OPENAI_API_KEY:-}
+
+      # Allow public bind inside Docker (required for container networking)
+      - DX_AGENTS_gateway__allow_public_bind=true
+      # Default gateway port inside container
+      - DX_AGENTS_gateway__port=${DX_AGENTS_GATEWAY_PORT:-42617}
+      
+    volumes:
+      # Persist workspace and config (must match WORKDIR/HOME in Dockerfile)
+      - dx-agents-data:/zeroclaw-data
+      
+    ports:
+      # Gateway API port (override HOST_PORT if 42617 is taken)
+      - "${HOST_BIND:-127.0.0.1}:${HOST_PORT:-42617}:${DX_AGENTS_GATEWAY_PORT:-42617}"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 32M
+
+    # Health check — uses lightweight status instead of full diagnostics.
+    # For images with curl, prefer: curl -f http://localhost:42617/health
+    healthcheck:
+      test: ["CMD", "dx-agents", "status", "--format=exit-code"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  dx-agents-data:

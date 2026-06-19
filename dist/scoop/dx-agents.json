@@ -1,0 +1,27 @@
+{
+    "version": "0.5.9",
+    "description": "DX Agents command-line AI runtime.",
+    "homepage": "https://github.com/millercarla211-ctrl/dx-agents",
+    "license": "MIT|Apache-2.0",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/millercarla211-ctrl/dx-agents/releases/download/v0.5.9/dx-agents-x86_64-pc-windows-msvc.zip",
+            "hash": "",
+            "bin": ["dx-agents.exe", "zerocode.exe"]
+        }
+    },
+    "checkver": {
+        "github": "https://github.com/millercarla211-ctrl/dx-agents"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/millercarla211-ctrl/dx-agents/releases/download/v$version/dx-agents-x86_64-pc-windows-msvc.zip"
+            }
+        },
+        "hash": {
+            "url": "https://github.com/millercarla211-ctrl/dx-agents/releases/download/v$version/SHA256SUMS",
+            "regex": "([a-f0-9]{64})\\s+dx-agents-x86_64-pc-windows-msvc\\.zip"
+        }
+    }
+}

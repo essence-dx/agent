@@ -1,0 +1,22 @@
+# DX GitHub Actions temporarily disabled.
+# Controlled deactivation requested by essencefromexistence to preserve limited GitHub Actions minutes.
+# Keep this workflow disabled until essencefromexistence explicitly re-enables GitHub Actions for this repository.
+name: PR Path Labeler
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    name: Apply path labels
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 # v6.1.0
+        with:
+          sync-labels: true
