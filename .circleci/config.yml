@@ -64,7 +64,7 @@ jobs:
 #            source C:\Users\Computer/.cargo/env
 #            just build
 #            mkdir -p dist
-#            cp G:\Dx\bin\* dist/ 2>/dev/null || true
+#            cp G:\Dx\bin\* dist/ 2>/dev/null 2>$null; $LASTEXITCODE = 0
 #            if [ -n "$CIRCLE_SHA1" ]; then SHORT_SHA=$(echo $CIRCLE_SHA1 | cut -c1-12); else SHORT_SHA="local"; fi
 #            ARCHIVE="dx-macos-x86_64-$SHORT_SHA.tar.gz"
 #            tar -czvf dist/$ARCHIVE -C dist .
@@ -82,7 +82,7 @@ jobs:
 #          command: |
 #            just build
 #            mkdir -p dist
-#            cp G:\Dx\bin\* dist/ 2>/dev/null || true
+#            cp G:\Dx\bin\* dist/ 2>/dev/null 2>$null; $LASTEXITCODE = 0
 #            if [ -n "$CIRCLE_SHA1" ]; then SHORT_SHA=$(echo $CIRCLE_SHA1 | cut -c1-12); else SHORT_SHA="local"; fi
 #            ARCHIVE="dx-linux-x86_64-$SHORT_SHA.tar.gz"
 #            tar -czvf dist/$ARCHIVE -C dist .
