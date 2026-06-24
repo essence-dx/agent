@@ -1,10 +1,10 @@
-# services.zeroclaw — multi-instance NixOS module for the ZeroClaw agent.
+# services.dx_agent — multi-instance NixOS module for the DX Agent agent.
 #
 # Design memo: see ./README.md for usage; the upstream PR body links the full
 # design rationale.
 #
 # Layout:
-#   - `services.zeroclaw.instances.<name>` is an attrset of instances.
+#   - `services.dx_agent.instances.<name>` is an attrset of instances.
 #     Membership in the attrset is the activation signal — there is no
 #     top-level `enable`. Mirrors `services.restic.backups.<name>`.
 #   - Each instance gets:
@@ -21,14 +21,14 @@
 #     start. The world-readable copy in `/nix/store` only ever contains the
 #     literal placeholders; the resolved file lives at `${dataDir}/config.toml`
 #     mode `0600`, owned by the per-instance user.
-#     This substitution is a property of *this module*, not of ZeroClaw —
-#     ZeroClaw itself reads `config.toml` verbatim plus a handful of named
-#     env-var overrides documented in `crates/zeroclaw-config/src/schema.rs`
-#     (e.g. `OPENROUTER_API_KEY`, `ZEROCLAW_PROVIDER`).
+#     This substitution is a property of *this module*, not of DX Agent —
+#     DX Agent itself reads `config.toml` verbatim plus a handful of named
+#     env-var overrides documented in `crates/dx-agent-config/src/schema.rs`
+#     (e.g. `OPENROUTER_API_KEY`, `DX_AGENT_PROVIDER`).
 #
 # Single-instance usage (laptop / single-host case):
 #
-#   services.zeroclaw.instances.me = {
+#   services.dx_agent.instances.me = {
 #     environmentFile = "/run/agenix/zeroclaw-bot-token";
 #     settings = {
 #       default_provider = "anthropic";
@@ -43,7 +43,7 @@
 #
 # Multi-instance usage (one box, N tenants — shape mirrors restic.backups):
 #
-#   services.zeroclaw.instances = lib.genAttrs slots (n: {
+#   services.dx_agent.instances = lib.genAttrs slots (n: {
 #     environmentFile = "/run/secrets/${n}/identity.env";
 #     settings = (import ./shared-settings.nix) { slot = n; };
 #   });
@@ -68,7 +68,7 @@ let
     literalExpression
     ;
 
-  cfg = config.services.zeroclaw;
+  cfg = config.services.dx_agent;
 
   # `pkgs.formats.toml` is the canonical RFC-42 shape: it both type-checks
   # the `settings` attrset at evaluation time and serialises it to TOML at
@@ -122,7 +122,7 @@ let
           defaultText = literalExpression ''"/var/lib/zeroclaw-''${name}"'';
           description = ''
             State directory. Holds `config.toml`, the workspace at
-            `''${dataDir}/workspace`, and ZeroClaw's SQLite databases.
+            `''${dataDir}/workspace`, and DX Agent's SQLite databases.
 
             Created by `systemd-tmpfiles` at activation time with mode `0750`
             owned by {option}`user`:{option}`group`, so any absolute path is
@@ -136,7 +136,7 @@ let
           type = types.submodule {
             # RFC-42 shape: typed options for the popular knobs go here later
             # once the surface stabilises; `freeformType` lets every other
-            # ZeroClaw config key flow through with TOML's value-model
+            # DX Agent config key flow through with TOML's value-model
             # validation. No string-of-doom escape hatch needed for the
             # common case.
             freeformType = tomlFormat.type;
@@ -154,7 +154,7 @@ let
             }
           '';
           description = ''
-            ZeroClaw configuration as a Nix attrset. Rendered to TOML in the
+            DX Agent configuration as a Nix attrset. Rendered to TOML in the
             Nix store at build time, then `envsubst`'d into
             `''${dataDir}/config.toml` (mode `0600`) by the unit's
             `ExecStartPre`.
@@ -167,15 +167,15 @@ let
             resolved file in `''${dataDir}/config.toml` is locked to
             {option}`user`:{option}`group` mode `0600`.
 
-            The substitution is performed by this module, not by ZeroClaw.
-            ZeroClaw reads `config.toml` verbatim and overlays a handful of
+            The substitution is performed by this module, not by DX Agent.
+            DX Agent reads `config.toml` verbatim and overlays a handful of
             named environment-variable overrides on top (e.g.
-            `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `ZEROCLAW_PROVIDER`,
-            `ZEROCLAW_MODEL`); any other secret-bearing field — Telegram
+            `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `DX_AGENT_PROVIDER`,
+            `DX_AGENT_MODEL`); any other secret-bearing field — Telegram
             `bot_token`, Discord `bot_token`, etc. — needs the
             `envsubst` path to avoid living in `/nix/store`.
 
-            See ZeroClaw's `config.toml.example` upstream for the full key
+            See DX Agent's `config.toml.example` upstream for the full key
             surface; only the shape we render here is module-contractual.
           '';
         };
@@ -209,7 +209,7 @@ let
           '';
           description = ''
             Raw TOML appended verbatim after the rendered {option}`settings`
-            block. Documented escape hatch (per RFC-42) for ZeroClaw config
+            block. Documented escape hatch (per RFC-42) for DX Agent config
             keys whose shape isn't yet covered by the typed `settings`
             surface — most things should go through `settings` instead.
           '';
@@ -254,10 +254,10 @@ let
     else
       pkgs.runCommand "zeroclaw-${name}-config.toml" { } ''
         cat ${base} > $out
-        cat <<'ZEROCLAW_EXTRA_CONFIG_EOF' >> $out
+        cat <<'DX_AGENT_EXTRA_CONFIG_EOF' >> $out
 
         ${instanceCfg.extraConfig}
-        ZEROCLAW_EXTRA_CONFIG_EOF
+        DX_AGENT_EXTRA_CONFIG_EOF
       '';
 
   # Build one systemd service from one instance entry. Mirrors the shape of
@@ -290,7 +290,7 @@ let
       };
     in
     nameValuePair "zeroclaw-${name}" {
-      description = "ZeroClaw agent (instance ${name})";
+      description = "DX Agent agent (instance ${name})";
       wantedBy = [ "multi-user.target" ];
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
@@ -304,8 +304,8 @@ let
       };
 
       environment = {
-        ZEROCLAW_CONFIG_DIR = instanceCfg.dataDir;
-        ZEROCLAW_WORKSPACE = "${instanceCfg.dataDir}/workspace";
+        DX_AGENT_CONFIG_DIR = instanceCfg.dataDir;
+        DX_AGENT_WORKSPACE = "${instanceCfg.dataDir}/workspace";
       };
 
       serviceConfig = {
@@ -314,7 +314,7 @@ let
         Group = instanceCfg.group;
 
         # Resolve the rendered config from /nix/store into
-        # ${dataDir}/config.toml so ZeroClaw reads it at a stable path
+        # ${dataDir}/config.toml so DX Agent reads it at a stable path
         # *and* `$VAR` / `${VAR}` references inside `settings` strings
         # expand against the unit environment (populated by
         # `EnvironmentFile=`). We use a tiny shell wrapper rather than
@@ -349,7 +349,7 @@ let
         PrivateTmp = true;
         PrivateDevices = true;
         # Closed device policy + empty allow-list — matches `atticd`.
-        # ZeroClaw doesn't need /dev/* nodes for normal operation.
+        # DX Agent doesn't need /dev/* nodes for normal operation.
         DeviceAllow = "";
         DevicePolicy = "closed";
         ProtectSystem = "strict";
@@ -363,7 +363,7 @@ let
         ProtectProc = "invisible";
         ProcSubset = "pid";
         # MemoryDenyWriteExecute=yes blocks W+X mappings; safe for a
-        # Rust binary with no JIT. ZeroClaw 0.7.x has no JIT path.
+        # Rust binary with no JIT. DX Agent 0.7.x has no JIT path.
         MemoryDenyWriteExecute = true;
         # PrivateUsers=yes runs the unit in its own user namespace. The
         # StateDirectory= bind-mount happens in the host namespace
@@ -371,7 +371,7 @@ let
         # the host's view. Matches `atticd`.
         PrivateUsers = true;
         # RemoveIPC=yes wipes any sysvipc/posix IPC objects the unit
-        # leaves behind on stop. ZeroClaw doesn't use SysV IPC, so this
+        # leaves behind on stop. DX Agent doesn't use SysV IPC, so this
         # is essentially a belt-and-braces cleanup.
         RemoveIPC = true;
         RestrictNamespaces = true;
@@ -403,12 +403,12 @@ let
 
 in
 {
-  options.services.zeroclaw = {
+  options.services.dx_agent = {
     instances = mkOption {
       type = types.attrsOf (types.submodule instanceModule);
       default = { };
       description = ''
-        ZeroClaw instances to run on this host. Each entry produces a
+        DX Agent instances to run on this host. Each entry produces a
         `zeroclaw-<name>.service` systemd unit with its own state
         directory, system user, and rendered `config.toml`.
 
@@ -445,7 +445,7 @@ in
         group = instanceCfg.group;
         home = instanceCfg.dataDir;
         createHome = false; # dataDir is created by systemd-tmpfiles.
-        description = "ZeroClaw instance ${name}";
+        description = "DX Agent instance ${name}";
       }
     ) (filterAttrs (_: i: i.createUser) cfg.instances);
 
@@ -491,7 +491,7 @@ in
         {
           assertion = badNames == [ ];
           message = ''
-            services.zeroclaw.instances: instance name(s) ${toString badNames}
+            services.dx_agent.instances: instance name(s) ${toString badNames}
             contain characters outside [A-Za-z0-9._-]. Rename them — the
             instance name appears verbatim in the systemd unit name,
             user name, and state directory.
@@ -500,7 +500,7 @@ in
         {
           assertion = lib.length dirs == lib.length (lib.unique dirs);
           message = ''
-            services.zeroclaw.instances: two or more instances declare the
+            services.dx_agent.instances: two or more instances declare the
             same dataDir. Each instance needs a unique state directory or
             its SQLite databases will corrupt under concurrent access.
           '';
@@ -508,7 +508,7 @@ in
         {
           assertion = lib.length users == lib.length (lib.unique users);
           message = ''
-            services.zeroclaw.instances: two or more instances declare the
+            services.dx_agent.instances: two or more instances declare the
             same `user`. If you intend to share a user across instances,
             set `createUser = false` on all but one.
           '';
@@ -518,7 +518,7 @@ in
 
   meta = {
     # Filled in by the upstream maintainer when this module lands in the
-    # ZeroClaw repository. `[]` rather than a guess so `meta.maintainers`
+    # DX Agent repository. `[]` rather than a guess so `meta.maintainers`
     # doesn't claim ownership we don't have.
     maintainers = [ ];
   };

@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "crates/zeroclaw-api", "crates/zeroclaw-infra", "crates/zeroclaw-config", "crates/zeroclaw-log", "crates/zeroclaw-spawn", "crates/zeroclaw-providers", "crates/zeroclaw-memory", "crates/zeroclaw-channels", "crates/zeroclaw-tools", "crates/zeroclaw-runtime", "apps/zerocode", "crates/zeroclaw-plugins", "crates/zeroclaw-gateway", "crates/zeroclaw-hardware", "crates/zeroclaw-tool-call-parser", "crates/robot-kit", "crates/aardvark-sys", "crates/zeroclaw-macros", "apps/tauri", "tools/fill-translations", "xtask"]
+members = [".", "crates/dx-agent-api", "crates/dx-agent-infra", "crates/dx-agent-config", "crates/dx-agent-log", "crates/dx-agent-spawn", "crates/dx-agent-providers", "crates/dx-agent-memory", "crates/dx-agent-channels", "crates/dx-agent-tools", "crates/dx-agent-runtime", "apps/agentcode", "crates/dx-agent-plugins", "crates/dx-agent-gateway", "crates/dx-agent-hardware", "crates/dx-agent-tool-call-parser", "crates/robot-kit", "crates/aardvark-sys", "crates/dx-agent-macros", "apps/tauri", "tools/fill-translations", "xtask"]
 resolver = "2"
 exclude = ["plugins/image-gen-fal"]
 
@@ -11,21 +11,21 @@ repository = "https://github.com/millercarla211-ctrl/dx-agent"
 rust-version = "1.87"
 
 [workspace.dependencies]
-zeroclaw-api = { path = "crates/zeroclaw-api", version = "0.8.0-beta-2" }
-zeroclaw-infra = { path = "crates/zeroclaw-infra", version = "0.8.0-beta-2" }
-zeroclaw-config = { path = "crates/zeroclaw-config", version = "0.8.0-beta-2", default-features = false }
-zeroclaw-log = { path = "crates/zeroclaw-log", version = "0.8.0-beta-2" }
-zeroclaw-spawn = { path = "crates/zeroclaw-spawn", version = "0.8.0-beta-2" }
-zeroclaw-providers = { path = "crates/zeroclaw-providers", version = "0.8.0-beta-2" }
-zeroclaw-memory = { path = "crates/zeroclaw-memory", version = "0.8.0-beta-2" }
-zeroclaw-channels = { path = "crates/zeroclaw-channels", version = "0.8.0-beta-2", default-features = false }
-zeroclaw-tools = { path = "crates/zeroclaw-tools", version = "0.8.0-beta-2" }
-zeroclaw-runtime = { path = "crates/zeroclaw-runtime", version = "0.8.0-beta-2", default-features = false }
-zeroclaw-plugins = { path = "crates/zeroclaw-plugins", version = "0.8.0-beta-2" }
-zeroclaw-gateway = { path = "crates/zeroclaw-gateway", version = "0.8.0-beta-2" }
-zeroclaw-hardware = { path = "crates/zeroclaw-hardware", version = "0.8.0-beta-2" }
-zeroclaw-tool-call-parser = { path = "crates/zeroclaw-tool-call-parser", version = "0.8.0-beta-2" }
-zeroclaw-macros = { path = "crates/zeroclaw-macros", version = "0.8.0-beta-2" }
+dx-agent-api = { path = "crates/dx-agent-api", version = "0.8.0-beta-2" }
+dx-agent-infra = { path = "crates/dx-agent-infra", version = "0.8.0-beta-2" }
+dx-agent-config = { path = "crates/dx-agent-config", version = "0.8.0-beta-2", default-features = false }
+dx-agent-log = { path = "crates/dx-agent-log", version = "0.8.0-beta-2" }
+dx-agent-spawn = { path = "crates/dx-agent-spawn", version = "0.8.0-beta-2" }
+dx-agent-providers = { path = "crates/dx-agent-providers", version = "0.8.0-beta-2" }
+dx-agent-memory = { path = "crates/dx-agent-memory", version = "0.8.0-beta-2" }
+dx-agent-channels = { path = "crates/dx-agent-channels", version = "0.8.0-beta-2", default-features = false }
+dx-agent-tools = { path = "crates/dx-agent-tools", version = "0.8.0-beta-2" }
+dx-agent-runtime = { path = "crates/dx-agent-runtime", version = "0.8.0-beta-2", default-features = false }
+dx-agent-plugins = { path = "crates/dx-agent-plugins", version = "0.8.0-beta-2" }
+dx-agent-gateway = { path = "crates/dx-agent-gateway", version = "0.8.0-beta-2" }
+dx-agent-hardware = { path = "crates/dx-agent-hardware", version = "0.8.0-beta-2" }
+dx-agent-tool-call-parser = { path = "crates/dx-agent-tool-call-parser", version = "0.8.0-beta-2" }
+dx-agent-macros = { path = "crates/dx-agent-macros", version = "0.8.0-beta-2" }
 aardvark-sys = { path = "crates/aardvark-sys", version = "0.1.0" }
 directories = "6.0"
 
@@ -73,21 +73,21 @@ path = "src/lib.rs"
 
 [dependencies]
 # Internal workspace crates — versions and paths declared once in [workspace.dependencies]
-zeroclaw-api.workspace = true
-zeroclaw-spawn.workspace = true
-zeroclaw-infra.workspace = true
-zeroclaw-config = { workspace = true, features = ["clap"] }
-zeroclaw-log.workspace = true
-zeroclaw-providers.workspace = true
-zeroclaw-memory.workspace = true
-zeroclaw-channels = { workspace = true, optional = true }
-zeroclaw-tools = { workspace = true, optional = true }
-zeroclaw-runtime = { workspace = true, optional = true }
-zeroclaw-plugins = { workspace = true, optional = true }
-zeroclaw-gateway = { workspace = true, optional = true }
-zeroclaw-hardware = { workspace = true, optional = true }
-zeroclaw-tool-call-parser.workspace = true
-zeroclaw-macros.workspace = true
+dx-agent-api.workspace = true
+dx-agent-spawn.workspace = true
+dx-agent-infra.workspace = true
+dx-agent-config = { workspace = true, features = ["clap"] }
+dx-agent-log.workspace = true
+dx-agent-providers.workspace = true
+dx-agent-memory.workspace = true
+dx-agent-channels = { workspace = true, optional = true }
+dx-agent-tools = { workspace = true, optional = true }
+dx-agent-runtime = { workspace = true, optional = true }
+dx-agent-plugins = { workspace = true, optional = true }
+dx-agent-gateway = { workspace = true, optional = true }
+dx-agent-hardware = { workspace = true, optional = true }
+dx-agent-tool-call-parser.workspace = true
+dx-agent-macros.workspace = true
 # CLI - minimal and fast
 clap = { version = "4.5", features = ["derive"] }
 clap_complete = "4.5"
@@ -254,7 +254,7 @@ default = [
 # Channels are opt-in via the lean `default-channels` bundle, `channels-full`,
 # or individual `channel-*` features.
 agent-runtime = [
-    "dep:zeroclaw-runtime", "dep:zeroclaw-channels", "dep:zeroclaw-tools",
+    "dep:dx-agent-runtime", "dep:dx-agent-channels", "dep:dx-agent-tools",
     "dep:rusqlite",
     "dep:ring", "dep:lru", "dep:chrono-tz", "dep:cron", "dep:glob", "dep:which",
     "dep:ratatui", "dep:crossterm",
@@ -272,7 +272,7 @@ default-channels = [
 # Historical broad channel bundle. Use this for builds that should preserve the
 # pre-#6895 default channel surface.
 channels-full = [
-    "default-channels", "zeroclaw-channels/channels-full", "channel-lark",
+    "default-channels", "dx-agent-channels/channels-full", "channel-lark",
     "channel-discord", "channel-slack", "channel-signal",
     "channel-mattermost", "channel-irc", "channel-imessage",
     "channel-dingtalk", "channel-qq", "channel-bluesky",
@@ -284,72 +284,72 @@ channels-full = [
 
 # Major subsystems — each forwards to exactly ONE crate
 gateway = [
-    "dep:zeroclaw-gateway",
+    "dep:dx-agent-gateway",
     "dep:axum", "dep:hyper", "dep:hyper-util", "dep:tower", "dep:tower-http", "dep:http-body-util",
     "dep:mime_guess",
 ]
-schema-export = ["zeroclaw-config/schema-export"]
+schema-export = ["dx-agent-config/schema-export"]
 acp-bridge = ["dep:tokio-tungstenite"]
 
-# Channels — each forwards to zeroclaw-channels.
-channel-email = ["zeroclaw-channels/channel-email", "zeroclaw-gateway?/channel-email", "dep:lettre", "dep:mail-parser", "dep:async-imap"]
-channel-telegram = ["zeroclaw-channels/channel-telegram"]
-channel-lark = ["zeroclaw-channels/channel-lark"]
-channel-nostr = ["zeroclaw-channels/channel-nostr", "dep:nostr-sdk"]
-channel-matrix = ["zeroclaw-channels/channel-matrix"]
-channel-discord = ["zeroclaw-channels/channel-discord"]
-channel-slack = ["zeroclaw-channels/channel-slack"]
-channel-signal = ["zeroclaw-channels/channel-signal"]
-channel-mattermost = ["zeroclaw-channels/channel-mattermost"]
-channel-irc = ["zeroclaw-channels/channel-irc"]
-channel-imessage = ["zeroclaw-channels/channel-imessage"]
-channel-dingtalk = ["zeroclaw-channels/channel-dingtalk"]
-channel-qq = ["zeroclaw-channels/channel-qq"]
-channel-bluesky = ["zeroclaw-channels/channel-bluesky"]
-channel-twitter = ["zeroclaw-channels/channel-twitter"]
-channel-reddit = ["zeroclaw-channels/channel-reddit"]
-channel-notion = ["zeroclaw-channels/channel-notion"]
-channel-mqtt = ["zeroclaw-channels/channel-mqtt"]
-channel-linq = ["zeroclaw-channels/channel-linq", "zeroclaw-gateway?/channel-linq"]
-channel-wati = ["zeroclaw-channels/channel-wati", "zeroclaw-gateway?/channel-wati"]
-channel-nextcloud = ["zeroclaw-channels/channel-nextcloud", "zeroclaw-gateway?/channel-nextcloud"]
-channel-mochat = ["zeroclaw-channels/channel-mochat"]
-channel-wechat = ["zeroclaw-channels/channel-wechat"]
-channel-wecom = ["zeroclaw-channels/channel-wecom"]
-channel-wecom-ws = ["zeroclaw-channels/channel-wecom-ws"]
-channel-clawdtalk = ["zeroclaw-channels/channel-clawdtalk"]
-channel-webhook = ["zeroclaw-channels/channel-webhook"]
-channel-acp-server = ["zeroclaw-channels/channel-acp-server", "zeroclaw-gateway?/channel-acp-server"]
-channel-whatsapp-cloud = ["zeroclaw-channels/channel-whatsapp-cloud", "zeroclaw-gateway?/channel-whatsapp-cloud"]
-channel-voice-call = ["zeroclaw-channels/channel-voice-call"]
-channel-line = ["zeroclaw-channels/channel-line"]
+# Channels — each forwards to dx-agent-channels.
+channel-email = ["dx-agent-channels/channel-email", "dx-agent-gateway?/channel-email", "dep:lettre", "dep:mail-parser", "dep:async-imap"]
+channel-telegram = ["dx-agent-channels/channel-telegram"]
+channel-lark = ["dx-agent-channels/channel-lark"]
+channel-nostr = ["dx-agent-channels/channel-nostr", "dep:nostr-sdk"]
+channel-matrix = ["dx-agent-channels/channel-matrix"]
+channel-discord = ["dx-agent-channels/channel-discord"]
+channel-slack = ["dx-agent-channels/channel-slack"]
+channel-signal = ["dx-agent-channels/channel-signal"]
+channel-mattermost = ["dx-agent-channels/channel-mattermost"]
+channel-irc = ["dx-agent-channels/channel-irc"]
+channel-imessage = ["dx-agent-channels/channel-imessage"]
+channel-dingtalk = ["dx-agent-channels/channel-dingtalk"]
+channel-qq = ["dx-agent-channels/channel-qq"]
+channel-bluesky = ["dx-agent-channels/channel-bluesky"]
+channel-twitter = ["dx-agent-channels/channel-twitter"]
+channel-reddit = ["dx-agent-channels/channel-reddit"]
+channel-notion = ["dx-agent-channels/channel-notion"]
+channel-mqtt = ["dx-agent-channels/channel-mqtt"]
+channel-linq = ["dx-agent-channels/channel-linq", "dx-agent-gateway?/channel-linq"]
+channel-wati = ["dx-agent-channels/channel-wati", "dx-agent-gateway?/channel-wati"]
+channel-nextcloud = ["dx-agent-channels/channel-nextcloud", "dx-agent-gateway?/channel-nextcloud"]
+channel-mochat = ["dx-agent-channels/channel-mochat"]
+channel-wechat = ["dx-agent-channels/channel-wechat"]
+channel-wecom = ["dx-agent-channels/channel-wecom"]
+channel-wecom-ws = ["dx-agent-channels/channel-wecom-ws"]
+channel-clawdtalk = ["dx-agent-channels/channel-clawdtalk"]
+channel-webhook = ["dx-agent-channels/channel-webhook"]
+channel-acp-server = ["dx-agent-channels/channel-acp-server", "dx-agent-gateway?/channel-acp-server"]
+channel-whatsapp-cloud = ["dx-agent-channels/channel-whatsapp-cloud", "dx-agent-gateway?/channel-whatsapp-cloud"]
+channel-voice-call = ["dx-agent-channels/channel-voice-call"]
+channel-line = ["dx-agent-channels/channel-line"]
 # Feishu uses the same channel implementation as Lark; `use_feishu = true`
 # selects Feishu endpoints at runtime.
 channel-feishu = ["channel-lark"]
-whatsapp-web = ["zeroclaw-channels/whatsapp-web"]
-voice-wake = ["zeroclaw-channels/voice-wake"]
-memory-postgres = ["zeroclaw-memory/memory-postgres"]
+whatsapp-web = ["dx-agent-channels/whatsapp-web"]
+voice-wake = ["dx-agent-channels/voice-wake"]
+memory-postgres = ["dx-agent-memory/memory-postgres"]
 
 # Backends and platform flags — each forwards to ONE crate
 observability-prometheus = [
-    "zeroclaw-runtime/observability-prometheus",
-    "zeroclaw-gateway/observability-prometheus",
+    "dx-agent-runtime/observability-prometheus",
+    "dx-agent-gateway/observability-prometheus",
 ]
-observability-otel = ["zeroclaw-runtime/observability-otel"]
-hardware = ["dep:zeroclaw-hardware", "zeroclaw-hardware/hardware"]
-peripheral-rpi = ["dep:zeroclaw-hardware", "zeroclaw-hardware/peripheral-rpi"]
-# Forwards `zeroclaw-hardware/dev-sim`: extends the serial allow-list with
+observability-otel = ["dx-agent-runtime/observability-otel"]
+hardware = ["dep:dx-agent-hardware", "dx-agent-hardware/hardware"]
+peripheral-rpi = ["dep:dx-agent-hardware", "dx-agent-hardware/peripheral-rpi"]
+# Forwards `dx-agent-hardware/dev-sim`: extends the serial allow-list with
 # `/tmp/zc-sim-*` for hardware-free simulation. Off by default; opt-in for the
 # simulator and demo.
-dev-sim = ["dep:zeroclaw-hardware", "zeroclaw-hardware/dev-sim"]
-sandbox-landlock = ["zeroclaw-runtime/sandbox-landlock"]
-sandbox-bubblewrap = ["zeroclaw-runtime/sandbox-bubblewrap"]
-browser-native = ["zeroclaw-tools/browser-native"]
-plugins-wasm = ["agent-runtime", "dep:zeroclaw-plugins", "zeroclaw-runtime/plugins-wasm"]
-probe = ["dep:zeroclaw-hardware", "zeroclaw-hardware/probe"]
-rag-pdf = ["zeroclaw-tools/rag-pdf", "zeroclaw-runtime/rag-pdf"]
-webauthn = ["zeroclaw-runtime/webauthn", "zeroclaw-gateway?/webauthn"]
-embedded-web = ["zeroclaw-gateway/embedded-web"]
+dev-sim = ["dep:dx-agent-hardware", "dx-agent-hardware/dev-sim"]
+sandbox-landlock = ["dx-agent-runtime/sandbox-landlock"]
+sandbox-bubblewrap = ["dx-agent-runtime/sandbox-bubblewrap"]
+browser-native = ["dx-agent-tools/browser-native"]
+plugins-wasm = ["agent-runtime", "dep:dx-agent-plugins", "dx-agent-runtime/plugins-wasm"]
+probe = ["dep:dx-agent-hardware", "dx-agent-hardware/probe"]
+rag-pdf = ["dx-agent-tools/rag-pdf", "dx-agent-runtime/rag-pdf"]
+webauthn = ["dx-agent-runtime/webauthn", "dx-agent-gateway?/webauthn"]
+embedded-web = ["dx-agent-gateway/embedded-web"]
 
 # Backward-compatible aliases
 fantoccini = ["browser-native"]

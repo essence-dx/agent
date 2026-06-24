@@ -21,20 +21,20 @@ COPY bin/${TARGETARCH}/dx-agents /usr/local/bin/dx-agents
 
 # Copy the web dashboard bundled alongside the binary in the release tarball.
 # Installed at /usr/share/zeroclawlabs/web/dist (outside the documented
-# /zeroclaw-data mount) so a bind mount on /zeroclaw-data cannot shadow it
+# /dx-agent-data mount) so a bind mount on /dx-agent-data cannot shadow it
 # (#6400). The dashboard was decoupled from the binary in #5665 and is now
 # served from disk at `gateway.web_dist_dir`.
 COPY bin/${TARGETARCH}/web/dist /usr/share/zeroclawlabs/web/dist
 
 # Runtime directory structure and default config
-COPY --chown=65534:65534 zeroclaw-data/ /zeroclaw-data/
+COPY --chown=65534:65534 dx-agent-data/ /dx-agent-data/
 
 ENV LANG=C.UTF-8
-ENV ZEROCLAW_DATA_DIR=/zeroclaw-data/data
-ENV HOME=/zeroclaw-data
-ENV ZEROCLAW_GATEWAY_PORT=42617
+ENV DX_AGENT_DATA_DIR=/dx-agent-data/data
+ENV HOME=/dx-agent-data
+ENV DX_AGENT_GATEWAY_PORT=42617
 
-WORKDIR /zeroclaw-data
+WORKDIR /dx-agent-data
 USER 65534:65534
 EXPOSE 42617
 ENTRYPOINT ["dx-agents"]

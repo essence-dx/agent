@@ -40,9 +40,9 @@ Flags:
 
 ### Option 3 — Homebrew
 
-DX Agents does not currently publish a DX-owned Homebrew formula. Use `install.sh` for release installs; legacy ZeroClaw Homebrew paths remain migration-only compatibility data.
+DX Agents does not currently publish a DX-owned Homebrew formula. Use `install.sh` for release installs; legacy DX Agent Homebrew paths remain migration-only compatibility data.
 
-**Legacy workspace location gotcha:** with a legacy Homebrew install, the service user and the CLI user may be different, so the workspace lives at `$HOMEBREW_PREFIX/var/zeroclaw/` rather than `~/.zeroclaw/`. Point CLI invocations at the same workspace:
+**Legacy workspace location gotcha:** with a legacy Homebrew install, the service user and the CLI user may be different, so the workspace lives at `$HOMEBREW_PREFIX/var/zeroclaw/` rather than `~/.dx_agent/`. Point CLI invocations at the same workspace:
 
 ```bash
 export DX_AGENTS_WORKSPACE="$HOMEBREW_PREFIX/var/zeroclaw"
@@ -64,15 +64,15 @@ Most features work with a stock macOS install. Optional extras:
 ## Running as a service
 
 ```bash
-dx-agents service install   # writes ~/Library/LaunchAgents/com.zeroclaw.daemon.plist
+dx-agents service install   # writes ~/Library/LaunchAgents/com.dx_agent.daemon.plist
 dx-agents service start
 dx-agents service status
 ```
 
-Logs go to `~/Library/Logs/ZeroClaw/`:
+Logs go to `~/Library/Logs/DX Agent/`:
 
 ```bash
-tail -f ~/Library/Logs/ZeroClaw/zeroclaw.log
+tail -f ~/Library/Logs/DX Agent/zeroclaw.log
 ```
 
 The service command produces a loaded LaunchAgent that starts on login.
@@ -115,15 +115,15 @@ Remove config and workspace (optional — this deletes conversation history):
 rm -rf "$HOMEBREW_PREFIX/var/zeroclaw"
 
 # Default workspace
-rm -rf ~/.zeroclaw ~/.config/zeroclaw
+rm -rf ~/.dx_agent ~/.config/zeroclaw
 
 # Logs
-rm -rf ~/Library/Logs/ZeroClaw
+rm -rf ~/Library/Logs/DX Agent
 ```
 
 ## Gotchas
 
-- **Legacy Homebrew config path mismatch.** A legacy `brew services` daemon reads `$HOMEBREW_PREFIX/var/zeroclaw/config.toml`, not `~/.zeroclaw/config.toml`. If your service is reading stale config, check which one the daemon sees and set `DX_AGENTS_WORKSPACE` accordingly.
+- **Legacy Homebrew config path mismatch.** A legacy `brew services` daemon reads `$HOMEBREW_PREFIX/var/zeroclaw/config.toml`, not `~/.dx_agent/config.toml`. If your service is reading stale config, check which one the daemon sees and set `DX_AGENTS_WORKSPACE` accordingly.
 - **First launch of the browser tool** downloads Chromium (~150 MB) via Playwright.
 - **Apple Silicon** and **Intel** builds are both released. The bootstrap script auto-detects the right archive.
 

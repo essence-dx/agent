@@ -1,6 +1,6 @@
-# ZeroClaw Robot Kit
+# DX Agent Robot Kit
 
-A complete toolkit for building AI-powered robots with ZeroClaw. Designed for Raspberry Pi deployment with offline Ollama inference.
+A complete toolkit for building AI-powered robots with DX Agent. Designed for Raspberry Pi deployment with offline Ollama inference.
 
 ## Features
 
@@ -17,7 +17,7 @@ A complete toolkit for building AI-powered robots with ZeroClaw. Designed for Ra
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                 ZeroClaw + Ollama                       │
+│                 DX Agent + Ollama                       │
 │              (High-Level AI Brain)                      │
 └─────────────────────┬───────────────────────────────────┘
                       │
@@ -84,7 +84,7 @@ pip install piper-tts
 
 ## Quick Start
 
-### 1. Build ZeroClaw with robot tools
+### 1. Build DX Agent with robot tools
 
 ```bash
 # Clone and build
@@ -97,12 +97,12 @@ cargo build -p zeroclaw-robot-kit --release
 
 ```bash
 # Copy config
-mkdir -p ~/.zeroclaw
-cp crates/robot-kit/robot.toml ~/.zeroclaw/
-cp crates/robot-kit/SOUL.md ~/.zeroclaw/workspace/
+mkdir -p ~/.dx_agent
+cp crates/robot-kit/robot.toml ~/.dx_agent/
+cp crates/robot-kit/SOUL.md ~/.dx_agent/workspace/
 
 # Edit for your hardware
-nano ~/.zeroclaw/robot.toml
+nano ~/.dx_agent/robot.toml
 ```
 
 ### 3. Test
@@ -186,11 +186,11 @@ Robot:
 mkdir zeroclaw-robot-kit
 cp -r target/release/zeroclaw zeroclaw-robot-kit/
 cp -r examples/robot_kit zeroclaw-robot-kit/
-cp -r ~/.zeroclaw zeroclaw-robot-kit/dot-zeroclaw
+cp -r ~/.dx_agent zeroclaw-robot-kit/dot-zeroclaw
 
 # Include models
 mkdir -p zeroclaw-robot-kit/models
-cp ~/.zeroclaw/models/ggml-base.bin zeroclaw-robot-kit/models/
+cp ~/.dx_agent/models/ggml-base.bin zeroclaw-robot-kit/models/
 # Note: Ollama models are large, may want to download on target
 
 # Create tarball
@@ -210,4 +210,4 @@ cp zeroclaw-robot-kit.tar.gz /media/usb/TarBalls/
 
 ## License
 
-MIT - Same as ZeroClaw
+MIT - Same as DX Agent

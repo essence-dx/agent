@@ -321,9 +321,9 @@ async fn agent_survives_large_tool_output() {
     /// Tool that returns a very large output.
     struct LargeOutputTool;
 
-    impl ::zeroclaw_api::attribution::Attributable for LargeOutputTool {
-        fn role(&self) -> ::zeroclaw_api::attribution::Role {
-            ::zeroclaw_api::attribution::Role::Tool(::zeroclaw_api::attribution::ToolKind::Plugin)
+    impl ::dx_agent_api::attribution::Attributable for LargeOutputTool {
+        fn role(&self) -> ::dx_agent_api::attribution::Role {
+            ::dx_agent_api::attribution::Role::Tool(::dx_agent_api::attribution::ToolKind::Plugin)
         }
         fn alias(&self) -> &str {
             <Self as Tool>::name(self)

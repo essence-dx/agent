@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::irc::*;
+pub use dx_agent_channels::irc::*;

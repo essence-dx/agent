@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::clawdtalk::*;
+pub use dx_agent_channels::clawdtalk::*;

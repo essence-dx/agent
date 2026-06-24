@@ -70,7 +70,7 @@ Before requesting review, the PR has all of these:
 - Validation evidence attached — actual command output, not "CI will check."
 - Security & privacy and rollback fields completed for risky paths.
 - Privacy and data-hygiene rules satisfied — neutral, project-scoped test wording. See [Privacy](../contributing/privacy.md).
-- Identity-like wording, where unavoidable, uses ZeroClaw / project-native labels.
+- Identity-like wording, where unavoidable, uses DX Agent / project-native labels.
 
 ## Definition of Done (DoD)
 
@@ -137,10 +137,10 @@ The reviewer-side queue management — backlog pruning order, stale handling, la
 
 These paths require stricter review and stronger test evidence:
 
-- `crates/zeroclaw-runtime/src/security/`
-- The rest of `crates/zeroclaw-runtime/`
-- `crates/zeroclaw-gateway/` (ingress, authentication, pairing)
-- `crates/zeroclaw-tools/` (anything with execution capability)
+- `crates/dx-agent-runtime/src/security/`
+- The rest of `crates/dx-agent-runtime/`
+- `crates/dx-agent-gateway/` (ingress, authentication, pairing)
+- `crates/dx-agent-tools/` (anything with execution capability)
 - Filesystem access boundaries.
 - Network and authentication behavior.
 - `.github/workflows/` and the release pipeline.

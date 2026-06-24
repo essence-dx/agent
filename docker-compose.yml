@@ -26,8 +26,8 @@ services:
       # V0.8.0: single env-var override surface — the schema-mirror grammar
       # `DX_AGENTS_<dotted_path_with_double_underscores>=<value>`. Each `__`
       # is a path separator. Legacy `API_KEY`, `ANTHROPIC_API_KEY`,
-      # `OPENAI_API_KEY`, `PROVIDER`, `ZEROCLAW_MODEL` (etc.) fallbacks were
-      # eradicated; `ZEROCLAW_*` remains a compatibility prefix only.
+      # `OPENAI_API_KEY`, `PROVIDER`, `DX_AGENT_MODEL` (etc.) fallbacks were
+      # eradicated; `DX_AGENT_*` remains a compatibility prefix only.
       #
       # Pick a typed-family alias and set its api_key + model:
       - DX_AGENTS_providers__models__openrouter__default__api_key=${OPENROUTER_API_KEY:-}
@@ -42,7 +42,7 @@ services:
       
     volumes:
       # Persist workspace and config (must match WORKDIR/HOME in Dockerfile)
-      - dx-agents-data:/zeroclaw-data
+      - dx-agents-data:/dx-agent-data
       
     ports:
       # Gateway API port (override HOST_PORT if 42617 is taken)

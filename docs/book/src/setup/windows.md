@@ -30,7 +30,7 @@ The script:
 3. Installs to `%USERPROFILE%\.dx-agents\bin\dx-agents.exe`
 4. Prints mode-specific next steps:
    - `--prebuilt`, `--standard`, `--full`: run `dx-agents quickstart`
-   - `--minimal`: Quickstart is unavailable; configure `%USERPROFILE%\.zeroclaw\config.toml` manually and use the reduced CLI path (`dx-agents agent ...`)
+   - `--minimal`: Quickstart is unavailable; configure `%USERPROFILE%\.dx_agent\config.toml` manually and use the reduced CLI path (`dx-agents agent ...`)
 
 For source builds, `setup.bat` now prints the exact `cargo build ...` command it executes and reports the installed `dx-agents.exe` size so command shape and artifact expectations stay visible.
 
@@ -76,7 +76,7 @@ dx-agents service start
 
 This creates a task that runs under your user account and starts on login. Managed via Task Scheduler (`taskschd.msc`).
 
-Logs go to `%LOCALAPPDATA%\ZeroClaw\logs\`.
+Logs go to `%LOCALAPPDATA%\DX Agent\logs\`.
 
 ### Windows Service (for server installs)
 
@@ -141,15 +141,15 @@ scoop uninstall dx-agents
 Remove config and workspace (optional — this deletes conversation history):
 
 ```cmd
-rmdir /s /q "%USERPROFILE%\.zeroclaw"
-rmdir /s /q "%LOCALAPPDATA%\ZeroClaw"
+rmdir /s /q "%USERPROFILE%\.dx_agent"
+rmdir /s /q "%LOCALAPPDATA%\DX Agent"
 ```
 
 ## Gotchas
 
 - **Long paths.** Some Windows file systems still cap path lengths at 260 characters. Enable long path support if you hit `path too long` errors during build (`reg add HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f`).
 - **SmartScreen.** The unsigned binary may trip SmartScreen on first launch. Right-click → Properties → "Unblock" is the standard workaround until we add a signed MSI.
-- **Task Scheduler stop-at-idle.** By default Windows may terminate scheduled tasks on idle / battery. The installed task explicitly disables these conditions; verify under Task Scheduler → ZeroClaw → Properties → Conditions.
+- **Task Scheduler stop-at-idle.** By default Windows may terminate scheduled tasks on idle / battery. The installed task explicitly disables these conditions; verify under Task Scheduler → DX Agent → Properties → Conditions.
 
 ## Next
 

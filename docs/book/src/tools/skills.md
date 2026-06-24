@@ -1,22 +1,22 @@
 # Skills
 
-Skills are reusable instructions and optional tool definitions that ZeroClaw can load into an agent session. Use them for repeatable workflows such as code review checklists, deployment runbooks, support playbooks, or domain-specific tool wrappers.
+Skills are reusable instructions and optional tool definitions that DX Agent can load into an agent session. Use them for repeatable workflows such as code review checklists, deployment runbooks, support playbooks, or domain-specific tool wrappers.
 
 Skills live in the workspace under `skills/<name>/`. With the default workspace this is:
 
 ```text
-~/.zeroclaw/workspace/skills/<name>/
+~/.dx_agent/workspace/skills/<name>/
 ```
 
-For hand-authored local skills, use `SKILL.md` or `SKILL.toml`. Use `SKILL.md` for instructions plus simple metadata. Use `SKILL.toml` when the skill needs structured prompts or tool definitions. ZeroClaw also understands `manifest.toml` for registry-style skill packages, but `SKILL.md` and `SKILL.toml` are the recommended local authoring formats.
+For hand-authored local skills, use `SKILL.md` or `SKILL.toml`. Use `SKILL.md` for instructions plus simple metadata. Use `SKILL.toml` when the skill needs structured prompts or tool definitions. DX Agent also understands `manifest.toml` for registry-style skill packages, but `SKILL.md` and `SKILL.toml` are the recommended local authoring formats.
 
 ## Create a Markdown skill
 
 A minimal instruction-only skill can be just a Markdown file:
 
 ```bash
-mkdir -p ~/.zeroclaw/workspace/skills/release-check
-$EDITOR ~/.zeroclaw/workspace/skills/release-check/SKILL.md
+mkdir -p ~/.dx_agent/workspace/skills/release-check
+$EDITOR ~/.dx_agent/workspace/skills/release-check/SKILL.md
 ```
 
 ```markdown
@@ -25,7 +25,7 @@ $EDITOR ~/.zeroclaw/workspace/skills/release-check/SKILL.md
 Review the release notes, changelog, version tags, and migration notes before confirming that a release is ready.
 ```
 
-The directory name becomes the skill name. ZeroClaw uses the first non-heading paragraph as the description when no frontmatter description is present.
+The directory name becomes the skill name. DX Agent uses the first non-heading paragraph as the description when no frontmatter description is present.
 
 `SKILL.md` also supports simple frontmatter for metadata:
 
@@ -112,7 +112,7 @@ zeroclaw skills test --verbose
 
 ## Prompt-triggered capability suggestions
 
-ZeroClaw can optionally suggest an installable skill capability when a submitted prompt clearly names something that exists in cached registry metadata but is not installed. The server-side path runs after submission and before the normal LLM turn. It only returns a suggestion; it does not install the skill, enable it, write memory, or treat the skill body as global instructions.
+DX Agent can optionally suggest an installable skill capability when a submitted prompt clearly names something that exists in cached registry metadata but is not installed. The server-side path runs after submission and before the normal LLM turn. It only returns a suggestion; it does not install the skill, enable it, write memory, or treat the skill body as global instructions.
 
 Enable it in config:
 
@@ -125,9 +125,9 @@ The suggestion matcher uses installed skill names and cached registry metadata s
 
 ## Script safety
 
-ZeroClaw audits skills before loading or installing them. Script-like files such as `.sh`, `.bash`, `.ps1`, and files with shell shebangs are blocked by default.
+DX Agent audits skills before loading or installing them. Script-like files such as `.sh`, `.bash`, `.ps1`, and files with shell shebangs are blocked by default.
 
-If you intentionally use script-bearing skills, enable them in the ZeroClaw config:
+If you intentionally use script-bearing skills, enable them in the DX Agent config:
 
 ```toml
 [skills]
@@ -147,7 +147,7 @@ Community open-skills loading is opt-in:
 open_skills_enabled = true
 ```
 
-When enabled, ZeroClaw loads skills from the configured `open_skills_dir`, or from `$HOME/open-skills` when no directory is set. If that directory does not exist, ZeroClaw may clone the community open-skills repository; if it does exist and is a git checkout, ZeroClaw may pull updates. Enable this only for community sources you trust, or point `open_skills_dir` at a reviewed local copy.
+When enabled, DX Agent loads skills from the configured `open_skills_dir`, or from `$HOME/open-skills` when no directory is set. If that directory does not exist, DX Agent may clone the community open-skills repository; if it does exist and is a git checkout, DX Agent may pull updates. Enable this only for community sources you trust, or point `open_skills_dir` at a reviewed local copy.
 
 ## Advanced config
 

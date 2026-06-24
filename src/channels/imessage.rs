@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::imessage::*;
+pub use dx_agent_channels::imessage::*;

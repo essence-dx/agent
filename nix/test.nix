@@ -1,4 +1,4 @@
-# NixOS test for `services.zeroclaw.instances.<name>`.
+# NixOS test for `services.dx_agent.instances.<name>`.
 #
 # Run via the standard nixosTest entry point:
 #
@@ -12,7 +12,7 @@
 # builder.
 #
 # Asserts:
-#   1. Two instances declared in `services.zeroclaw.instances` produce two
+#   1. Two instances declared in `services.dx_agent.instances` produce two
 #      `zeroclaw-<name>.service` units that both reach `active` within 30 s.
 #   2. Each instance has its own state directory under `/var/lib/zeroclaw-<name>`,
 #      owned by its own per-instance system user.
@@ -33,7 +33,7 @@
 #      that silently created the wrong directory.
 #
 # A no-op stub binary stands in for the real `zeroclaw daemon` so the test
-# does not depend on a working ZeroClaw build. The stub validates everything
+# does not depend on a working DX Agent build. The stub validates everything
 # we need from the *module*: unit generation, file rendering, user creation,
 # hardening defaults.
 {
@@ -74,7 +74,7 @@ in
     {
       imports = [ moduleUnderTest ];
 
-      services.zeroclaw.instances.test = {
+      services.dx_agent.instances.test = {
         package = stubPackage;
         settings = {
           default_provider = "anthropic";
@@ -88,7 +88,7 @@ in
         };
       };
 
-      services.zeroclaw.instances.other = {
+      services.dx_agent.instances.other = {
         package = stubPackage;
         settings = {
           default_provider = "anthropic";
@@ -104,7 +104,7 @@ in
         BOT_TOKEN=secret-from-env-file
       '';
 
-      services.zeroclaw.instances.secret = {
+      services.dx_agent.instances.secret = {
         package = stubPackage;
         environmentFile = "/etc/zeroclaw-secret-env";
         settings = {
@@ -121,7 +121,7 @@ in
       # Under the previous `StateDirectory = baseNameOf dataDir` shape
       # systemd would have created `/var/lib/srv-test` and the unit's
       # WorkingDirectory= would have pointed at the absent `/srv/zeroclaw-srv`.
-      services.zeroclaw.instances.srv-test = {
+      services.dx_agent.instances.srv-test = {
         package = stubPackage;
         dataDir = "/srv/zeroclaw-srv";
         settings = {

@@ -7,8 +7,8 @@ use crate::cli_provider_health_live::{
 };
 use anyhow::Result;
 use serde::Serialize;
-use zeroclaw_config::schema::{Config, ModelProviderConfig};
-use zeroclaw_providers::provider_catalog::{
+use dx_agent_config::schema::{Config, ModelProviderConfig};
+use dx_agent_providers::provider_catalog::{
     DxProvidersCatalogLoadDiagnostic, ModelProviderCatalogEntry, ModelProviderCatalogListing,
     ModelProviderCatalogSource,
 };
@@ -75,7 +75,7 @@ pub async fn print_providers_health_json(
     live: bool,
 ) -> Result<()> {
     validate_provider_health_request(provider, live)?;
-    let listing = zeroclaw_providers::provider_catalog::list_model_provider_catalog_listing();
+    let listing = dx_agent_providers::provider_catalog::list_model_provider_catalog_listing();
     let live_results = if live {
         run_live_provider_probes(config, provider, &listing).await?
     } else {
@@ -97,7 +97,7 @@ pub async fn print_providers_health(
     live: bool,
 ) -> Result<()> {
     validate_provider_health_request(provider, live)?;
-    let listing = zeroclaw_providers::provider_catalog::list_model_provider_catalog_listing();
+    let listing = dx_agent_providers::provider_catalog::list_model_provider_catalog_listing();
     let live_results = if live {
         run_live_provider_probes(config, provider, &listing).await?
     } else {

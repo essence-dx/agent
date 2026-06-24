@@ -1694,7 +1694,7 @@
           source: "bridge_fallback",
           product_name: "DX Agents",
           package_name: "dx-agents-web",
-          legacy_product_names: ["ZeroClaw"],
+          legacy_product_names: ["DX Agent"],
           compatibility_policy: {
             legacy_readable: true,
             legacy_writable: true,
@@ -1702,11 +1702,11 @@
             cleanup_requires_migration_plan: true,
           },
           env_aliases: [
-            { label: "Gateway port env", primary: "DX_AGENTS_GATEWAY_PORT", legacy: ["ZEROCLAW_GATEWAY_PORT"] },
+            { label: "Gateway port env", primary: "DX_AGENTS_GATEWAY_PORT", legacy: ["DX_AGENT_GATEWAY_PORT"] },
           ],
           window_globals: [
-            { label: "Dashboard base path", primary: "__DX_AGENTS_BASE__", legacy: ["__ZEROCLAW_BASE__"] },
-            { label: "Gateway base URL", primary: "__DX_AGENTS_GATEWAY__", legacy: ["__ZEROCLAW_GATEWAY__"] },
+            { label: "Dashboard base path", primary: "__DX_AGENTS_BASE__", legacy: ["__DX_AGENT_BASE__"] },
+            { label: "Gateway base URL", primary: "__DX_AGENTS_GATEWAY__", legacy: ["__DX_AGENT_GATEWAY__"] },
           ],
           storage_aliases: [
             { label: "Auth token storage", scope: "localStorage", primary: "dx_agents_token", legacy: ["zeroclaw_token"] },

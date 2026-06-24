@@ -8,14 +8,14 @@ import { isTauri, tauriGatewayUrl } from './tauri';
 declare global {
   interface Window {
     __DX_AGENTS_BASE__?: string;
-    __ZEROCLAW_BASE__?: string;
+    __DX_AGENT_BASE__?: string;
   }
 }
 
 /** Gateway path prefix (e.g. "/dx-agents"), or empty string when served at root. */
 export const basePath: string = isTauri()
   ? ''
-  : (window.__DX_AGENTS_BASE__ ?? window.__ZEROCLAW_BASE__ ?? '').replace(/\/+$/, '');
+  : (window.__DX_AGENTS_BASE__ ?? window.__DX_AGENT_BASE__ ?? '').replace(/\/+$/, '');
 
 /** Full origin for API requests. Empty when served by the gateway (same-origin). */
 export const apiOrigin: string = isTauri() ? tauriGatewayUrl() : '';

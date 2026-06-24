@@ -11,14 +11,14 @@ use tokio_tungstenite::{
         http::{HeaderValue, header},
     },
 };
-use zeroclaw_config::schema::resolve_runtime_dirs;
+use dx_agent_config::schema::resolve_runtime_dirs;
 
 const CONFIG_NOT_FOUND_ERROR: &str = "ERROR: config.toml not found. Are you sure the bridge and DX Agents are running on the same host? Tool use will not work remotely.";
-const PAIRING_TOKEN_NOT_FOUND_ERROR: &str = "ERROR: Gateway pairing is active but no ACP bridge token is cached. Run `dx-agents gateway get-paircode --new`, then run `dx-agents-acp-bridge --pair-code <code>`, or set DX_AGENTS_ACP_BRIDGE_TOKEN.";
+const PAIRING_TOKEN_NOT_FOUND_ERROR: &str = "ERROR: Gateway pairing is active but no ACP bridge token is cached. Run `dx-agent gateway get-paircode --new`, then run `dx-agent-acp-bridge --pair-code <code>`, or set DX_AGENTS_ACP_BRIDGE_TOKEN.";
 const ACP_BRIDGE_TOKEN_ENV: &str = "DX_AGENTS_ACP_BRIDGE_TOKEN";
-const LEGACY_ACP_BRIDGE_TOKEN_ENV: &str = "ZEROCLAW_ACP_BRIDGE_TOKEN";
+const LEGACY_ACP_BRIDGE_TOKEN_ENV: &str = "DX_AGENT_ACP_BRIDGE_TOKEN";
 const ACP_BRIDGE_PAIRING_CODE_ENV: &str = "DX_AGENTS_ACP_PAIRING_CODE";
-const LEGACY_ACP_BRIDGE_PAIRING_CODE_ENV: &str = "ZEROCLAW_ACP_PAIRING_CODE";
+const LEGACY_ACP_BRIDGE_PAIRING_CODE_ENV: &str = "DX_AGENT_ACP_PAIRING_CODE";
 
 #[tokio::main]
 async fn main() {
@@ -46,7 +46,7 @@ async fn run() -> Result<()> {
         .with_context(|| format!("failed to connect to {}", bridge_target.url))?;
     let (mut ws_write, mut ws_read) = ws_stream.split();
 
-    let stdin_to_ws = zeroclaw_spawn::spawn!(async move {
+    let stdin_to_ws = dx_agent_spawn::spawn!(async move {
         let stdin = io::stdin();
         let mut lines = BufReader::new(stdin).lines();
 
@@ -63,7 +63,7 @@ async fn run() -> Result<()> {
             .context("failed to close websocket")
     });
 
-    let ws_to_stdout = zeroclaw_spawn::spawn!(async move {
+    let ws_to_stdout = dx_agent_spawn::spawn!(async move {
         let mut stdout = io::stdout();
 
         while let Some(message) = ws_read.next().await {
@@ -189,10 +189,10 @@ fn config_dir_from_args(args: impl IntoIterator<Item = String>) -> Result<Option
     while let Some(arg) = args.next() {
         if arg == "--config-dir" {
             let dir = args.next().ok_or_else(|| {
-                ::zeroclaw_log::record!(
+                ::dx_agent_log::record!(
                     WARN,
-                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Reject)
-                        .with_outcome(::zeroclaw_log::EventOutcome::Failure),
+                    ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Reject)
+                        .with_outcome(::dx_agent_log::EventOutcome::Failure),
                     "acp-bridge args rejected: --config-dir missing value"
                 );
                 anyhow::Error::msg("--config-dir requires a path value")
@@ -211,10 +211,10 @@ fn pair_code_from_args(args: impl IntoIterator<Item = String>) -> Result<Option<
     while let Some(arg) = args.next() {
         if arg == "--pair-code" {
             let code = args.next().ok_or_else(|| {
-                ::zeroclaw_log::record!(
+                ::dx_agent_log::record!(
                     WARN,
-                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Reject)
-                        .with_outcome(::zeroclaw_log::EventOutcome::Failure),
+                    ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Reject)
+                        .with_outcome(::dx_agent_log::EventOutcome::Failure),
                     "acp-bridge args rejected: --pair-code missing value"
                 );
                 anyhow::Error::msg("--pair-code requires a code value")
@@ -589,7 +589,7 @@ mod tests {
     fn token_from_env_prefers_dx_named_bridge_token() {
         let _lock = ENV_LOCK.lock().unwrap();
         let _dx_guard = EnvGuard::set("DX_AGENTS_ACP_BRIDGE_TOKEN", "dx_plaintext");
-        let _legacy_guard = EnvGuard::set("ZEROCLAW_ACP_BRIDGE_TOKEN", "zc_plaintext");
+        let _legacy_guard = EnvGuard::set("DX_AGENT_ACP_BRIDGE_TOKEN", "zc_plaintext");
 
         assert_eq!(token_from_env().as_deref(), Some("dx_plaintext"));
     }
@@ -598,7 +598,7 @@ mod tests {
     fn token_from_env_keeps_legacy_bridge_token_fallback() {
         let _lock = ENV_LOCK.lock().unwrap();
         let _dx_guard = EnvGuard::remove("DX_AGENTS_ACP_BRIDGE_TOKEN");
-        let _guard = EnvGuard::set("ZEROCLAW_ACP_BRIDGE_TOKEN", "zc_plaintext");
+        let _guard = EnvGuard::set("DX_AGENT_ACP_BRIDGE_TOKEN", "zc_plaintext");
 
         assert_eq!(token_from_env().as_deref(), Some("zc_plaintext"));
     }
@@ -607,7 +607,7 @@ mod tests {
     fn pair_code_from_env_prefers_dx_named_pairing_code() {
         let _lock = ENV_LOCK.lock().unwrap();
         let _dx_guard = EnvGuard::set("DX_AGENTS_ACP_PAIRING_CODE", "DXPAIR");
-        let _legacy_guard = EnvGuard::set("ZEROCLAW_ACP_PAIRING_CODE", "ZCPAIR");
+        let _legacy_guard = EnvGuard::set("DX_AGENT_ACP_PAIRING_CODE", "ZCPAIR");
 
         assert_eq!(pair_code_from_env().as_deref(), Some("DXPAIR"));
     }
@@ -616,14 +616,14 @@ mod tests {
     fn pair_code_from_env_keeps_legacy_pairing_code_fallback() {
         let _lock = ENV_LOCK.lock().unwrap();
         let _dx_guard = EnvGuard::remove("DX_AGENTS_ACP_PAIRING_CODE");
-        let _legacy_guard = EnvGuard::set("ZEROCLAW_ACP_PAIRING_CODE", "ZCPAIR");
+        let _legacy_guard = EnvGuard::set("DX_AGENT_ACP_PAIRING_CODE", "ZCPAIR");
 
         assert_eq!(pair_code_from_env().as_deref(), Some("ZCPAIR"));
     }
 
     #[test]
     fn cached_token_path_lives_next_to_config_without_using_config_toml() {
-        let dir = std::path::Path::new("/tmp/zeroclaw-config");
+        let dir = std::path::Path::new("/tmp/dx-agent-config");
 
         assert_eq!(cached_token_path(dir), dir.join("acp-bridge-token"));
     }
@@ -755,8 +755,8 @@ mod tests {
 
     #[test]
     fn missing_token_error_uses_dx_agent_commands_and_env() {
-        assert!(PAIRING_TOKEN_NOT_FOUND_ERROR.contains("dx-agents gateway get-paircode --new"));
-        assert!(PAIRING_TOKEN_NOT_FOUND_ERROR.contains("dx-agents-acp-bridge --pair-code"));
+        assert!(PAIRING_TOKEN_NOT_FOUND_ERROR.contains("dx-agent gateway get-paircode --new"));
+        assert!(PAIRING_TOKEN_NOT_FOUND_ERROR.contains("dx-agent-acp-bridge --pair-code"));
         assert!(PAIRING_TOKEN_NOT_FOUND_ERROR.contains("DX_AGENTS_ACP_BRIDGE_TOKEN"));
     }
 }

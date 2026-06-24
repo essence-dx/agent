@@ -48,7 +48,7 @@ fn query_snapshot() -> WindowsPrivacySnapshot {
         .unwrap_or_default();
 
     let script = r##"
-$appExe = $env:ZEROCLAW_APP_EXE
+$appExe = $env:DX_AGENT_APP_EXE
 function Get-AppConsentValue {
   param([string]$cap, [string]$appExe)
   function Matches-AppConsentEntryName {
@@ -102,7 +102,7 @@ $admin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
 } | ConvertTo-Json -Compress
 "##;
 
-    if let Some(json) = execute_powershell_script(script, &[("ZEROCLAW_APP_EXE", app_exe.as_str())])
+    if let Some(json) = execute_powershell_script(script, &[("DX_AGENT_APP_EXE", app_exe.as_str())])
         && let Ok(value) = serde_json::from_str::<serde_json::Value>(&json)
     {
         return WindowsPrivacySnapshot {

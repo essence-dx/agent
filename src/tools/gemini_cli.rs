@@ -1,1 +1,1 @@
-pub use zeroclaw_tools::gemini_cli::*;
+pub use dx_agent_tools::gemini_cli::*;

@@ -30,7 +30,7 @@ Instead, please report them responsibly:
 
 ## Security Architecture
 
-ZeroClaw implements defense-in-depth security:
+DX Agent implements defense-in-depth security:
 
 ### Autonomy Levels
 - **ReadOnly** — Agent can only read, no shell or write access
@@ -64,7 +64,7 @@ cargo test -- tools::file_write
 
 ## Container Security
 
-ZeroClaw Docker images follow CIS Docker Benchmark best practices:
+DX Agent Docker images follow CIS Docker Benchmark best practices:
 
 | Control | Implementation |
 |---------|----------------|

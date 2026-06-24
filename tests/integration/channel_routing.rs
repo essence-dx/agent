@@ -182,10 +182,10 @@ impl CapturingChannel {
     }
 }
 
-impl ::zeroclaw_api::attribution::Attributable for CapturingChannel {
-    fn role(&self) -> ::zeroclaw_api::attribution::Role {
-        ::zeroclaw_api::attribution::Role::Channel(
-            ::zeroclaw_api::attribution::ChannelKind::Webhook,
+impl ::dx_agent_api::attribution::Attributable for CapturingChannel {
+    fn role(&self) -> ::dx_agent_api::attribution::Role {
+        ::dx_agent_api::attribution::Role::Channel(
+            ::dx_agent_api::attribution::ChannelKind::Webhook,
         )
     }
     fn alias(&self) -> &str {

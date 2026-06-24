@@ -1,4 +1,4 @@
-//! ZeroClaw WASM plugin: text-to-image generation via fal.ai Flux models.
+//! DX Agent WASM plugin: text-to-image generation via fal.ai Flux models.
 //!
 //! Mirrors the native `ImageGenTool` but runs as a sandboxed WASM plugin.
 //! Uses host functions for HTTP requests and environment variable access.
@@ -9,7 +9,7 @@
 //! - `tool_metadata(_) -> JSON` — returns `{"name", "description", "parameters_schema"}`
 //! - `execute(args_json) -> JSON` — returns `{"success", "output", "error?"}`
 //!
-//! **Host functions (provided by ZeroClaw runtime):**
+//! **Host functions (provided by DX Agent runtime):**
 //! - `zc_http_request(json) -> json` — make an HTTP request (requires `http_client` permission)
 //! - `zc_env_read(name) -> value` — read an env var (requires `env_read` permission)
 

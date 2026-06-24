@@ -1,4 +1,4 @@
-# ZeroClaw v0.8.0-beta-2
+# DX Agent v0.8.0-beta-2
 
 This is the second beta of the v0.8.0 line, and the largest release since v0.7.5. Its headline is **zerocode** — a brand-new, full-featured terminal UI for running and operating your agents without leaving the terminal. Around it, this release ships the multi-agent runtime and schema V3, a rebuilt Quickstart onboarding flow that works identically across the CLI, zerocode, and the web dashboard, and a deny-with-edit approval mode that lets you rewrite a tool result inline. Hundreds of fixes harden the credential boundary, token accounting, sandboxing, and channel delivery.
 
@@ -6,7 +6,7 @@ Because this beta consolidates two milestones, the **What's New** section is fra
 
 ## Meet zerocode
 
-**zerocode is a complete terminal interface for ZeroClaw** — a standalone binary that connects to a daemon and gives you a five-pane workspace for everything from chatting with an agent to editing config to reading live logs. It speaks to the daemon over a filesystem-permission-gated local socket (Unix domain socket or Windows named pipe) or a remote WSS connection, and it can spin up its own ephemeral daemon if one isn't already running.
+**zerocode is a complete terminal interface for DX Agent** — a standalone binary that connects to a daemon and gives you a five-pane workspace for everything from chatting with an agent to editing config to reading live logs. It speaks to the daemon over a filesystem-permission-gated local socket (Unix domain socket or Windows named pipe) or a remote WSS connection, and it can spin up its own ephemeral daemon if one isn't already running.
 
 What you can do in zerocode:
 
@@ -35,7 +35,7 @@ Local connections use a platform-native, permission-gated endpoint — no TCP po
 - **Unix-like (Linux/macOS):** a Unix domain socket at `<data_dir>/daemon.sock`, created with `0600` permissions so only the owning user can connect. On Linux the daemon reads the peer's PID/UID via `SO_PEERCRED` for the connection label.
 - **Windows:** a named pipe at `\\.\pipe\zeroclaw-<hash>`, where `<hash>` is derived from the data directory so each install gets its own pipe in the kernel object namespace.
 
-The endpoint is auto-derived from the daemon's `data_dir` (override with `$ZEROCLAW_SOCKET`), and the same JSON-RPC line protocol runs over the local socket and over WSS — remote access is the same surface, just tunneled over TLS.
+The endpoint is auto-derived from the daemon's `data_dir` (override with `$DX_AGENT_SOCKET`), and the same JSON-RPC line protocol runs over the local socket and over WSS — remote access is the same surface, just tunneled over TLS.
 
 ### Your shell environment comes with you
 
@@ -43,7 +43,7 @@ When zerocode connects over the local socket, it captures your real shell enviro
 
 ## Highlights
 
-- **zerocode** — a new terminal UI for ZeroClaw. A standalone binary with a five-pane workspace (Chat, Code, Config, Logs, Dashboard) that connects to a local or remote daemon and lets you run agents, edit config, approve tool calls, and read live logs without leaving the terminal. Open as many windows as you want against one daemon — local or over WSS — and if none is running, zerocode spins up an ephemeral one that cleans itself up when you're done. See **Meet zerocode** above.
+- **zerocode** — a new terminal UI for DX Agent. A standalone binary with a five-pane workspace (Chat, Code, Config, Logs, Dashboard) that connects to a local or remote daemon and lets you run agents, edit config, approve tool calls, and read live logs without leaving the terminal. Open as many windows as you want against one daemon — local or over WSS — and if none is running, zerocode spins up an ephemeral one that cleans itself up when you're done. See **Meet zerocode** above.
 - **Multi-agent runtime + schema V3**: run several named agents from one daemon, each with its own model provider, risk profile, runtime profile, channels, and memory namespace.
 - **Quickstart**, a rebuilt onboarding flow that replaces `onboard`: one backend-authored field shape drives CLI, TUI, and web with no duplicated picker rows, live model catalog, personality-file templates, and an atomic apply.
 - **Deny-with-edit approvals**: when a tool call needs approval, you can edit the proposed result inline and hand the edited value back to the agent as the tool result, with the substitution recorded in the audit trail.
@@ -96,7 +96,7 @@ zerocode is covered in depth in **Meet zerocode** above; the daemon-side groundw
 
 ### Security & Approvals
 
-- Deny-with-edit approval variant across `zeroclaw-api`, runtime, channels, and the TUI overlay, with a `ReplaceWith` audit entry (#6820).
+- Deny-with-edit approval variant across `dx-agent-api`, runtime, channels, and the TUI overlay, with a `ReplaceWith` audit entry (#6820).
 - Pairing-token auth removed from the RPC socket transport in favour of filesystem permissions (#6837); `#[secret]` generalized via a `SecretField` trait (#6918).
 - Runtime profile now enforced in channel-driven agent paths; Canvas iframe sandbox tightened against token theft via XSS (GHSA-f385-f6h2-3gqj, #6942); bubblewrap sandbox binds `/lib64`/`/lib` conditionally (#6902); Groq API keys detected in the leak scanner (#6812).
 
@@ -119,7 +119,7 @@ zerocode is covered in depth in **Meet zerocode** above; the daemon-side groundw
 
 ### Installation & Distribution
 
-- NixOS module + test for `services.zeroclaw.instances` (#6562); Tauri desktop permission onboarding for Linux/Windows (#6710) and a macOS onboarding wizard (#6506); `take_screenshot` / `run_applescript` desktop commands (#6507).
+- NixOS module + test for `services.dx_agent.instances` (#6562); Tauri desktop permission onboarding for Linux/Windows (#6710) and a macOS onboarding wizard (#6506); `take_screenshot` / `run_applescript` desktop commands (#6507).
 
 ## What's New since v0.8.0-beta-1
 

@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::webhook::*;
+pub use dx_agent_channels::webhook::*;

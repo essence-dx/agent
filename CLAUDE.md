@@ -1,4 +1,4 @@
-# CLAUDE.md — ZeroClaw (Claude Code)
+# CLAUDE.md — DX Agent (Claude Code)
 
 > **Shared instructions live in [`AGENTS.md`](./AGENTS.md).**
 > This file contains only Claude Code-specific directives.

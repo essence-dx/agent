@@ -22,8 +22,8 @@ Use [PR lanes](./pr-workflow.md#pr-lanes) for routing expectations; use this pla
 | Risk label | Typical paths | Minimum depth | Required evidence |
 |---|---|---|---|
 | `risk: low` | Docs, tests, chore, isolated non-runtime | 1 reviewer + CI gate | Coherent local validation, no behavior ambiguity |
-| `risk: medium` | `crates/zeroclaw-providers/`, `crates/zeroclaw-channels/`, `crates/zeroclaw-memory/`, `crates/zeroclaw-config/` | 1 subsystem-aware reviewer + behavior verification | Focused scenario proof, explicit side effects |
-| `risk: high` | `crates/zeroclaw-runtime/src/security/`, the rest of `crates/zeroclaw-runtime/`, `crates/zeroclaw-gateway/`, `crates/zeroclaw-tools/`, `.github/workflows/` | Fast triage + deep review + rollback readiness | Security and failure-mode checks, rollback clarity |
+| `risk: medium` | `crates/dx-agent-providers/`, `crates/dx-agent-channels/`, `crates/dx-agent-memory/`, `crates/dx-agent-config/` | 1 subsystem-aware reviewer + behavior verification | Focused scenario proof, explicit side effects |
+| `risk: high` | `crates/dx-agent-runtime/src/security/`, the rest of `crates/dx-agent-runtime/`, `crates/dx-agent-gateway/`, `crates/dx-agent-tools/`, `.github/workflows/` | Fast triage + deep review + rollback readiness | Security and failure-mode checks, rollback clarity |
 
 When uncertain, treat as higher risk.
 

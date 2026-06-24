@@ -1,10 +1,10 @@
 # Channels — Overview
 
-A **channel** is a messaging surface the agent talks through. One ZeroClaw instance can bind multiple channels simultaneously — the same agent can answer in Discord, Telegram, email, and over the REST gateway without you running separate processes.
+A **channel** is a messaging surface the agent talks through. One DX Agent instance can bind multiple channels simultaneously — the same agent can answer in Discord, Telegram, email, and over the REST gateway without you running separate processes.
 
-Channels are implementations of the `Channel` trait in `zeroclaw-api`. Each one is feature-gated at compile time, so a minimal build only includes the channels you want.
+Channels are implementations of the `Channel` trait in `dx-agent-api`. Each one is feature-gated at compile time, so a minimal build only includes the channels you want.
 
-The default ZeroClaw build includes a lean channel bundle: ACP, webhook, email, and Telegram. These cover local/editor sessions, gateway ingress, and common first-run external messaging without compiling every bundled platform integration. Pre-built binaries use this lean default. For source installs that need the historical broad channel set, run `install.sh --source --preset full`, build with `--features channels-full`, or use individual `channel-*` features for selective builds:
+The default DX Agent build includes a lean channel bundle: ACP, webhook, email, and Telegram. These cover local/editor sessions, gateway ingress, and common first-run external messaging without compiling every bundled platform integration. Pre-built binaries use this lean default. For source installs that need the historical broad channel set, run `install.sh --source --preset full`, build with `--features channels-full`, or use individual `channel-*` features for selective builds:
 
 ```bash
 ./install.sh --source --preset full
@@ -112,4 +112,4 @@ Channels declare what kind of streaming they support — see [Providers → Stre
 
 ## Adding a channel
 
-Implementing a new channel means adding a file to `crates/zeroclaw-channels/src/` that implements the `Channel` trait. The canonical reference is any existing channel of similar shape — `discord.rs` for push-based, `email_channel.rs` for polling, `webhook.rs` for HTTP-driven.
+Implementing a new channel means adding a file to `crates/dx-agent-channels/src/` that implements the `Channel` trait. The canonical reference is any existing channel of similar shape — `discord.rs` for push-based, `email_channel.rs` for polling, `webhook.rs` for HTTP-driven.

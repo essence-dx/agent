@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::slack::*;
+pub use dx_agent_channels::slack::*;

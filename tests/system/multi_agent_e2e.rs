@@ -34,7 +34,7 @@ fn legacy_install_upgrades_cleanly_with_backup() {
     std::fs::create_dir_all(&legacy_db).unwrap();
     std::fs::write(legacy_db.join("brain.db"), b"sqlite-bytes").unwrap();
 
-    let report = zeroclaw_config::schema::v2::migrate_v2_to_v3_install_filesystem(install_root)
+    let report = dx_agent_config::schema::v2::migrate_v2_to_v3_install_filesystem(install_root)
         .expect("migration must succeed on populated legacy install");
     assert!(
         report.entries_relocated > 0 && report.backup_dir.is_some(),
@@ -96,7 +96,7 @@ fn legacy_install_upgrades_cleanly_with_backup() {
 
     // Idempotent re-run: legacy gone → no-op (no backup, nothing moved).
     let report_again =
-        zeroclaw_config::schema::v2::migrate_v2_to_v3_install_filesystem(install_root)
+        dx_agent_config::schema::v2::migrate_v2_to_v3_install_filesystem(install_root)
             .expect("idempotent re-run must succeed");
     assert!(
         report_again.backup_dir.is_none() && report_again.entries_relocated == 0,
@@ -111,7 +111,7 @@ fn legacy_install_upgrades_cleanly_with_backup() {
 /// factory builds its wrappers.
 #[tokio::test]
 async fn two_sqlite_agents_on_one_install_have_isolated_memory() {
-    use zeroclaw_config::schema::{AliasedAgentConfig, Config, RiskProfileConfig};
+    use dx_agent_config::schema::{AliasedAgentConfig, Config, RiskProfileConfig};
 
     let tmp = TempDir::new().unwrap();
     let install_root = tmp.path();
@@ -125,7 +125,7 @@ async fn two_sqlite_agents_on_one_install_have_isolated_memory() {
         .insert("default".into(), RiskProfileConfig::default());
     cfg.providers.models.openrouter.insert(
         "default".to_string(),
-        zeroclaw_config::schema::OpenRouterModelProviderConfig::default(),
+        dx_agent_config::schema::OpenRouterModelProviderConfig::default(),
     );
     for alias in ["alpha", "beta"] {
         cfg.agents.insert(
@@ -141,10 +141,10 @@ async fn two_sqlite_agents_on_one_install_have_isolated_memory() {
     // Build per-agent wrappers and store an attributable row from
     // each. Without an allowlist between them, neither sibling sees
     // the other's row.
-    let alpha_mem = zeroclaw_memory::create_memory_for_agent(&cfg, "alpha", None)
+    let alpha_mem = dx_agent_memory::create_memory_for_agent(&cfg, "alpha", None)
         .await
         .expect("per-agent memory for alpha");
-    let beta_mem = zeroclaw_memory::create_memory_for_agent(&cfg, "beta", None)
+    let beta_mem = dx_agent_memory::create_memory_for_agent(&cfg, "beta", None)
         .await
         .expect("per-agent memory for beta");
 
@@ -152,7 +152,7 @@ async fn two_sqlite_agents_on_one_install_have_isolated_memory() {
         .store(
             "alpha-key",
             "alpha owns this row",
-            zeroclaw_memory::MemoryCategory::Core,
+            dx_agent_memory::MemoryCategory::Core,
             None,
         )
         .await
@@ -161,7 +161,7 @@ async fn two_sqlite_agents_on_one_install_have_isolated_memory() {
         .store(
             "beta-key",
             "beta owns this row",
-            zeroclaw_memory::MemoryCategory::Core,
+            dx_agent_memory::MemoryCategory::Core,
             None,
         )
         .await
@@ -218,12 +218,12 @@ async fn two_sqlite_agents_on_one_install_have_isolated_memory() {
 async fn peer_group_routes_messages_only_within_resolved_peer_set() {
     use serde_json::json;
     use std::sync::Arc;
-    use zeroclaw_api::tool::Tool;
-    use zeroclaw_config::multi_agent::{AgentAlias, PeerGroupConfig, PeerUsername};
-    use zeroclaw_config::providers::ChannelRef;
-    use zeroclaw_config::schema::{AliasedAgentConfig, Config, RiskProfileConfig};
-    use zeroclaw_runtime::peers::resolve_peer_set;
-    use zeroclaw_runtime::tools::SendMessageToPeerTool;
+    use dx_agent_api::tool::Tool;
+    use dx_agent_config::multi_agent::{AgentAlias, PeerGroupConfig, PeerUsername};
+    use dx_agent_config::providers::ChannelRef;
+    use dx_agent_config::schema::{AliasedAgentConfig, Config, RiskProfileConfig};
+    use dx_agent_runtime::peers::resolve_peer_set;
+    use dx_agent_runtime::tools::SendMessageToPeerTool;
 
     let mut cfg = Config::default();
     cfg.risk_profiles
@@ -265,7 +265,7 @@ async fn peer_group_routes_messages_only_within_resolved_peer_set() {
     let gamma_peers = resolve_peer_set(&cfg, "gamma");
     assert_eq!(
         gamma_peers,
-        zeroclaw_runtime::peers::ResolvedPeers::default(),
+        dx_agent_runtime::peers::ResolvedPeers::default(),
         "gamma is on no peer group; resolved set is empty"
     );
 
@@ -314,12 +314,12 @@ async fn peer_group_routes_messages_only_within_resolved_peer_set() {
 async fn peer_group_dotted_channel_refs_remain_alias_scoped_for_dispatch() {
     use serde_json::json;
     use std::sync::Arc;
-    use zeroclaw_api::tool::Tool;
-    use zeroclaw_config::multi_agent::{AgentAlias, PeerGroupConfig};
-    use zeroclaw_config::providers::ChannelRef;
-    use zeroclaw_config::schema::{AliasedAgentConfig, Config, RiskProfileConfig};
-    use zeroclaw_runtime::peers::resolve_peer_set;
-    use zeroclaw_runtime::tools::SendMessageToPeerTool;
+    use dx_agent_api::tool::Tool;
+    use dx_agent_config::multi_agent::{AgentAlias, PeerGroupConfig};
+    use dx_agent_config::providers::ChannelRef;
+    use dx_agent_config::schema::{AliasedAgentConfig, Config, RiskProfileConfig};
+    use dx_agent_runtime::peers::resolve_peer_set;
+    use dx_agent_runtime::tools::SendMessageToPeerTool;
 
     let mut cfg = Config::default();
     cfg.risk_profiles

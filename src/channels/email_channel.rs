@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::email_channel::*;
+pub use dx_agent_channels::email_channel::*;

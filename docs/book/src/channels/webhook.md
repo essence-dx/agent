@@ -104,8 +104,8 @@ Outbound sends retry transient failures — network errors, HTTP `429`, and HTTP
 
 ## Code
 
-- Channel: `crates/zeroclaw-channels/src/webhook.rs`
-- Config: `crates/zeroclaw-config/src/schema.rs` (`WebhookConfig`)
+- Channel: `crates/dx-agent-channels/src/webhook.rs`
+- Config: `crates/dx-agent-config/src/schema.rs` (`WebhookConfig`)
 
 ## See also
 

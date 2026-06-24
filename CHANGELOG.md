@@ -10,14 +10,14 @@
 
 ### Fixed
 
-- Made ACP bridge launch DX-first by preferring `DX_AGENTS_ACP_BRIDGE_TOKEN` and `DX_AGENTS_ACP_PAIRING_CODE`, keeping legacy `ZEROCLAW_*` fallback, and updating ACP/gateway recovery commands to `dx-agents`.
-- Rebranded ACP initialize metadata to `dx-agents-acp` and `_meta.dxAgents` while preserving `_meta.zeroclaw` for compatible clients.
+- Made ACP bridge launch DX-first by preferring `DX_AGENTS_ACP_BRIDGE_TOKEN` and `DX_AGENTS_ACP_PAIRING_CODE`, keeping legacy `DX_AGENT_*` fallback, and updating ACP/gateway recovery commands to `dx-agents`.
+- Rebranded ACP initialize metadata to `dx-agents-acp` and `_meta.dxAgents` while preserving `_meta.dx_agent` for compatible clients.
 - Classified and encrypted file upload bundle headers, file download headers, Gmail push webhook secrets, and voice-call auth tokens so config saves and wire surfaces do not expose those credentials.
 - Sanitized OpenAI-compatible streaming status error bodies, reflected authorization/header/JSON credential fields, and reliable-provider stream forwarding logs so provider errors cannot echo supplied API keys.
 - Encrypted nested model and embedding route `api_key` values on config save/load, masked them in object-array display and whole-config API responses, restored masked PATCH values from the active config, and fixed first-hour policy action counters so rate limits count fresh actions correctly.
 - Changed Unix installer onboarding detection to require both a configured model provider and a runnable agent route, preventing provider-only configs from skipping Quickstart, and updated Linux/macOS setup docs to the DX Agents repo, binary, Quickstart, and service command surface.
 - Kept Docker release gateway pairing required, switched Docker/Compose/Kubernetes env examples to DX-first names, and made Compose host-port publishing loopback-only by default.
-- Updated Quick Start, Windows setup, CLI help, and English help catalog examples away from upstream ZeroClaw install/onboard commands.
+- Updated Quick Start, Windows setup, CLI help, and English help catalog examples away from upstream DX Agent install/onboard commands.
 - Verified a transient Groq quickstart and `llama-3.3-70b-versatile` agent message returned `dx-agents-provider-ok`, with no raw supplied keys found in the temp config or repo scan.
 - Preserved credential surface classification when config fields are exported through schema/wire metadata, keeping secret fields redacted and typed for UI consumers.
 - Awaited Windows native process-output tests correctly so async runtime checks compile on Windows.
@@ -29,7 +29,7 @@
 - Rebranded Kubernetes/OpenShift samples and checked-in AUR/Scoop package templates to the DX Agents public binary/image contract without storing provider API keys in sample ConfigMaps.
 - Pointed self-update checks at the DX Agents release repository by default, switched update requests to the `dx-agents` user agent, preferred `dx-agents-*` release artifacts while keeping legacy archive compatibility, and added Windows zip extraction for update assets.
 - Rebranded stable release artifacts, CI Docker release images, Docker Compose, and the Kubernetes sample to use the `dx-agents` binary/image contract, and gated package-manager dry-runs, website redeploys, and release announcements behind explicit DX release variables.
-- Rebranded the shell installer, Windows installer, and Raspberry Pi deploy service to install and verify `dx-agents` binaries from the DX Agents release repository while preserving the current `.zeroclaw` runtime config path for compatibility.
+- Rebranded the shell installer, Windows installer, and Raspberry Pi deploy service to install and verify `dx-agents` binaries from the DX Agents release repository while preserving the current `.dx_agent` runtime config path for compatibility.
 - Kept the update asset-selection helper warning-free in production builds after the DX asset migration.
 - Re-synced the web API client with the gateway's current config, quickstart, skills, browse, workspace, cron, cost, memory, session, and TUI routes so the dashboard agent surfaces typecheck again.
 - Required cron edit requests from the dashboard to include the owning agent alias, matching the gateway's policy-validation contract.
@@ -395,7 +395,7 @@
 - Added retained redacted raw-command operator packet release-checklist history snapshots behind explicit archive mode plus latest-vs-previous drift for checklist state, packet/history/alert states, placeholder defaults, unsafe-review allowance, command guidance, staleness, and payload-free policy.
 - Added metadata-only raw-command operator packet release-checklist history alerts for empty/single/stale history, checklist-state regressions, placeholder-default regressions, unsafe-review regressions, dependency regressions, item-count regressions, command-guidance drift, payload-policy regressions, and stable retained signoff evidence.
 - Added parity inventory and verifier coverage for raw-command operator packet release-checklist history plus release-checklist alerts, including schema, required-surface, required-alert, and redaction checks.
-- Added a metadata-only legacy alias decommission readiness report for `ZEROCLAW_*` environment aliases, legacy storage fallback, dashboard browser aliases, migration readers, archived Agent reference, and internal `zeroclaw-*` namespace compatibility without exporting secret values, config contents, browser storage values, or workspace paths.
+- Added a metadata-only legacy alias decommission readiness report for `DX_AGENT_*` environment aliases, legacy storage fallback, dashboard browser aliases, migration readers, archived Agent reference, and internal `zeroclaw-*` namespace compatibility without exporting secret values, config contents, browser storage values, or workspace paths.
 - Added retained metadata-only legacy alias decommission snapshots behind explicit archive mode plus latest-vs-previous drift for alias state, active legacy env names, active surface counts, decommission readiness, staleness, and redaction policy.
 - Added metadata-only legacy alias decommission alerts for empty/single/stale evidence, active alias usage, alias regressions, missing migration readers, decommission gate regressions, payload-free regressions, and unsafe removal attempts.
 - Added parity inventory and verifier coverage for legacy alias decommission readiness, retained history, and alert metadata, including schema, required-surface, required-alert, and redaction checks.
@@ -416,8 +416,8 @@
 - Added a strict CI rollout pack command that exposes one safe non-failing default command, one explicit `--fail-on-non-clear` command, rollout readiness state, evidence freshness, archive guidance, runbooks, and payload-free redaction metadata for CI template handoff.
 - Added retained redacted strict CI rollout pack history snapshots with drift across rollout state, opt-in readiness, evidence freshness, dependency states, exit codes, command guidance, and staleness.
 - Added strict CI rollout pack history alerts for empty history, single snapshots, stale evidence, rollout-state regressions, opt-in readiness regressions, evidence regressions, dependency-state regressions, exit-code drift, accidental failure-mode enablement, command drift, and stable pack history.
-- Established DX Agents as the active Rust product forked from latest ZeroClaw.
-- Added provider/model CLI management, session recovery commands, focused self-test slices, channel allowlist management, and OpenClaw/Hermes/Agent/ZeroClaw migration readers.
+- Established DX Agents as the active Rust product forked from latest DX Agent.
+- Added provider/model CLI management, session recovery commands, focused self-test slices, channel allowlist management, and OpenClaw/Hermes/Agent/DX Agent migration readers.
 - Added `docs/parity/openclaw-hermes-core.md` to track implemented, preserved, and deferred parity work.
 - Added DX Agents desktop package branding, bundle identity, onboarding copy, tray labels, and compatible dashboard token storage.
 - Added a grouped DX CLI host menu command for the desktop bridge so future UI work can render command groups directly.
@@ -617,7 +617,7 @@
 ### Changed
 
 - Root package, library, binary, ACP bridge, service install names, update source, config/env prefix, and high-visibility English CLI copy now prefer DX Agents naming.
-- Legacy `zeroclaw`, `ZEROCLAW_*`, archived Agent, OpenClaw, and Hermes data paths remain readable for migration.
+- Legacy `zeroclaw`, `DX_AGENT_*`, archived Agent, OpenClaw, and Hermes data paths remain readable for migration.
 - Web auth storage now prefers `dx_agents_token` while still reading and writing `zeroclaw_token` for compatibility with existing dashboard sessions.
 - `TODO.md` now marks the first core runtime parity batch as complete and opens Batch 2 for automation continuity and operator control-plane work.
 - Batch 2 now completes the automation continuity/operator control-plane checklist and opens Batch 3 for desktop live-ops hardening.
@@ -670,13 +670,13 @@
 - The DX CLI Bridge now prefers the generated top-level `embedded_terminal_tui_canary_renderer_evidence` contract before local renderer-evidence fallback snapshots.
 - Batch 16 opens dashboard branding and DX env alias compatibility while preserving old storage and API paths.
 - The web dashboard package, Vite gateway env, base/gateway globals, pairing dialog, sidebar, logs, chat header, and settings preview now prefer DX Agents naming.
-- Dashboard storage now writes DX Agents keys while keeping old ZeroClaw keys readable and writable for existing sessions.
+- Dashboard storage now writes DX Agents keys while keeping old DX Agent keys readable and writable for existing sessions.
 - Dashboard compatibility now covers local storage, session storage, window globals, gateway env vars, unauthorized events, and WebSocket protocol aliases.
 - Batch 16 completes dashboard branding and DX env alias compatibility while keeping legacy compatibility paths readable.
 - Batch 17 opens dashboard compatibility contract promotion so the alias set can move from local dashboard constants into generated source-owned metadata.
 - Batch 17 completes dashboard compatibility contract promotion; the bridge now prefers host-contract metadata and keeps local constants only as an older-contract fallback.
 - Batch 18 completes dashboard compatibility status export and drift guard coverage.
-- The gateway SPA fallback now injects both `window.__DX_AGENTS_BASE__` and `window.__ZEROCLAW_BASE__` for path-prefixed dashboards.
+- The gateway SPA fallback now injects both `window.__DX_AGENTS_BASE__` and `window.__DX_AGENT_BASE__` for path-prefixed dashboards.
 - Batch 19 completes the dashboard compatibility migration plan and keeps all legacy aliases active until a versioned cleanup note is approved.
 - Batch 20 completes the dashboard compatibility command surface without adding duplicate bridge UI controls.
 - Batch 21 completes dashboard compatibility decommission telemetry and keeps legacy aliases blocked until a zero-legacy-usage telemetry export is available.
@@ -759,7 +759,7 @@
 - `cargo test -p dx-agents --bin dx-agents channel_app_readiness -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_channels_json_cli_parses -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_inventory -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_verification -- --nocapture`, `cargo fmt --check`, `git diff --check`, and `cargo check -p dx-agents --bin dx-agents` passed for the channel/app capability readiness batch.
 - `cargo test -p dx-agents --bin dx-agents managed_tool_gateway_readiness -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_managed_tools_json_cli_parses -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_inventory -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_verification -- --nocapture`, `cargo fmt --check`, `git diff --check`, and `cargo check -p dx-agents --bin dx-agents` passed for the managed tool gateway readiness batch.
 - `cargo test -p dx-agents --bin dx-agents remote_skill_readiness -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_remote_skills_json_cli_parses -- --nocapture`, `cargo test -p dx-agents --bin dx-agents skill_pack_readiness -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_inventory -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_verification -- --nocapture`, `cargo fmt --check`, `git diff --check`, and `cargo check -p dx-agents --bin dx-agents` passed for the remote skill node readiness batch.
-- `cargo test -p zeroclaw-runtime delivery_queue -- --nocapture`, `cargo test -p zeroclaw-runtime persist_job_result_delivery_stubbed_succeeds -- --nocapture`, `cargo test -p dx-agents --bin dx-agents delivery_queue_health -- --nocapture`, `cargo test -p dx-agents --bin dx-agents runtime_preflight -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_delivery_queue_json_cli_parses -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_verification -- --nocapture`, `cargo fmt --check`, `git diff --check`, and `cargo check -p dx-agents --bin dx-agents` passed for the durable outbound queue store batch.
+- `cargo test -p dx-agent-runtime delivery_queue -- --nocapture`, `cargo test -p dx-agent-runtime persist_job_result_delivery_stubbed_succeeds -- --nocapture`, `cargo test -p dx-agents --bin dx-agents delivery_queue_health -- --nocapture`, `cargo test -p dx-agents --bin dx-agents runtime_preflight -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_delivery_queue_json_cli_parses -- --nocapture`, `cargo test -p dx-agents --bin dx-agents parity_verification -- --nocapture`, `cargo fmt --check`, `git diff --check`, and `cargo check -p dx-agents --bin dx-agents` passed for the durable outbound queue store batch.
 - `cargo test -p dx-agents delivery_queue_health -- --nocapture`, `cargo test -p dx-agents parity_delivery_queue_json_cli_parses -- --nocapture`, `cargo test -p dx-agents runtime_preflight -- --nocapture`, `cargo test -p dx-agents parity_verification -- --nocapture`, `cargo fmt --check`, `git diff --check`, and `cargo check -p dx-agents --bin dx-agents` passed for the durable delivery queue health preflight batch.
 - `cargo test -p dx-agents agent_routing_parity -- --nocapture`, `cargo test -p dx-agents parity_agents_json_cli_parses -- --nocapture`, `cargo test -p dx-agents parity_inventory -- --nocapture`, `cargo test -p dx-agents parity_verification -- --nocapture`, `cargo fmt --check`, `git diff --check`, and `cargo check -p dx-agents --bin dx-agents` passed for the multi-agent routing parity report batch.
 - `cargo test -p dx-agents-desktop continuation_doc_targets -- --nocapture`, `cargo test -p dx-agents-desktop release_readiness_report_scores_local_release_inputs -- --nocapture`, `cargo test -p dx-agents-desktop tool_safety_audit_recovery_alert_digest_release_gate_digest_alert_digest_alert_digest_alert_digest_alert_digest -- --nocapture`, `cargo fmt --check`, `git diff --check`, `cargo check -p dx-agents-desktop`, and `cargo check -p dx-agents --bin dx-agents` passed for the audit review recovery alert digest release gate digest alert digest alert digest alert digest alert digest alert runbook batch.
@@ -806,8 +806,8 @@
 - `cargo test -p dx-agents gateway_pairing_drill -- --nocapture`
 - `cargo test -p dx-agents-desktop gateway_pairing_drill -- --nocapture`
 - `npm run typecheck` from `web`
-- `cargo test -p zeroclaw-gateway select_supported -- --nocapture`
-- `cargo check -p zeroclaw-gateway`
+- `cargo test -p dx-agent-gateway select_supported -- --nocapture`
+- `cargo check -p dx-agent-gateway`
 - `cargo test -p dx-agents-desktop dashboard_compatibility -- --nocapture`
 - `cargo check -p dx-agents-desktop`
 - `cargo test -p dx-agents-desktop embedded_terminal_tui_canary_runner -- --nocapture`
@@ -851,9 +851,9 @@
 - `cargo test -p dx-agents-desktop dashboard_compatibility_status -- --nocapture`
 - `cargo test -p dx-agents-desktop release_readiness_report_scores_local_release_inputs -- --nocapture`
 - `cargo test -p dx-agents-desktop bridge_self_test_inventory_contains_live_ops_commands -- --nocapture`
-- `cargo test -p zeroclaw-gateway base_prefix_script -- --nocapture`
+- `cargo test -p dx-agent-gateway base_prefix_script -- --nocapture`
 - `node -e "const fs=require('fs'); const html=fs.readFileSync('apps/tauri/onboarding/bridge.html','utf8'); const m=html.match(/<script>([\s\S]*?)<\/script>/); if(!m){throw new Error('missing script')}; new Function(m[1]); console.log('bridge.html script syntax ok');"`
-- `cargo check -p zeroclaw-gateway`
+- `cargo check -p dx-agent-gateway`
 - `cargo check -p dx-agents-desktop` after embedded terminal resize diagnostics.
 - `cargo test -p dx-agents-desktop release_readiness_report_scores_local_release_inputs -- --nocapture`
 - `cargo check -p dx-agents-desktop`
@@ -1015,4 +1015,4 @@
 
 ## Upstream History
 
-The ZeroClaw upstream changelog for the fork base remains in `CHANGELOG-next.md`.
+The DX Agent upstream changelog for the fork base remains in `CHANGELOG-next.md`.

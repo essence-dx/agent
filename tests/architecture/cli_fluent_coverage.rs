@@ -8,7 +8,7 @@
 //!   2. Terminal output macros with a bare string literal as the format arg —
 //!      `println!("Done.")`, `eprint!("error: ...")`, etc. A literal ships
 //!      English in every locale; the text must come from
-//!      `zeroclaw_runtime::i18n` (a `cli-*` Fluent key). `println!("{}", t(..))`
+//!      `dx_agent_runtime::i18n` (a `cli-*` Fluent key). `println!("{}", t(..))`
 //!      and `println!()` are fine — the format arg is not a bare literal.
 //!
 //! Doc-comments are out of scope. To exempt a specific line deliberately (a
@@ -26,7 +26,7 @@ fn user_facing_strings_route_through_fluent() {
     assert!(
         violations.is_empty(),
         "Bare user-facing string literals detected. User-facing text must come \
-         from Fluent (a `cli-*` key via `zeroclaw_runtime::i18n`), not a literal: \
+         from Fluent (a `cli-*` key via `dx_agent_runtime::i18n`), not a literal: \
          clap `about`/`long_about`/`help = \"...\"` and `println!`/`eprintln!`/\
          `print!`/`eprint!` with a literal format string. Wrap the text in a \
          Fluent lookup, or exempt a deliberate line with `// i18n-exempt: <reason>`.\n\n\

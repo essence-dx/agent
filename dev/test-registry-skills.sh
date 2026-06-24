@@ -46,8 +46,8 @@ printf "${DIM}Binary:  %s${RESET}\n" "$ZEROCLAW"
 printf "${DIM}Branch:  %s${RESET}\n" "$(git branch --show-current 2>/dev/null || echo 'unknown')"
 
 # ── Discover skills from the registry cache ──────────────────────
-SKILLS_DIR="$HOME/.zeroclaw/workspace/skills"
-REGISTRY_DIR="$HOME/.zeroclaw/workspace/skills-registry"
+SKILLS_DIR="$HOME/.dx_agent/workspace/skills"
+REGISTRY_DIR="$HOME/.dx_agent/workspace/skills-registry"
 
 # Bootstrap the registry cache by attempting a dummy install (which
 # clones/pulls the registry even though it fails).
@@ -171,14 +171,14 @@ fi
 # ══════════════════════════════════════════════════════════════════
 info "=== Registry cache ==="
 
-REGISTRY_DIR="$HOME/.zeroclaw/workspace/skills-registry"
+REGISTRY_DIR="$HOME/.dx_agent/workspace/skills-registry"
 if [ -d "$REGISTRY_DIR" ]; then
   pass "registry cache exists at $REGISTRY_DIR"
 else
   fail "registry cache not found"
 fi
 
-if [ -f "$REGISTRY_DIR/.zeroclaw-skills-registry-sync" ]; then
+if [ -f "$REGISTRY_DIR/.dx_agent-skills-registry-sync" ]; then
   pass "sync marker present"
 else
   fail "sync marker missing"

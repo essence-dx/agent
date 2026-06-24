@@ -1,1 +1,1 @@
-pub use zeroclaw_plugins::*;
+pub use dx_agent_plugins::*;

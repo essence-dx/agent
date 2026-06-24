@@ -70,7 +70,7 @@ export default function AgentsList() {
             Agents
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--pc-text-muted)' }}>
-            Configured agents on this ZeroClaw instance.
+            Configured agents on this DX Agent instance.
           </p>
         </div>
         <Link

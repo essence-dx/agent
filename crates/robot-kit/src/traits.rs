@@ -1,7 +1,7 @@
 //! Tool trait definition
 //!
 //! This defines the interface that all robot tools implement.
-//! It is compatible with ZeroClaw's Tool trait but standalone.
+//! It is compatible with DX Agent's Tool trait but standalone.
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};

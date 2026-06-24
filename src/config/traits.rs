@@ -1,1 +1,1 @@
-pub use zeroclaw_config::traits::*;
+pub use dx_agent_config::traits::*;

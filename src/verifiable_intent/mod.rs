@@ -1,1 +1,1 @@
-pub use zeroclaw_runtime::verifiable_intent::*;
+pub use dx_agent_runtime::verifiable_intent::*;

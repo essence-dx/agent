@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use super::*;
-use zeroclaw_config::schema::Config;
-use zeroclaw_providers::provider_catalog::{
+use dx_agent_config::schema::Config;
+use dx_agent_providers::provider_catalog::{
     DxProvidersCatalogLoadDiagnostic, ModelProviderCatalogEntry, ModelProviderCatalogListing,
     ModelProviderCatalogSource,
 };

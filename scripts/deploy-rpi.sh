@@ -164,11 +164,11 @@ else
 fi
 
 # ── 5. Deploy config ─────────────────────────────────────────────────────────
-CONFIG_DEST="/home/${RPI_USER}/.zeroclaw/config.toml"
+CONFIG_DEST="/home/${RPI_USER}/.dx_agent/config.toml"
 echo ""
 echo "==> Deploying config to ${CONFIG_DEST}"
 # shellcheck disable=SC2029
-${SSH_CMD} ${SSH_OPTS} "${RPI_USER}@${RPI_HOST}" "mkdir -p /home/${RPI_USER}/.zeroclaw"
+${SSH_CMD} ${SSH_OPTS} "${RPI_USER}@${RPI_HOST}" "mkdir -p /home/${RPI_USER}/.dx_agent"
 # Preserve existing api_key from the remote config if present.
 # shellcheck disable=SC2029
 EXISTING_API_KEY=$(${SSH_CMD} ${SSH_OPTS} "${RPI_USER}@${RPI_HOST}" \

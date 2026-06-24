@@ -83,9 +83,9 @@ Drop(handle)
 
 ### Layer 2 — `AardvarkTransport` (the bridge)
 
-**File:** `crates/zeroclaw-hardware/src/aardvark.rs`
+**File:** `crates/dx-agent-hardware/src/aardvark.rs`
 
-The rest of ZeroClaw speaks a single language: `ZcCommand` → `ZcResponse`.
+The rest of DX Agent speaks a single language: `ZcCommand` → `ZcResponse`.
 `AardvarkTransport` translates between that protocol and the aardvark-sys calls above.
 
 **Algorithm:**
@@ -133,7 +133,7 @@ send(ZcCommand) → ZcResponse
 
 ### Layer 3 — Tools (what the agent calls)
 
-**File:** `crates/zeroclaw-hardware/src/aardvark_tools.rs`
+**File:** `crates/dx-agent-hardware/src/aardvark_tools.rs`
 
 Each tool is a thin wrapper. It:
 1. Validates the agent's JSON input
@@ -174,7 +174,7 @@ GpioAardvarkTool.call(args)
 DatasheetTool.call(args)
   → action = args["action"]: "search" | "download" | "list" | "read"
   → "search":   return a Google/vendor search URL for the device
-  → "download": fetch PDF from args["url"] → save to ~/.zeroclaw/hardware/datasheets/
+  → "download": fetch PDF from args["url"] → save to ~/.dx_agent/hardware/datasheets/
   → "list":     scan the datasheets directory → return filenames
   → "read":     open a saved PDF and return its text
 ```
@@ -183,7 +183,7 @@ DatasheetTool.call(args)
 
 ### Layer 4 — Device Registry (the address book)
 
-**File:** `crates/zeroclaw-hardware/src/device.rs`
+**File:** `crates/dx-agent-hardware/src/device.rs`
 
 The registry is a runtime map of every connected device.
 Each entry stores: alias, kind, capabilities, transport handle.
@@ -211,7 +211,7 @@ resolve_aardvark_device(args)
 
 ### Layer 5 — `boot()` (startup wiring)
 
-**File:** `crates/zeroclaw-hardware/src/lib.rs`
+**File:** `crates/dx-agent-hardware/src/lib.rs`
 
 `boot()` runs once at startup. For Aardvark:
 
@@ -236,7 +236,7 @@ boot()
 
 ### Layer 6 — Tool Registry (the loader)
 
-**File:** `crates/zeroclaw-hardware/src/tool_registry.rs`
+**File:** `crates/dx-agent-hardware/src/tool_registry.rs`
 
 After `boot()`, the tool registry checks what hardware is present and loads
 only the relevant tools:
@@ -259,7 +259,7 @@ This is why the `hardware_feature_registers_all_six_tools` test still passes in 
 ## Full Flow Diagram
 
 ```
- SDK FILES          aardvark-sys            ZeroClaw core
+ SDK FILES          aardvark-sys            DX Agent core
  (vendor/)          (crates/)               (src/)
 ─────────────────────────────────────────────────────────────────
 

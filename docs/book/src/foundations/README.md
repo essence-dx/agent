@@ -1,4 +1,4 @@
-# The ZeroClaw Maturity Framework
+# The DX Agent Maturity Framework
 
 *A letter to whoever finds this.*
 
@@ -8,7 +8,7 @@ If you are reading this, you have found your way into a folder that represents s
 this team is genuinely proud of — not because the documents here are perfect, but
 because they are honest.
 
-ZeroClaw started as something accidental. It was bootstrapped from an existing codebase,
+DX Agent started as something accidental. It was bootstrapped from an existing codebase,
 shaped by AI tools working faster than anyone could fully understand, and grew into a
 codebase that was impressively functional and architecturally unplanned. Nobody chose
 that outcome. It accumulated. Most software does.
@@ -102,7 +102,7 @@ That is the investment this series is making in you. Welcome to the team.
 
 ---
 
-*The ZeroClaw Maturity Framework is a living body of work. New documents are added when
+*The DX Agent Maturity Framework is a living body of work. New documents are added when
 the team has learned something worth preserving. Each begins as a public RFC discussion
 and earns its place here through the same process as the six above: open conversation,
 honest disagreement, and the team's collective decision to carry it forward.*

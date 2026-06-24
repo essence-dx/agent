@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use anyhow::Result;
 use serde::Serialize;
-use zeroclaw_config::schema::Config;
-use zeroclaw_providers::provider_catalog::{
+use dx_agent_config::schema::Config;
+use dx_agent_providers::provider_catalog::{
     DxProvidersCatalogLoadDiagnostic, ModelProviderCatalogEntry, ModelProviderCatalogListing,
     ModelProviderCatalogSource,
 };
@@ -63,7 +63,7 @@ struct ModelListProviderRow {
 }
 
 pub fn print_providers_json(config: &Config) -> Result<()> {
-    let listing = zeroclaw_providers::provider_catalog::list_model_provider_catalog_listing();
+    let listing = dx_agent_providers::provider_catalog::list_model_provider_catalog_listing();
     let configured_aliases = configured_aliases_by_family(config);
     let report = build_provider_list_report(listing, configured_aliases);
 
@@ -72,7 +72,7 @@ pub fn print_providers_json(config: &Config) -> Result<()> {
 }
 
 pub fn print_models_json(_config: &Config, provider: Option<&str>) -> Result<()> {
-    let listing = zeroclaw_providers::provider_catalog::list_model_provider_catalog_listing();
+    let listing = dx_agent_providers::provider_catalog::list_model_provider_catalog_listing();
     let report = build_model_list_report(listing, provider);
 
     println!("{}", serde_json::to_string_pretty(&report)?);
@@ -199,10 +199,10 @@ fn model_row_for_provider(
     provider_id: &str,
     catalog: &ProviderCatalogReport,
 ) -> ModelListProviderRow {
-    match zeroclaw_providers::provider_catalog::find_model_provider_catalog_entry(provider_id) {
+    match dx_agent_providers::provider_catalog::find_model_provider_catalog_entry(provider_id) {
         Some(entry) => {
             let models =
-                zeroclaw_providers::provider_catalog::list_models_for_catalog_provider(&entry.name);
+                dx_agent_providers::provider_catalog::list_models_for_catalog_provider(&entry.name);
             match models {
                 Ok(models) => ModelListProviderRow {
                     model_count: models.len(),
@@ -258,7 +258,7 @@ fn model_row_base(entry: ModelProviderCatalogEntry) -> ModelListProviderRow {
 mod tests {
     use super::*;
     use std::path::PathBuf;
-    use zeroclaw_providers::provider_catalog::DxProvidersCatalogLoadDiagnostic;
+    use dx_agent_providers::provider_catalog::DxProvidersCatalogLoadDiagnostic;
 
     fn catalog_error_listing() -> ModelProviderCatalogListing {
         ModelProviderCatalogListing {

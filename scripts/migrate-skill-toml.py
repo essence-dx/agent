@@ -5,7 +5,7 @@ Background
 ----------
 Issue #6128 made the `[skill]` block of `SKILL.toml` strict
 (`#[serde(deny_unknown_fields)]`). The SkillForge integrator
-(`crates/zeroclaw-runtime/src/skillforge/integrate.rs`) used to emit its
+(`crates/dx-agent-runtime/src/skillforge/integrate.rs`) used to emit its
 provenance fields — `source`, `owner`, `language`, `license`, `stars`,
 `updated_at` — and the nested sub-tables `[skill.requirements]` /
 `[skill.metadata]` directly inside `[skill]`. After PR #6209 (which closes

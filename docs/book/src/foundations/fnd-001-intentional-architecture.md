@@ -1,4 +1,4 @@
-# FND-001: Intentional Architecture — ZeroClaw Microkernel Transition
+# FND-001: Intentional Architecture — DX Agent Microkernel Transition
 ### Starting v0.7.0 · Type: Architecture · Rev. 3
 
 > **Canonical reference** · Ratified by the team · Rev. 3
@@ -16,7 +16,7 @@
 ## Table of Contents
 
 1. [A Development Philosophy: Vision First](#1-a-development-philosophy-vision-first)
-2. [The Vision — What ZeroClaw Is](#2-the-vision--what-zeroclaw-is)
+2. [The Vision — What DX Agent Is](#2-the-vision--what-zeroclaw-is)
 3. [Honest Assessment: Where We Are Today](#3-honest-assessment-where-we-are-today)
 4. [The Target Architecture](#4-the-target-architecture)
    - [4.4.1 Versioning Policy](#441-versioning-policy)
@@ -34,7 +34,7 @@
 |---|---|---|
 | 1 | 2026-04-09 | Initial draft |
 | 2 | 2026-04-09 | Added §4.4.1 Versioning Policy (unified workspace inheritance, stability tiers, product-level breaking change definition); added §4.4.2 Release Artifacts (feature flag fate, canonical release binary profile, release artifact matrix); added Discussion Questions for versioning strategy and observability defaults |
-| 3 | 2026-04-10 | Terminology correction per implementation feedback from PR #5559: "kernel" → "runtime" for the agent orchestration layer throughout; "kernel" now refers specifically to the irreducible foundation (`--no-default-features` build); §4.1 updated to describe the explicit two-layer architecture (foundation + runtime); §4.2–§4.3 dependency diagram and component map updated to show `zeroclaw-runtime`; Phase 2 renamed from "The Kernel" to "The Runtime"; binary size targets reframed as aspirational north stars with measured progress tracking rather than hard gates; §7 updated with actual Phase 1 measurement (6.6 MB foundation build) and explicit note that architectural decomposition enables optimization but optimization is a dedicated second pass |
+| 3 | 2026-04-10 | Terminology correction per implementation feedback from PR #5559: "kernel" → "runtime" for the agent orchestration layer throughout; "kernel" now refers specifically to the irreducible foundation (`--no-default-features` build); §4.1 updated to describe the explicit two-layer architecture (foundation + runtime); §4.2–§4.3 dependency diagram and component map updated to show `dx-agent-runtime`; Phase 2 renamed from "The Kernel" to "The Runtime"; binary size targets reframed as aspirational north stars with measured progress tracking rather than hard gates; §7 updated with actual Phase 1 measurement (6.6 MB foundation build) and explicit note that architectural decomposition enables optimization but optimization is a dedicated second pass |
 
 ---
 
@@ -68,7 +68,7 @@ This is not a waterfall process. It is a **decision hierarchy**. It means that w
 
 ### The Problem With Skipping the Top
 
-ZeroClaw was bootstrapped by AI tools working from OpenClaw's TypeScript codebase. AI code generation works at the **Implementation** layer. It writes functions, structs, and modules that do things. It does not set Vision. It does not make Architecture decisions. It does not define Design contracts.
+DX Agent was bootstrapped by AI tools working from OpenClaw's TypeScript codebase. AI code generation works at the **Implementation** layer. It writes functions, structs, and modules that do things. It does not set Vision. It does not make Architecture decisions. It does not define Design contracts.
 
 The result is a codebase that is impressively functional but architecturally accidental. The code does what it needs to do today, but it was not designed — it accumulated. This pattern has a name in our industry: **the Big Ball of Mud**. It is the most common architecture in software, not because anyone chose it, but because it is what you get when you skip the top of the hierarchy.
 
@@ -76,23 +76,23 @@ This RFC is our chance to fix that — not by throwing away what works, but by g
 
 ---
 
-## 2. The Vision — What ZeroClaw Is
+## 2. The Vision — What DX Agent Is
 
 Before we talk about architecture, we need to be precise about what we are building. This is the Vision layer. Everything that follows must serve this.
 
-> **ZeroClaw is a personal AI assistant runtime that any person can run on any hardware — from a $10 embedded board to a cloud server — with zero configuration overhead, zero external service requirements, and zero compromise on capability or security.**
+> **DX Agent is a personal AI assistant runtime that any person can run on any hardware — from a $10 embedded board to a cloud server — with zero configuration overhead, zero external service requirements, and zero compromise on capability or security.**
 
 Breaking that down into concrete commitments:
 
 **Zero overhead.** The core agent starts in milliseconds and uses less memory than a browser tab. This is not a marketing claim — it is an architectural constraint. Every decision we make must be tested against it.
 
-**Zero external requirements.** A user who downloads ZeroClaw and has an LLM provider configured should have a working, useful AI assistant without installing anything else. Channels, dashboards, and integrations are things you add when you want them — not things you need before it works.
+**Zero external requirements.** A user who downloads DX Agent and has an LLM provider configured should have a working, useful AI assistant without installing anything else. Channels, dashboards, and integrations are things you add when you want them — not things you need before it works.
 
-**Zero compromise.** Lean does not mean weak. ZeroClaw must have a serious security model, real observability, and genuine extensibility. The tension between "small binary" and "full capability" is resolved through composition: a small core, extended by components you choose.
+**Zero compromise.** Lean does not mean weak. DX Agent must have a serious security model, real observability, and genuine extensibility. The tension between "small binary" and "full capability" is resolved through composition: a small core, extended by components you choose.
 
-**For every skill level.** A student on a $10 Raspberry Pi and a team running a production deployment should both feel like ZeroClaw was designed for them. This means the default experience must be simple, and the advanced experience must be powerful — not two different products.
+**For every skill level.** A student on a $10 Raspberry Pi and a team running a production deployment should both feel like DX Agent was designed for them. This means the default experience must be simple, and the advanced experience must be powerful — not two different products.
 
-**User-owned.** Your data, your hardware, your configuration. ZeroClaw does not require an account, does not phone home, and does not lock you into a platform.
+**User-owned.** Your data, your hardware, your configuration. DX Agent does not require an account, does not phone home, and does not lock you into a platform.
 
 ---
 
@@ -102,7 +102,7 @@ This section is not criticism of anyone's work. It is a diagnosis, and you canno
 
 ### 3.1 The Structural Problem
 
-The entire ZeroClaw codebase currently lives in a single Rust crate. This means:
+The entire DX Agent codebase currently lives in a single Rust crate. This means:
 
 - A Telegram channel and the core agent loop are compiled from the same source tree whether you use Telegram or not
 - The web dashboard (a full React application) is embedded in the binary using `rust-embed`, making every binary include the web UI even for users who only ever use the CLI
@@ -136,7 +136,7 @@ This diagnosis should not obscure what is genuinely well-designed:
 - **The observability system is mature.** OpenTelemetry, Prometheus, and DORA metrics are all implemented against a clean `Observer` trait. This is production-quality work.
 - **The security model is thoughtful.** Pairing codes, autonomy levels, sandboxing, and policy enforcement show real design intent.
 
-We are not rewriting ZeroClaw. We are giving its existing good ideas a structure they can grow in.
+We are not rewriting DX Agent. We are giving its existing good ideas a structure they can grow in.
 
 ---
 
@@ -148,18 +148,18 @@ A microkernel architecture separates a minimal, stable core from optional subsys
 
 For an AI agent runtime, the mapping reveals **two distinct internal layers** that the OS analogy conflates:
 
-| OS Microkernel Concept | ZeroClaw Equivalent |
+| OS Microkernel Concept | DX Agent Equivalent |
 |---|---|
 | Kernel | **Foundation layer** — API traits, config, providers, memory backends, infra, tool-call parser. The irreducible core: builds with `--no-default-features`. Can exchange messages with an LLM and store memory. Nothing more. |
-| Init / runtime system | **Agent runtime layer** — Orchestration loop, security policy enforcement, plugin host, core tools, IPC API. The `zeroclaw-runtime` crate, gated by the `agent-runtime` feature. This is what makes ZeroClaw an *agent*, not just a library. |
+| Init / runtime system | **Agent runtime layer** — Orchestration loop, security policy enforcement, plugin host, core tools, IPC API. The `dx-agent-runtime` crate, gated by the `agent-runtime` feature. This is what makes DX Agent an *agent*, not just a library. |
 | IPC | Local socket / IPC API between the runtime and external components |
 | Device drivers | Channel plugins (Telegram, Discord, etc.) |
 | Filesystem drivers | Memory backend plugins (SQLite, Markdown) |
 | User processes | Gateway binary, Tauri desktop app |
 
-The distinction matters: the **foundation** is the minimum that must exist for any ZeroClaw binary to function. The **runtime** is the minimum that must exist for it to function *as an agent*. Everything else is composed in.
+The distinction matters: the **foundation** is the minimum that must exist for any DX Agent binary to function. The **runtime** is the minimum that must exist for it to function *as an agent*. Everything else is composed in.
 
-This two-layer split was identified during the Phase 1 workspace decomposition (PR #5559) and is reflected in the crate naming: `zeroclaw-runtime` (the crate) is gated by `agent-runtime` (the feature). The earlier revisions of this RFC used "kernel" loosely to refer to what is now correctly named the runtime layer. This revision corrects that terminology throughout.
+This two-layer split was identified during the Phase 1 workspace decomposition (PR #5559) and is reflected in the crate naming: `dx-agent-runtime` (the crate) is gated by `agent-runtime` (the feature). The earlier revisions of this RFC used "kernel" loosely to refer to what is now correctly named the runtime layer. This revision corrects that terminology throughout.
 
 ### 4.2 The Dependency Rule
 
@@ -168,23 +168,23 @@ The most important architectural rule in this design — the one that, if broken
 > **Dependencies flow inward. The runtime knows nothing about the plugins. Plugins know about the API. Nothing knows about everything.**
 
 ```
-    zeroclaw-api          ← defines all traits (Provider, Channel, Tool, ...)
+    dx-agent-api          ← defines all traits (Provider, Channel, Tool, ...)
          ▲                  no implementations, no heavy dependencies
          │ depends on
-  foundation crates       ← zeroclaw-config, zeroclaw-providers, zeroclaw-memory,
-         ▲                  zeroclaw-infra, zeroclaw-tool-call-parser
-         │ depends on        all depend on zeroclaw-api; no cross-dependencies
-    zeroclaw-runtime      ← implements the agent loop (agent-runtime feature)
-         ▲                  depends on zeroclaw-api + foundation crates
+  foundation crates       ← dx-agent-config, dx-agent-providers, dx-agent-memory,
+         ▲                  dx-agent-infra, dx-agent-tool-call-parser
+         │ depends on        all depend on dx-agent-api; no cross-dependencies
+    dx-agent-runtime      ← implements the agent loop (agent-runtime feature)
+         ▲                  depends on dx-agent-api + foundation crates
          │ depends on        knows nothing about specific channels or tools
-  plugin crates           ← zeroclaw-channel-discord, zeroclaw-tools-web, ...
-         ▲                  depend on zeroclaw-api (not the runtime)
+  plugin crates           ← zeroclaw-channel-discord, dx-agent-tools-web, ...
+         ▲                  depend on dx-agent-api (not the runtime)
          │ depends on
   zeroclaw binary         ← thin wiring layer
                              reads config, registers plugins, starts runtime
 ```
 
-If `zeroclaw-runtime` ever imports `TelegramChannel`, the architecture has been violated. The compiler will enforce this once crate boundaries are drawn.
+If `dx-agent-runtime` ever imports `TelegramChannel`, the architecture has been violated. The compiler will enforce this once crate boundaries are drawn.
 
 ### 4.3 Component Map
 
@@ -194,7 +194,7 @@ If `zeroclaw-runtime` ever imports `TelegramChannel`, the architecture has been 
 │  Reads config → registers only configured components → starts       │
 │                                                                     │
 │   ┌──────────────────────────────────────────────────────────────┐  │
-│   │              zeroclaw-runtime  (agent-runtime feature)       │  │
+│   │              dx-agent-runtime  (agent-runtime feature)       │  │
 │   │                                                              │  │
 │   │  Agent Loop · CLI Channel · Security Policy                  │  │
 │   │  Plugin Host · Local IPC API                                 │  │
@@ -203,15 +203,15 @@ If `zeroclaw-runtime` ever imports `TelegramChannel`, the architecture has been 
 │   │  ┌──────────────────────────────────────────────────────┐   │  │
 │   │  │   Foundation  (--no-default-features)                │   │  │
 │   │  │                                                      │   │  │
-│   │  │  zeroclaw-api · zeroclaw-config · zeroclaw-infra     │   │  │
-│   │  │  zeroclaw-providers · zeroclaw-memory                │   │  │
-│   │  │  zeroclaw-tool-call-parser                           │   │  │
+│   │  │  dx-agent-api · dx-agent-config · dx-agent-infra     │   │  │
+│   │  │  dx-agent-providers · dx-agent-memory                │   │  │
+│   │  │  dx-agent-tool-call-parser                           │   │  │
 │   │  │                                                      │   │  │
 │   │  │  Vision target: <5 MB RAM at runtime                 │   │  │
 │   │  └──────────────────────────────────────────────────────┘   │  │
 │   └──────────────────────────────────────────────────────────────┘  │
 │                              ▲                                      │
-│                   zeroclaw-api (traits only)                        │
+│                   dx-agent-api (traits only)                        │
 │                              ▲                                      │
 │   ┌──────────────┐  ┌────────┴────────┐  ┌─────────────────────┐   │
 │   │  zeroclaw-gw │  │  Channel plugins│  │   Tool plugins      │   │
@@ -248,7 +248,7 @@ The `zeroclaw plugin install` command (backed by `PluginHost`, which already exi
 
 #### 4.4.1 Versioning Policy
 
-As ZeroClaw transitions from a single crate to a multi-crate workspace, two concerns must be kept separate from the start:
+As DX Agent transitions from a single crate to a multi-crate workspace, two concerns must be kept separate from the start:
 
 - **The product version** — what `zeroclaw --version` reports, what GitHub Releases, changelogs, and package managers (Homebrew, apt, cargo-binstall) track. This is the version operators and users reason about.
 - **Component stability** — how mature and reliable a given component is. A single version number cannot carry this signal on its own.
@@ -275,14 +275,14 @@ A single version in the root `Cargo.toml` is the authoritative product version. 
 
 - Users, operators, and packagers deal with one version, not twelve
 - Release automation via `release-plz` is straightforward: one PR, one bump, one changelog entry
-- It reflects ZeroClaw's identity as a **product**, not a library ecosystem
+- It reflects DX Agent's identity as a **product**, not a library ecosystem
 - The WIT interface version — not the Rust crate version — is the actual plugin ABI contract (see §5.2)
 
 Three crate classes are intentionally excluded from workspace inheritance and maintain independent versions on their own cadence:
 
 | Crate | Reason for independence |
 |---|---|
-| `zeroclaw-api` | Starts at `0.1.0`; its `1.0.0` release is a formal milestone deliverable of v1.0.0, signalling a stable Rust trait surface for plugin SDK authors |
+| `dx-agent-api` | Starts at `0.1.0`; its `1.0.0` release is a formal milestone deliverable of v1.0.0, signalling a stable Rust trait surface for plugin SDK authors |
 | `aardvark-sys`, `zeroclaw-robot-kit` | Hardware library crates with their own user audiences and maintenance cadences; not application components |
 | WIT interface files (`wit/*.wit`) | Versioned via `@since` and `@unstable` annotations per the WASI component model spec; these are the primary plugin ABI contract and are independent of Cargo semver entirely |
 
@@ -306,7 +306,7 @@ The product version answers *"what release is this?"* A stability tier answers *
 
 | Tier | Meaning | Implication |
 |---|---|---|
-| **Stable** | Covered by the product's breaking-change policy. No breaking changes without a MAJOR version bump and a published migration guide. | Kernel (target: v0.8.0), `zeroclaw-api` WIT interface (target: v0.9.0), kernel IPC API (target: v1.0.0) |
+| **Stable** | Covered by the product's breaking-change policy. No breaking changes without a MAJOR version bump and a published migration guide. | Kernel (target: v0.8.0), `dx-agent-api` WIT interface (target: v0.9.0), kernel IPC API (target: v1.0.0) |
 | **Beta** | Functional and tested. Breaking changes are permitted in MINOR releases but are announced in the changelog with upgrade notes. | `zeroclaw-gw` (v0.9.0 → v1.0.0), mature channel and tool plugins |
 | **Experimental** | No stability guarantee. May break in PATCH releases. Must be clearly marked as `experimental` in docs and plugin registry manifests. | New tool integrations, new channel implementations, early hardware plugins |
 
@@ -316,7 +316,7 @@ Stability tiers are **promoted, never demoted** through a deliberate team decisi
 
 **Release automation**
 
-Releases use [`release-plz`](https://release-plz.eplant.org/), which opens a release PR on push to `master`, bumps the workspace version, and generates a changelog from conventional commit titles. `release-plz` natively understands workspace inheritance and handles the crate publication order automatically. Crates with independent versions (`zeroclaw-api`, hardware library crates) are managed separately using the same tool's per-crate configuration.
+Releases use [`release-plz`](https://release-plz.eplant.org/), which opens a release PR on push to `master`, bumps the workspace version, and generates a changelog from conventional commit titles. `release-plz` natively understands workspace inheritance and handles the crate publication order automatically. Crates with independent versions (`dx-agent-api`, hardware library crates) are managed separately using the same tool's per-crate configuration.
 
 #### 4.4.2 Release Artifacts
 
@@ -420,19 +420,19 @@ Target (correct):
 
 ## 5. Standards We Should Adopt
 
-Standards are agreements that have been made by many smart people over many years. Adopting them means we get those years of thinking for free, and it means our software integrates naturally with the rest of the ecosystem. Here are the ones that apply directly to ZeroClaw.
+Standards are agreements that have been made by many smart people over many years. Adopting them means we get those years of thinking for free, and it means our software integrates naturally with the rest of the ecosystem. Here are the ones that apply directly to DX Agent.
 
 ### 5.1 Observability: OpenTelemetry
 
 **What it is:** OpenTelemetry (OTel) is the industry standard for collecting traces, metrics, and logs from software systems. It is maintained by the Cloud Native Computing Foundation and supported by every major cloud provider and monitoring tool.
 
-**Why it matters for ZeroClaw:** We have already implemented `OtelObserver` against our `Observer` trait. We have Prometheus metrics and DORA metrics. The issue is that these are not yet standardized across the codebase — some modules log with `tracing::info!`, others emit `ObserverEvent`s, and the two are not connected.
+**Why it matters for DX Agent:** We have already implemented `OtelObserver` against our `Observer` trait. We have Prometheus metrics and DORA metrics. The issue is that these are not yet standardized across the codebase — some modules log with `tracing::info!`, others emit `ObserverEvent`s, and the two are not connected.
 
 **What we should do:**
 - Adopt OpenTelemetry as the single observability interface for all components
 - Ensure every plugin emits OTel spans when it executes, so a user can see a full trace from "message received on Discord" through "agent called shell tool" to "response sent"
 - Adopt W3C Trace Context (`traceparent`/`tracestate` headers) for propagating trace IDs across the kernel ↔ gateway ↔ plugin boundary
-- Structured log output should be JSON when `ZEROCLAW_LOG_FORMAT=json` is set (already using the `tracing` crate, just needs a JSON subscriber)
+- Structured log output should be JSON when `DX_AGENT_LOG_FORMAT=json` is set (already using the `tracing` crate, just needs a JSON subscriber)
 
 **Standards:** OpenTelemetry specification · W3C Trace Context (REC) · RFC 5424 (Syslog, for system log integration)
 
@@ -440,13 +440,13 @@ Standards are agreements that have been made by many smart people over many year
 
 **What it is:** WASI (WebAssembly System Interface) is the standard API that WebAssembly modules use to interact with the host system. WIT (WebAssembly Interface Types) is the interface definition language for describing what a WASM component exports and imports — think of it as a `.proto` file but for WASM plugins.
 
-**Why it matters for ZeroClaw:** Our `WasmTool` and `WasmChannel` bridges currently have no formal contract for what a plugin WASM binary must export. This means a plugin author has to guess. WIT files define that contract precisely and enable automatic code generation for plugin authors in any language.
+**Why it matters for DX Agent:** Our `WasmTool` and `WasmChannel` bridges currently have no formal contract for what a plugin WASM binary must export. This means a plugin author has to guess. WIT files define that contract precisely and enable automatic code generation for plugin authors in any language.
 
 **What we should do:**
 - Define WIT interface files for `Tool`, `Channel`, and `Memory` plugin types (a `wit/` directory at the root of the workspace)
 - Use `wit-bindgen` to generate the Rust host-side bindings from those WIT files
 - Document the WIT interfaces as the official plugin SDK
-- A plugin author writes Rust (or Go, or C, or Python) against the WIT interface and `cargo build --target wasm32-wasi` — the result drops into `~/.zeroclaw/plugins/`
+- A plugin author writes Rust (or Go, or C, or Python) against the WIT interface and `cargo build --target wasm32-wasi` — the result drops into `~/.dx_agent/plugins/`
 
 **Standards:** WASI 0.2 · W3C WebAssembly Component Model · WIT IDL
 
@@ -454,7 +454,7 @@ Standards are agreements that have been made by many smart people over many year
 
 **What it is:** OpenAPI is the standard for describing HTTP APIs. Version 3.1 aligns with JSON Schema Draft 2020-12.
 
-**Why it matters for ZeroClaw:** The kernel's local IPC API (the socket that the gateway and other components connect to) needs a stable, documented contract. Without a formal spec, the gateway and kernel will drift apart silently over time.
+**Why it matters for DX Agent:** The kernel's local IPC API (the socket that the gateway and other components connect to) needs a stable, documented contract. Without a formal spec, the gateway and kernel will drift apart silently over time.
 
 **What we should do:**
 - Write an OpenAPI 3.1 spec for the kernel's local IPC API before implementing it
@@ -468,7 +468,7 @@ Standards are agreements that have been made by many smart people over many year
 
 **What it is:** The OWASP Application Security Verification Standard is a checklist of security requirements organized by risk level (L1 basic, L2 standard, L3 advanced).
 
-**Why it matters for ZeroClaw:** The gateway handles webhooks from external services, processes untrusted user input, and manages secrets. The pairing system, WebAuthn support, and rate limiting all exist — but there is no framework for verifying that they are complete or correct.
+**Why it matters for DX Agent:** The gateway handles webhooks from external services, processes untrusted user input, and manages secrets. The pairing system, WebAuthn support, and rate limiting all exist — but there is no framework for verifying that they are complete or correct.
 
 **What we should do:**
 - Target ASVS Level 2 for the gateway and security module
@@ -481,7 +481,7 @@ Standards are agreements that have been made by many smart people over many year
 
 **What it is:** ISO/IEC 25010 defines a model for software product quality with eight top-level characteristics: functional suitability, performance efficiency, compatibility, usability, reliability, security, maintainability, and portability.
 
-**Why it matters for ZeroClaw:** When someone asks "is this good enough to merge?" the answer is currently subjective. ISO 25010 gives us a vocabulary for that conversation. The vision commitments map directly: "zero overhead" → performance efficiency; "any hardware" → portability; "zero compromise" → security + reliability.
+**Why it matters for DX Agent:** When someone asks "is this good enough to merge?" the answer is currently subjective. ISO 25010 gives us a vocabulary for that conversation. The vision commitments map directly: "zero overhead" → performance efficiency; "any hardware" → portability; "zero compromise" → security + reliability.
 
 **What we should do:**
 - Use the eight quality characteristics as a lens in PR reviews for significant changes
@@ -522,9 +522,9 @@ The overall migration strategy is the **Strangler Fig Pattern**: we grow the new
 
 #### Deliverables
 
-**D1: Extract `zeroclaw-api` crate**
+**D1: Extract `dx-agent-api` crate**
 
-Create a new crate `crates/zeroclaw-api` containing only trait definitions and their supporting types. No implementations. No heavy dependencies. This crate should compile in under two seconds.
+Create a new crate `crates/dx-agent-api` containing only trait definitions and their supporting types. No implementations. No heavy dependencies. This crate should compile in under two seconds.
 
 Move into this crate:
 - `src/providers/traits.rs` → `Provider`, `ChatMessage`, `ChatResponse`, `ToolCall`, `StreamChunk`, `ProviderCapabilities`
@@ -535,9 +535,9 @@ Move into this crate:
 - `src/runtime/traits.rs` → `RuntimeAdapter`
 - `src/peripherals/traits.rs` → `Peripheral`
 
-Every other crate in the workspace that needs these types adds `zeroclaw-api` as a dependency. The compiler now enforces that no implementation crate can import another implementation crate without going through the API layer.
+Every other crate in the workspace that needs these types adds `dx-agent-api` as a dependency. The compiler now enforces that no implementation crate can import another implementation crate without going through the API layer.
 
-**D2: Extract `zeroclaw-tool-call-parser` crate**
+**D2: Extract `dx-agent-tool-call-parser` crate**
 
 The tool call parsing logic in `src/agent/loop_.rs` is approximately 1,400 lines of pure text transformation: it takes a string from the LLM and returns a list of structured tool calls. It has no dependency on agent state, memory, providers, or channels. It handles a dozen different LLM output formats (JSON, XML, GLM-style, MiniMax, Perl-style, markdown fences, and more).
 
@@ -546,7 +546,7 @@ This logic is:
 2. The most fuzz-testable code in the project — property-based tests belong here
 3. A genuine contribution to the Rust ecosystem — no other crate does this comprehensively
 
-Create `crates/zeroclaw-tool-call-parser` with a public API of approximately:
+Create `crates/dx-agent-tool-call-parser` with a public API of approximately:
 
 ```rust
 pub fn parse(text: &str, specs: &[ToolSpec]) -> ParseResult
@@ -567,7 +567,7 @@ The ~300 parsing tests currently in `loop_.rs` move into this crate. `loop_.rs` 
 
 **D3: Adopt OpenTelemetry as the observability standard**
 
-Formalize what is already implemented: document that `ObserverEvent` and `ObserverMetric` are the internal event bus, and that `OtelObserver` is the canonical production backend. Add a JSON structured logging subscriber for `ZEROCLAW_LOG_FORMAT=json`. Adopt W3C Trace Context for future cross-component tracing.
+Formalize what is already implemented: document that `ObserverEvent` and `ObserverMetric` are the internal event bus, and that `OtelObserver` is the canonical production backend. Add a JSON structured logging subscriber for `DX_AGENT_LOG_FORMAT=json`. Adopt W3C Trace Context for future cross-component tracing.
 
 **D4: Write WIT interface files**
 
@@ -579,8 +579,8 @@ These become the official plugin SDK. The implementation in v0.8.0 will be gener
 
 #### Success Metrics for v0.7.0
 
-- `zeroclaw-api` compiles in < 2 seconds with zero implementation dependencies
-- `zeroclaw-tool-call-parser` has ≥ 95% test coverage (the logic is fully testable in isolation)
+- `dx-agent-api` compiles in < 2 seconds with zero implementation dependencies
+- `dx-agent-tool-call-parser` has ≥ 95% test coverage (the logic is fully testable in isolation)
 - `loop_.rs` is under 8,000 lines
 - Zero user-facing behavior changes
 - Zero performance regressions (benchmark suite passes)
@@ -591,15 +591,15 @@ These become the official plugin SDK. The implementation in v0.8.0 will be gener
 
 **Theme:** Formalize the agent runtime as a clean, independently deployable unit. Everything that is not the runtime becomes a guest.
 
-**Why this phase:** Once the seams exist (v0.7.0), we can draw the runtime boundary explicitly. This phase extracts `zeroclaw-runtime` as a standalone crate, completes the WASM plugin execution bridge, and wires the plugin registry client — the mechanism by which everything outside the runtime connects to it.
+**Why this phase:** Once the seams exist (v0.7.0), we can draw the runtime boundary explicitly. This phase extracts `dx-agent-runtime` as a standalone crate, completes the WASM plugin execution bridge, and wires the plugin registry client — the mechanism by which everything outside the runtime connects to it.
 
 **Vision alignment:** This is where the composition model becomes real for users. A user who wants only a CLI agent downloads one binary, runs `zeroclaw onboard`, and is done — no Rust toolchain, no compilation. The `zeroclaw onboard` wizard gains the ability to download plugin components on demand.
 
 #### Deliverables
 
-**D1: Formalize `zeroclaw-runtime` crate**
+**D1: Formalize `dx-agent-runtime` crate**
 
-Extract the agent orchestration loop, CLI channel, security policy, plugin host, and IPC API into `crates/zeroclaw-runtime`, gated by the `agent-runtime` feature. This crate depends on `zeroclaw-api` and the foundation crates. It has no knowledge of Telegram, Discord, Anthropic, or any specific tool implementation.
+Extract the agent orchestration loop, CLI channel, security policy, plugin host, and IPC API into `crates/dx-agent-runtime`, gated by the `agent-runtime` feature. This crate depends on `dx-agent-api` and the foundation crates. It has no knowledge of Telegram, Discord, Anthropic, or any specific tool implementation.
 
 The runtime exports a clean public API:
 
@@ -637,7 +637,7 @@ zeroclaw plugin remove <name>     # remove an installed plugin
 zeroclaw plugin update            # update all installed plugins
 ```
 
-The registry is a JSON index file served from a known URL (e.g., `https://plugins.zeroclawlabs.ai/index.json`). Each entry includes name, version, download URL, SHA-256 checksum, and the publisher's Ed25519 public key. The `PluginHost` signature verification already handles the security model.
+The registry is a JSON index file served from a known URL (e.g., `https://plugins.dx_agentlabs.ai/index.json`). Each entry includes name, version, download URL, SHA-256 checksum, and the publisher's Ed25519 public key. The `PluginHost` signature verification already handles the security model.
 
 **D4: Integrate `zeroclaw onboard` with the plugin system**
 
@@ -649,7 +649,7 @@ The kernel includes exactly the tools a user needs for a useful agent with no pl
 
 #### Success Metrics for v0.8.0
 
-- `zeroclaw-runtime` compiles independently with no channel or tool implementation code
+- `dx-agent-runtime` compiles independently with no channel or tool implementation code
 - `zeroclaw plugin install channel-discord` works end-to-end
 - `zeroclaw onboard` installs plugins without requiring a Rust toolchain
 - Runtime binary size is **tracked and reported** in the release notes; the aspiration is downward progress toward the vision target (see §7)
@@ -675,11 +675,11 @@ Endpoints include: send a message, receive a streaming response, list active ses
 
 **D2: Implement the kernel IPC server**
 
-Add the IPC server to `zeroclaw-kernel` behind a feature flag (`--features ipc`). On platforms that support it, the kernel listens on a Unix socket at `~/.zeroclaw/kernel.sock`. On Windows, use a named pipe. The `zeroclaw gateway` command (the current entrypoint for the web server) becomes `zeroclaw-gw` connecting to this socket.
+Add the IPC server to `zeroclaw-kernel` behind a feature flag (`--features ipc`). On platforms that support it, the kernel listens on a Unix socket at `~/.dx_agent/kernel.sock`. On Windows, use a named pipe. The `zeroclaw gateway` command (the current entrypoint for the web server) becomes `zeroclaw-gw` connecting to this socket.
 
 **D3: Extract `zeroclaw-gw` as a separate binary**
 
-Move `src/gateway/` to a new `crates/zeroclaw-gw/` crate with its own binary. It depends on `zeroclaw-api` and connects to the kernel via the IPC API. The embedded React application via `rust-embed` moves entirely into this crate — the kernel binary no longer contains any web assets.
+Move `src/gateway/` to a new `crates/zeroclaw-gw/` crate with its own binary. It depends on `dx-agent-api` and connects to the kernel via the IPC API. The embedded React application via `rust-embed` moves entirely into this crate — the kernel binary no longer contains any web assets.
 
 **D4: Migrate channel webhook handlers out of the gateway**
 
@@ -701,9 +701,9 @@ Update `apps/tauri/` to bundle `zeroclaw-gw` as a Tauri sidecar binary. The Taur
 
 ### Phase 4 · v1.0.0 — "The Platform"
 
-**Theme:** ZeroClaw becomes a composable platform, not a monolithic application.
+**Theme:** DX Agent becomes a composable platform, not a monolithic application.
 
-**Why this phase:** With the kernel stable, the gateway separate, and the plugin system working, v1.0.0 is the release where the architecture becomes the product. External developers can write and publish plugins. Users can assemble exactly the ZeroClaw they want. The binary can credibly claim the lean profile the vision promises.
+**Why this phase:** With the kernel stable, the gateway separate, and the plugin system working, v1.0.0 is the release where the architecture becomes the product. External developers can write and publish plugins. Users can assemble exactly the DX Agent they want. The binary can credibly claim the lean profile the vision promises.
 
 #### Deliverables
 
@@ -713,7 +713,7 @@ Each of the 27+ channel implementations becomes a standalone WASM plugin crate. 
 
 **D2: Migrate long-tail tools to plugins**
 
-Approximately 60 of the 70+ tools move to plugin crates, grouped by domain: `zeroclaw-tools-web` (browser, search, screenshot, PDF), `zeroclaw-tools-integrations` (Jira, Notion, Google Workspace, MS365, LinkedIn), `zeroclaw-tools-hardware` (board info, GPIO), `zeroclaw-tools-cloud` (cloud ops, security ops). The kernel retains only the 10–12 core tools identified in v0.8.0.
+Approximately 60 of the 70+ tools move to plugin crates, grouped by domain: `dx-agent-tools-web` (browser, search, screenshot, PDF), `dx-agent-tools-integrations` (Jira, Notion, Google Workspace, MS365, LinkedIn), `dx-agent-tools-hardware` (board info, GPIO), `dx-agent-tools-cloud` (cloud ops, security ops). The kernel retains only the 10–12 core tools identified in v0.8.0.
 
 **D3: Plugin SDK and developer documentation**
 
@@ -751,7 +751,7 @@ These are estimates based on direct code analysis of the current codebase. They 
 
 | What moves | Approximate lines | Destination |
 |---|---|---|
-| Tool call parser (from `loop_.rs`) | ~1,400 | `zeroclaw-tool-call-parser` crate |
+| Tool call parser (from `loop_.rs`) | ~1,400 | `dx-agent-tool-call-parser` crate |
 | 60+ non-core tool implementations | ~30,000 | Plugin crates |
 | 24+ non-core channel implementations | ~7,200 | Plugin crates |
 | Gateway HTTP server | ~2,260 | `zeroclaw-gw` crate |
@@ -813,7 +813,7 @@ With the microkernel architecture, the answer is: "it goes to the kernel's `Chan
 
 ### For maintainers
 
-Every bug report will have a clear home. "The agent is calling tools incorrectly" → `zeroclaw-tool-call-parser` or `zeroclaw-runtime`. "The Discord integration is broken" → `channel-discord` plugin. "The web dashboard is not loading" → `zeroclaw-gw`. Right now, any of those bugs could be anywhere in 50,000+ lines.
+Every bug report will have a clear home. "The agent is calling tools incorrectly" → `dx-agent-tool-call-parser` or `dx-agent-runtime`. "The Discord integration is broken" → `channel-discord` plugin. "The web dashboard is not loading" → `zeroclaw-gw`. Right now, any of those bugs could be anywhere in 50,000+ lines.
 
 ### For the release process
 
@@ -821,7 +821,7 @@ The plugin model means channels and tools can have independent release cycles. A
 
 ### For the community
 
-A published WIT interface and plugin SDK means anyone can extend ZeroClaw without forking it. A company that needs a specific integration can write a plugin against the public interface. This is how ecosystems are built.
+A published WIT interface and plugin SDK means anyone can extend DX Agent without forking it. A company that needs a specific integration can write a plugin against the public interface. This is how ecosystems are built.
 
 ---
 
@@ -834,7 +834,7 @@ Terms used in this document that may be unfamiliar:
 
 **Conway's Law** — "Any organization that designs a system will produce a design whose structure is a mirror image of the organization's communication structure." (Mel Conway, 1968) If contributors work in isolated silos without talking to each other, the code will reflect that. If contributors collaborate with clear interfaces between their work, the code will reflect that too.
 
-**Dependency Inversion Principle** — High-level modules should not depend on low-level modules. Both should depend on abstractions. This is why `zeroclaw-runtime` depends on `zeroclaw-api` (abstractions) and not on `channel-discord` (a specific implementation).
+**Dependency Inversion Principle** — High-level modules should not depend on low-level modules. Both should depend on abstractions. This is why `dx-agent-runtime` depends on `dx-agent-api` (abstractions) and not on `channel-discord` (a specific implementation).
 
 **Microkernel** — An architecture in which the core system contains only the minimum necessary functionality, and all other capabilities are provided by separate components that communicate with the core through well-defined interfaces.
 
@@ -864,6 +864,6 @@ These are resources the team may find valuable. They are not required reading, b
 
 ---
 
-*This proposal was developed from a detailed analysis of the ZeroClaw codebase at v0.6.8. The code metrics cited are based on direct measurement of the source files. The architectural recommendations reflect established patterns in systems software design applied to the specific constraints and goals of the ZeroClaw project.*
+*This proposal was developed from a detailed analysis of the DX Agent codebase at v0.6.8. The code metrics cited are based on direct measurement of the source files. The architectural recommendations reflect established patterns in systems software design applied to the specific constraints and goals of the DX Agent project.*
 
 *Feedback, corrections, and counterproposals are welcome. The best architecture is the one the team understands and believes in — not the one any single person dictated.*

@@ -1,4 +1,4 @@
-# Contributing to ZeroClaw
+# Contributing to DX Agent
 
 Thanks for your interest. Every kind of contribution helps — code, docs, bug reports, design feedback. This file is the first stop; the full contributor guide lives in the [docs book](docs/book/src/contributing/how-to.md).
 
@@ -58,39 +58,39 @@ Pre-push hook opt-ins (set the env var to enable for one push):
 
 | Variable | Effect |
 |---|---|
-| `ZEROCLAW_STRICT_LINT=1` | Strict lint pass on the full repo |
-| `ZEROCLAW_DOCS_LINT=1` | Markdown gate on changed lines |
-| `ZEROCLAW_DOCS_LINKS=1` | Link check on added links only |
+| `DX_AGENT_STRICT_LINT=1` | Strict lint pass on the full repo |
+| `DX_AGENT_DOCS_LINT=1` | Markdown gate on changed lines |
+| `DX_AGENT_DOCS_LINKS=1` | Link check on added links only |
 
 Skip the hook for rapid iteration with `git push --no-verify`. CI runs the same checks regardless.
 
 ## Local secret management
 
-ZeroClaw supports layered secret management for local development.
+DX Agent supports layered secret management for local development.
 
 **Storage options:**
 
 1. **Environment variables** (recommended for development) — copy `.env.example` to `.env` and fill in values. `.env` is git-ignored.
-2. **Config file** (`~/.zeroclaw/config.toml`) — when `secrets.encrypt = true` (default), values are encrypted with the key at `~/.zeroclaw/.secret_key`. Use `zeroclaw onboard` for guided setup.
+2. **Config file** (`~/.dx_agent/config.toml`) — when `secrets.encrypt = true` (default), values are encrypted with the key at `~/.dx_agent/.secret_key`. Use `zeroclaw onboard` for guided setup.
 
 **API key resolution order:**
 
 1. Explicit key passed from config or CLI.
-2. `ZEROCLAW_<lowercase_dotted_path>` env-var override (lands on the in-memory `Config` at load time; see below).
+2. `DX_AGENT_<lowercase_dotted_path>` env-var override (lands on the in-memory `Config` at load time; see below).
 
-Set credentials in your config file (`~/.zeroclaw/config.toml` by default; custom workspaces override the path) under `[providers.models.<type>.<alias>]`, or inject at runtime via the V0.8.0 schema-mirror grammar:
+Set credentials in your config file (`~/.dx_agent/config.toml` by default; custom workspaces override the path) under `[providers.models.<type>.<alias>]`, or inject at runtime via the V0.8.0 schema-mirror grammar:
 
 ```sh
-ZEROCLAW_providers__models__anthropic__default__api_key=sk-ant-...
-ZEROCLAW_providers__models__openrouter__prod_v2__model=anthropic/claude-sonnet-4-6
-ZEROCLAW_gateway__request_timeout_secs=120
+DX_AGENT_providers__models__anthropic__default__api_key=sk-ant-...
+DX_AGENT_providers__models__openrouter__prod_v2__model=anthropic/claude-sonnet-4-6
+DX_AGENT_gateway__request_timeout_secs=120
 ```
 
-The lowercase tail mirrors the dotted TOML path 1:1; each `__` (double underscore) is a path separator (`.` in TOML) and each single `_` is either a snake-case joiner inside a field name (`api_key` → `api-key`) or a literal char inside an alias key (`prod_v2`). Aliases are `[a-z0-9][a-z0-9_]{0,62}` — lowercase letters, digits, and single underscores; no leading underscore, no hyphen, no uppercase. Bootstrap variables (`ZEROCLAW_WORKSPACE`, `ZEROCLAW_CONFIG_DIR`) keep their UPPERCASE form; the case rule disambiguates them from the schema-mirror surface.
+The lowercase tail mirrors the dotted TOML path 1:1; each `__` (double underscore) is a path separator (`.` in TOML) and each single `_` is either a snake-case joiner inside a field name (`api_key` → `api-key`) or a literal char inside an alias key (`prod_v2`). Aliases are `[a-z0-9][a-z0-9_]{0,62}` — lowercase letters, digits, and single underscores; no leading underscore, no hyphen, no uppercase. Bootstrap variables (`DX_AGENT_WORKSPACE`, `DX_AGENT_CONFIG_DIR`) keep their UPPERCASE form; the case rule disambiguates them from the schema-mirror surface.
 
-V0.8.0 eradicated every per-provider env-var fallback (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY`, …), the generic `ZEROCLAW_API_KEY` / `API_KEY`, and the legacy `ZEROCLAW_PROVIDER` / `PROVIDER` / `ZEROCLAW_MODEL` dispatchers. Legacy names have no runtime effect — they're silently ignored. See `docs/book/src/reference/env-vars.md` for the migration table and the `💉` visibility behavior.
+V0.8.0 eradicated every per-provider env-var fallback (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY`, …), the generic `DX_AGENT_API_KEY` / `API_KEY`, and the legacy `DX_AGENT_PROVIDER` / `PROVIDER` / `DX_AGENT_MODEL` dispatchers. Legacy names have no runtime effect — they're silently ignored. See `docs/book/src/reference/env-vars.md` for the migration table and the `💉` visibility behavior.
 
-**Never commit:** `.env`, API keys / tokens / passwords / OAuth tokens / webhook signing secrets, `~/.zeroclaw/.secret_key`, or any personal identifier in tests or fixtures. The full content discipline is in **[Privacy & PII](docs/book/src/contributing/privacy.md)**.
+**Never commit:** `.env`, API keys / tokens / passwords / OAuth tokens / webhook signing secrets, `~/.dx_agent/.secret_key`, or any personal identifier in tests or fixtures. The full content discipline is in **[Privacy & PII](docs/book/src/contributing/privacy.md)**.
 
 **Pre-commit secret scan.** `.githooks/pre-commit` runs `gitleaks protect --staged --redact` when `gitleaks` is installed; if it's not installed, the hook prints a warning and continues. Install one of:
 

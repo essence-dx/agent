@@ -1,5 +1,5 @@
 //! Architecture gate: tests that persist `Config` must isolate the target
-//! path. `Config::default()` targets the real ~/.zeroclaw, so an
+//! path. `Config::default()` targets the real ~/.dx-agent, so an
 //! unisolated save clobbers the developer's live config.
 
 use std::fs;
@@ -17,7 +17,7 @@ const PERSIST_CALLS: &[&str] = &[
 ];
 
 /// Evidence that a file isolates its config writes.
-const ISOLATION_MARKERS: &[&str] = &["config_path", "ZEROCLAW_CONFIG_DIR", "set_var(\"HOME\""];
+const ISOLATION_MARKERS: &[&str] = &["config_path", "DX_AGENT_CONFIG_DIR", "set_var(\"HOME\""];
 
 #[test]
 fn tests_that_persist_config_isolate_the_path() {
@@ -29,9 +29,9 @@ fn tests_that_persist_config_isolate_the_path() {
     assert!(
         violations.is_empty(),
         "Config-persisting test code without path isolation detected. \
-         `Config::default()` targets the real ~/.zeroclaw; a test that \
+         `Config::default()` targets the real ~/.dx-agent; a test that \
          saves it clobbers the developer's live config. Set `config_path` \
-         to a TempDir (or override HOME / ZEROCLAW_CONFIG_DIR to a tempdir) \
+         to a TempDir (or override HOME / DX_AGENT_CONFIG_DIR to a tempdir) \
          before persisting. To override, add `// SOT: <reason>` on the line.\n\n\
          Violations:\n{}",
         violations.join("\n")

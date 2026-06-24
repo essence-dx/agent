@@ -1,1 +1,1 @@
-pub use zeroclaw_tools::node_capabilities::*;
+pub use dx_agent_tools::node_capabilities::*;

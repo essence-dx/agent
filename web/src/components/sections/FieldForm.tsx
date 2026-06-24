@@ -396,7 +396,7 @@ export function clearFieldFormCatalogCaches() {
 // picks (including empty) and surfaces structured errors inline.
 //
 // Keys are snake_case to match `prop_fields()` emission (the macro at
-// crates/zeroclaw-macros/src/lib.rs:1056 passes through snake_case Rust
+// crates/dx-agent-macros/src/lib.rs:1056 passes through snake_case Rust
 // field name unchanged for the schema path).
 const AGENT_SINGLE_ALIAS_FIELDS: Record<string, keyof AgentOptionsResponse> = {
   "model_provider": "model_providers",

@@ -1,1 +1,1 @@
-pub use zeroclaw_tools::proxy_config::*;
+pub use dx_agent_tools::proxy_config::*;

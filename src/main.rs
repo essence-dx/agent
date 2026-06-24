@@ -41,7 +41,7 @@ use dialoguer::{Password, Select};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use zeroclaw_config::api_error::{ConfigApiCode, ConfigApiError};
+use dx_agent_config::api_error::{ConfigApiCode, ConfigApiError};
 
 /// Resolve a `cli-*` Fluent key for CLI output. Routes through the runtime
 /// i18n catalogue under `agent-runtime` (default + CI/release); without that
@@ -50,7 +50,7 @@ use zeroclaw_config::api_error::{ConfigApiCode, ConfigApiError};
 fn t(key: &str, fallback: &str) -> String {
     #[cfg(feature = "agent-runtime")]
     {
-        zeroclaw_runtime::i18n::get_required_cli_string(key)
+        dx_agent_runtime::i18n::get_required_cli_string(key)
     }
     #[cfg(not(feature = "agent-runtime"))]
     {
@@ -63,7 +63,7 @@ fn t(key: &str, fallback: &str) -> String {
 fn ta(key: &str, args: &[(&str, &str)], fallback: &str) -> String {
     #[cfg(feature = "agent-runtime")]
     {
-        zeroclaw_runtime::i18n::get_required_cli_string_with_args(key, args)
+        dx_agent_runtime::i18n::get_required_cli_string_with_args(key, args)
     }
     #[cfg(not(feature = "agent-runtime"))]
     {
@@ -80,7 +80,7 @@ async fn apply_comment_inline(
     path: &str,
     comment: &str,
 ) -> Result<()> {
-    zeroclaw_config::comment_writer::apply_comments(
+    dx_agent_config::comment_writer::apply_comments(
         config_path,
         &[(path.to_string(), comment.to_string())],
     )
@@ -102,11 +102,11 @@ fn json_value_to_setprop_string(
     path: &str,
 ) -> Result<String> {
     let kind = config_patch_prop_kind(config, path);
-    zeroclaw_config::typed_value::coerce_for_set_prop(value, kind).map_err(|e| {
-        ::zeroclaw_log::record!(
+    dx_agent_config::typed_value::coerce_for_set_prop(value, kind).map_err(|e| {
+        ::dx_agent_log::record!(
             WARN,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Reject)
-                .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Reject)
+                .with_outcome(::dx_agent_log::EventOutcome::Failure)
                 .with_attrs(::serde_json::json!({"path": path, "error": e.message.clone()})),
             "config patch coercion rejected JSON value"
         );
@@ -177,7 +177,7 @@ fn print_no_command_help(cmd: clap::Command) -> Result<()> {
             "{}",
             crate::i18n::get_cli_string("cli-try-quickstart")
                 .as_deref()
-                .unwrap_or("Try `dx-agents quickstart` to create your first agent.")
+                .unwrap_or("Try `dx-agent quickstart` to create your first agent.")
         );
     }
     #[cfg(not(feature = "agent-runtime"))]
@@ -187,7 +187,7 @@ fn print_no_command_help(cmd: clap::Command) -> Result<()> {
             "{}",
             t(
                 "cli-try-quickstart",
-                "Try `dx-agents quickstart` to create your first agent."
+                "Try `dx-agent quickstart` to create your first agent."
             )
         );
     }
@@ -329,7 +329,7 @@ enum EstopLevelArg {
 
 /// DX Agents - command-line agent runtime for DX.
 #[derive(Parser, Debug)]
-#[command(name = "dx-agents")]
+#[command(name = "dx-agent")]
 #[command(author = "theonlyhennygod")]
 #[command(version)]
 // i18n-exempt: clap derive help — framework requires a compile-time literal
@@ -403,11 +403,11 @@ enum Commands {
         agent: Option<String>,
     },
 
-    /// Deprecated. Use `dx-agents quickstart`. Any flags error.
+    /// Deprecated. Use `dx-agent quickstart`. Any flags error.
     Onboard {
         /// Configure a specific section only. Omit to run the full flow.
         #[command(subcommand)]
-        section: Option<zeroclaw_config::sections::Section>,
+        section: Option<dx_agent_config::sections::Section>,
 
         /// Skip interactive prompts; read from --api-key/--model-provider/--model/--memory.
         #[arg(long, hide = true)]
@@ -469,10 +469,10 @@ Launches an interactive chat session with the configured AI model_provider. \
 Use --message for single-shot queries without entering interactive mode.
 
 Examples:
-  dx-agents agent -a dx                                                # interactive session
-  dx-agents agent -a dx -m \"Summarize today's logs\"                    # single message
-  dx-agents agent -a dx -p gemini --model gemini-2.0-flash
-  dx-agents agent -a dx --peripheral nucleo-f401re:/dev/ttyACM0")]
+  dx-agent agent -a dx                                                # interactive session
+  dx-agent agent -a dx -m \"Summarize today's logs\"                    # single message
+  dx-agent agent -a dx -p gemini --model gemini-2.0-flash
+  dx-agent agent -a dx --peripheral nucleo-f401re:/dev/ttyACM0")]
     Agent {
         /// Configured agent alias to run as (must match `[agents.<alias>]`).
         /// Required — there is no default agent.
@@ -513,9 +513,9 @@ Start, restart, or inspect the HTTP/WebSocket gateway that accepts \
 incoming webhook events and WebSocket connections.
 
 Examples:
-  dx-agents gateway start              # start gateway
-  dx-agents gateway restart            # restart gateway
-  dx-agents gateway get-paircode       # show pairing code")]
+  dx-agent gateway start              # start gateway
+  dx-agent gateway restart            # restart gateway
+  dx-agent gateway get-paircode       # show pairing code")]
     Gateway {
         #[command(subcommand)]
         gateway_command: Option<dx_agents::GatewayCommands>,
@@ -533,8 +533,8 @@ responses as notifications.
 Methods: initialize, session/new, session/prompt, session/stop.
 
 Examples:
-  dx-agents acp                        # start ACP server
-  dx-agents acp --max-sessions 5       # limit concurrent sessions")]
+  dx-agent acp                        # start ACP server
+  dx-agent acp --max-sessions 5       # limit concurrent sessions")]
     Acp {
         /// Maximum concurrent sessions (default: 10)
         #[arg(long)]
@@ -555,13 +555,13 @@ channels (Telegram, Discord, Slack, etc.), heartbeat monitor, and \
 the cron scheduler. This is the recommended way to run DX Agents in \
 production or as an always-on assistant.
 
-Use 'dx-agents service install' to register the daemon as an OS \
+Use 'dx-agent service install' to register the daemon as an OS \
 service (systemd/launchd) for auto-start on boot.
 
 Examples:
-  dx-agents daemon                   # use config defaults
-  dx-agents daemon -p 9090           # gateway on port 9090
-  dx-agents daemon --host 127.0.0.1  # localhost only")]
+  dx-agent daemon                   # use config defaults
+  dx-agent daemon -p 9090           # gateway on port 9090
+  dx-agent daemon --host 127.0.0.1  # localhost only")]
     Daemon {
         /// Port to listen on (use 0 for random available port); defaults to config gateway.port
         #[arg(short, long)]
@@ -642,15 +642,15 @@ the runtime local timezone. For user-facing schedules, pass --tz with \
 an explicit IANA timezone.
 
 Examples:
-  dx-agents cron list
-  dx-agents cron add '0 9 * * 1-5' 'Good morning' --tz America/New_York --agent
-  dx-agents cron add '*/30 * * * *' 'Check system health' --agent
-  dx-agents cron add '*/5 * * * *' 'echo ok'
-  dx-agents cron add-at 2025-01-15T14:00:00Z 'Send reminder' --agent
-  dx-agents cron add-every 60000 'Ping heartbeat'
-  dx-agents cron once 30m 'Run backup in 30 minutes' --agent
-  dx-agents cron pause TASK_ID
-  dx-agents cron update TASK_ID --expression '0 8 * * *' --tz Europe/London")]
+  dx-agent cron list
+  dx-agent cron add '0 9 * * 1-5' 'Good morning' --tz America/New_York --agent
+  dx-agent cron add '*/30 * * * *' 'Check system health' --agent
+  dx-agent cron add '*/5 * * * *' 'echo ok'
+  dx-agent cron add-at 2025-01-15T14:00:00Z 'Send reminder' --agent
+  dx-agent cron add-every 60000 'Ping heartbeat'
+  dx-agent cron once 30m 'Run backup in 30 minutes' --agent
+  dx-agent cron pause TASK_ID
+  dx-agent cron update TASK_ID --expression '0 8 * * *' --tz Europe/London")]
     Cron {
         #[command(subcommand)]
         cron_command: CronCommands,
@@ -682,12 +682,12 @@ to messaging platforms. Supported channel types: telegram, discord, \
 slack, whatsapp, matrix, imessage, email.
 
 Examples:
-  dx-agents channel list
-  dx-agents channel doctor
-  dx-agents channel add telegram '{\"bot_token\":\"...\",\"name\":\"my-bot\"}'
-  dx-agents channel remove my-bot
-  dx-agents channel bind-telegram dx_user
-  dx-agents channel send 'Alert!' --channel-id telegram --recipient 123456789")]
+  dx-agent channel list
+  dx-agent channel doctor
+  dx-agent channel add telegram '{\"bot_token\":\"...\",\"name\":\"my-bot\"}'
+  dx-agent channel remove my-bot
+  dx-agent channel bind-telegram dx_user
+  dx-agent channel send 'Alert!' --channel-id telegram --recipient 123456789")]
     Channel {
         #[command(subcommand)]
         channel_command: ChannelCommands,
@@ -812,18 +812,18 @@ Secret fields (API keys, tokens) automatically use masked input.
 Enum fields offer interactive selection when value is omitted.
 
 Examples:
-  dx-agents config list                                  # list all properties
-  dx-agents config list --secrets                        # list only secrets
-  dx-agents config list --filter channels.matrix         # filter by prefix
-  dx-agents config get channels.matrix.mention-only      # get a value
-  dx-agents config set channels.matrix.mention-only true # set a value
-  dx-agents config set channels.matrix.access-token      # secret: masked input
-  dx-agents config set channels.matrix.stream-mode       # enum: interactive select
-  dx-agents config init channels.matrix                  # init section with defaults
-  dx-agents config schema                                # print JSON Schema to stdout
-  dx-agents config schema > schema.json
+  dx-agent config list                                  # list all properties
+  dx-agent config list --secrets                        # list only secrets
+  dx-agent config list --filter channels.matrix         # filter by prefix
+  dx-agent config get channels.matrix.mention-only      # get a value
+  dx-agent config set channels.matrix.mention-only true # set a value
+  dx-agent config set channels.matrix.access-token      # secret: masked input
+  dx-agent config set channels.matrix.stream-mode       # enum: interactive select
+  dx-agent config init channels.matrix                  # init section with defaults
+  dx-agent config schema                                # print JSON Schema to stdout
+  dx-agent config schema > schema.json
 
-Property path tab completion is included automatically in `dx-agents completions <shell>`.")]
+Property path tab completion is included automatically in `dx-agent completions <shell>`.")]
     Config {
         #[command(subcommand)]
         config_command: ConfigCommands,
@@ -843,10 +843,10 @@ Use --force to skip the confirmation prompt.
 Use --version to target a specific release instead of latest.
 
 Examples:
-  dx-agents update                     # download and install latest
-  dx-agents update --check             # check only, don't install
-  dx-agents update --force             # install without confirmation
-  dx-agents update --version 0.6.0     # install specific version")]
+  dx-agent update                     # download and install latest
+  dx-agent update --check             # check only, don't install
+  dx-agent update --force             # install without confirmation
+  dx-agent update --version 0.6.0     # install specific version")]
     Update {
         /// Only check for updates, don't install
         #[arg(long)]
@@ -869,8 +869,8 @@ By default, runs the full test suite including network checks \
 checks for faster offline validation.
 
 Examples:
-  dx-agents self-test             # full suite
-  dx-agents self-test --quick     # quick checks only (no network)")]
+  dx-agent self-test             # full suite
+  dx-agent self-test --quick     # quick checks only (no network)")]
     SelfTest {
         /// Run quick checks only (no network)
         #[arg(long)]
@@ -880,18 +880,18 @@ Examples:
     /// Generate shell completion script to stdout
     // i18n-exempt: clap derive help — framework requires a compile-time literal
     #[command(long_about = "\
-Generate shell completion scripts for `dx-agents`.
+Generate shell completion scripts for `dx-agent`.
 
 The script is printed to stdout so it can be sourced directly:
 
 Examples (Unix shells):
-  source <(dx-agents completions bash)
-  dx-agents completions zsh > ~/.zfunc/_dx-agents
-  dx-agents completions fish > ~/.config/fish/completions/dx-agents.fish
+  source <(dx-agent completions bash)
+  dx-agent completions zsh > ~/.zfunc/_dx-agent
+  dx-agent completions fish > ~/.config/fish/completions/dx-agent.fish
 
 Examples (Windows PowerShell):
-  dx-agents completions powershell | Out-String | Invoke-Expression
-  dx-agents completions powershell > $PROFILE.CurrentUserAllHosts")]
+  dx-agent completions powershell | Out-String | Invoke-Expression
+  dx-agent completions powershell > $PROFILE.CurrentUserAllHosts")]
     Completions {
         /// Target shell
         #[arg(value_enum)]
@@ -975,7 +975,7 @@ enum LocalesCommands {
 }
 
 // `zeroclaw onboard <section>` parses its positional subcommand into
-// `zeroclaw_config::sections::Section` directly via clap's
+// `dx_agent_config::sections::Section` directly via clap's
 // `Subcommand` derive (gated on the `clap` feature there). No mirror
 // enum, no parallel variant list — the canonical `Section` enum IS
 // the clap surface.
@@ -991,8 +991,8 @@ enum DeprecatedPropsCommands {
 #[cfg(feature = "agent-runtime")]
 fn runtime_dir_env_is_explicit(name: &str, value: &str) -> bool {
     match name {
-        "ZEROCLAW_CONFIG_DIR" | "ZEROCLAW_DATA_DIR" => !value.trim().is_empty(),
-        "ZEROCLAW_WORKSPACE" => !value.is_empty(),
+        "DX_AGENT_CONFIG_DIR" | "DX_AGENT_DATA_DIR" => !value.trim().is_empty(),
+        "DX_AGENT_WORKSPACE" => !value.is_empty(),
         _ => false,
     }
 }
@@ -1003,9 +1003,9 @@ fn resolve_homebrew_onboard_config_dir(
     env_lookup: impl Fn(&str) -> Option<String>,
 ) -> Option<PathBuf> {
     let explicit_runtime_dir = [
-        "ZEROCLAW_CONFIG_DIR",
-        "ZEROCLAW_DATA_DIR",
-        "ZEROCLAW_WORKSPACE",
+        "DX_AGENT_CONFIG_DIR",
+        "DX_AGENT_DATA_DIR",
+        "DX_AGENT_WORKSPACE",
     ]
     .iter()
     .any(|name| env_lookup(name).is_some_and(|value| runtime_dir_env_is_explicit(name, &value)));
@@ -1014,7 +1014,7 @@ fn resolve_homebrew_onboard_config_dir(
         return None;
     }
 
-    zeroclaw_runtime::service::homebrew_var_dir_from_exe(exe)
+    dx_agent_runtime::service::homebrew_var_dir_from_exe(exe)
 }
 
 #[cfg(feature = "agent-runtime")]
@@ -1024,7 +1024,7 @@ fn apply_homebrew_onboard_config_dir_with(
     mut set_env: impl FnMut(&'static str, &Path),
 ) -> Option<PathBuf> {
     let config_dir = resolve_homebrew_onboard_config_dir(exe, env_lookup)?;
-    set_env("ZEROCLAW_CONFIG_DIR", &config_dir);
+    set_env("DX_AGENT_CONFIG_DIR", &config_dir);
     Some(config_dir)
 }
 
@@ -1074,7 +1074,7 @@ where
 
 #[cfg(feature = "agent-runtime")]
 fn print_provider_list(config: &Config) {
-    let model_providers = zeroclaw_providers::list_model_providers();
+    let model_providers = dx_agent_providers::list_model_providers();
     let configured_types: std::collections::HashSet<&str> = config
         .providers
         .models
@@ -1113,9 +1113,9 @@ fn print_provider_list(config: &Config) {
 /// "Create new" entry).
 ///
 /// All option lists, field shapes, presets, and the apply path come
-/// directly from `zeroclaw_runtime::quickstart` — the same module the
+/// directly from `dx_agent_runtime::quickstart` — the same module the
 /// gateway and TUI surfaces consume. No RPC, no daemon: the CLI is
-/// compiled in-process with `zeroclaw-runtime` and calls
+/// compiled in-process with `dx-agent-runtime` and calls
 /// `snapshot_state` / `field_shape` / `apply_with_surface` as plain
 /// functions.
 ///
@@ -1131,11 +1131,11 @@ async fn run_quickstart_cli(
     agent: Option<String>,
 ) -> anyhow::Result<()> {
     use dialoguer::{Confirm, Editor, FuzzySelect, Input, Password};
-    use zeroclaw_config::presets::{
+    use dx_agent_config::presets::{
         AgentIdentity, BuilderSubmission, ChannelQuickStart, MemoryChoice, ModelProviderChoice,
         RISK_PRESETS, RUNTIME_PRESETS, SelectorChoice,
     };
-    use zeroclaw_runtime::quickstart::{
+    use dx_agent_runtime::quickstart::{
         FieldSection, QuickstartTypeOption, Surface, apply_with_surface, field_shape,
         snapshot_state,
     };
@@ -1158,7 +1158,7 @@ async fn run_quickstart_cli(
         // `channels_visited == false` is *not* satisfied — the
         // selector still shows `[ ]`.
         channels_visited: bool,
-        peer_groups: Vec<zeroclaw_config::presets::QuickstartPeerGroup>,
+        peer_groups: Vec<dx_agent_config::presets::QuickstartPeerGroup>,
         // Mirrors `channels_visited`: peer groups are optional, so an
         // empty `peer_groups` Vec only counts as satisfied once the
         // user has actually opened the selector and left it. Until
@@ -1200,7 +1200,7 @@ async fn run_quickstart_cli(
     struct AgentChoice {
         name: String,
         system_prompt: String,
-        personality_files: Vec<zeroclaw_config::presets::QuickstartPersonalityFile>,
+        personality_files: Vec<dx_agent_config::presets::QuickstartPersonalityFile>,
     }
 
     impl Form {
@@ -1248,7 +1248,7 @@ async fn run_quickstart_cli(
     if providers.is_empty() {
         anyhow::bail!(
             "Quickstart could not enumerate model providers — \
-             zeroclaw_providers::list_model_providers() returned no entries."
+             dx_agent_providers::list_model_providers() returned no entries."
         );
     }
 
@@ -1369,7 +1369,7 @@ async fn run_quickstart_cli(
         let channels_summary = if !form.channels_visited {
             "not yet visited".to_string()
         } else if form.channels.is_empty() {
-            "none (chat via `dx-agents agent` only)".to_string()
+            "none (chat via `dx-agent agent` only)".to_string()
         } else {
             form.channels
                 .iter()
@@ -1565,10 +1565,10 @@ async fn run_quickstart_cli(
                     let upgraded;
                     let d_used = if d.key.eq_ignore_ascii_case("model") {
                         let (models, live) =
-                            zeroclaw_runtime::quickstart::model_catalog(&chosen.kind).await;
+                            dx_agent_runtime::quickstart::model_catalog(&chosen.kind).await;
                         if live && !models.is_empty() {
-                            upgraded = zeroclaw_runtime::quickstart::FieldDescriptor {
-                                kind: zeroclaw_config::traits::PropKind::Enum,
+                            upgraded = dx_agent_runtime::quickstart::FieldDescriptor {
+                                kind: dx_agent_config::traits::PropKind::Enum,
                                 enum_variants: Some(models),
                                 ..d.clone()
                             };
@@ -1590,7 +1590,7 @@ async fn run_quickstart_cli(
                     // its schema identifier — no cherry-picking.
                     if d.key.eq_ignore_ascii_case("model") {
                         model = value;
-                    } else if !value.is_empty() && value != zeroclaw_config::traits::UNSET_DISPLAY {
+                    } else if !value.is_empty() && value != dx_agent_config::traits::UNSET_DISPLAY {
                         field_buf.insert(d.key.clone(), value);
                     }
                 }
@@ -1661,7 +1661,7 @@ async fn run_quickstart_cli(
             Action::Memory => {
                 // Schema-derived list — six variants today, more as
                 // soon as someone adds them to
-                // `zeroclaw_config::multi_agent::MemoryBackendKind`.
+                // `dx_agent_config::multi_agent::MemoryBackendKind`.
                 // The exhaustive `match` here keeps the variant
                 // array honest at compile time.
                 let kinds: [MemoryChoice; 6] = [
@@ -1764,7 +1764,7 @@ async fn run_quickstart_cli(
                                 println!(
                                     "  Every configured channel is already \
                                      bound to an agent. Free one with \
-                                     `dx-agents config set agents.<alias>.channels \
+                                     `dx-agent config set agents.<alias>.channels \
                                      ...` before reusing it here."
                                 );
                                 continue;
@@ -1824,7 +1824,7 @@ async fn run_quickstart_cli(
                                 aborted = true;
                                 break;
                             };
-                            if !value.is_empty() && value != zeroclaw_config::traits::UNSET_DISPLAY
+                            if !value.is_empty() && value != dx_agent_config::traits::UNSET_DISPLAY
                             {
                                 extras.insert(d.key.clone(), value);
                             }
@@ -1931,7 +1931,7 @@ async fn run_quickstart_cli(
                             .filter(|s| !s.is_empty())
                             .collect();
                         form.peer_groups
-                            .push(zeroclaw_config::presets::QuickstartPeerGroup {
+                            .push(dx_agent_config::presets::QuickstartPeerGroup {
                                 name,
                                 channel,
                                 external_peers,
@@ -1998,14 +1998,14 @@ async fn run_quickstart_cli(
                 // Pre-render the default template set once; the per-file
                 // [t] Use template option seeds the editor from this map.
                 let template_ctx =
-                    zeroclaw_runtime::agent::personality_templates::TemplateContext {
+                    dx_agent_runtime::agent::personality_templates::TemplateContext {
                         agent: trimmed_agent_name_for_templates(
                             form.agent.as_ref().map(|a| a.name.as_str()),
                         ),
                         ..Default::default()
                     };
                 let templates: std::collections::HashMap<String, String> =
-                    zeroclaw_runtime::agent::personality_templates::render_preset_default(
+                    dx_agent_runtime::agent::personality_templates::render_preset_default(
                         &template_ctx,
                     )
                     .into_iter()
@@ -2119,12 +2119,12 @@ async fn run_quickstart_cli(
                     continue;
                 }
                 // Materialize in canonical file order; only files with content.
-                let personality_files: Vec<zeroclaw_config::presets::QuickstartPersonalityFile> =
+                let personality_files: Vec<dx_agent_config::presets::QuickstartPersonalityFile> =
                     files
                         .iter()
                         .filter_map(|filename| {
                             personality_results.get(*filename).map(|content| {
-                                zeroclaw_config::presets::QuickstartPersonalityFile {
+                                dx_agent_config::presets::QuickstartPersonalityFile {
                                     filename: (*filename).to_string(),
                                     content: content.clone(),
                                 }
@@ -2220,7 +2220,7 @@ async fn run_quickstart_cli(
             println!();
             println!("{}", t("cli-next-steps", "Next steps:"));
             println!(
-                "  dx-agents agent -a {}  # chat with this agent in your terminal",
+                "  dx-agent agent -a {}  # chat with this agent in your terminal",
                 applied.alias
             );
             if which_zerocode_on_path() {
@@ -2270,7 +2270,7 @@ fn model_path_provider_type(path: &str) -> Option<&'static str> {
         return None;
     }
     let family = parts[2];
-    zeroclaw_providers::list_model_providers()
+    dx_agent_providers::list_model_providers()
         .iter()
         .find(|p| p.name == family)
         .map(|p| p.name)
@@ -2288,7 +2288,7 @@ fn ensure_map_key_for_prop_path(config: &mut Config, prop_path: &str) -> Result<
     let Some((section_path, key)) = Config::map_key_sections()
         .into_iter()
         .filter(|section| section.path.starts_with("providers."))
-        .filter(|section| section.kind == zeroclaw_config::traits::MapKeyKind::Map)
+        .filter(|section| section.kind == dx_agent_config::traits::MapKeyKind::Map)
         .filter_map(|section| {
             let key = map_key_for_prop_path(section.path, prop_path)?;
             Some((section.path, key))
@@ -2313,17 +2313,17 @@ fn trimmed_agent_name_for_templates(prior_name: Option<&str>) -> String {
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| {
-            zeroclaw_runtime::agent::personality_templates::TemplateContext::default().agent
+            dx_agent_runtime::agent::personality_templates::TemplateContext::default().agent
         })
 }
 
 #[cfg(feature = "agent-runtime")]
 fn prompt_for_field(
-    desc: &zeroclaw_runtime::quickstart::FieldDescriptor,
+    desc: &dx_agent_runtime::quickstart::FieldDescriptor,
     seed: Option<&str>,
 ) -> anyhow::Result<Option<String>> {
     use dialoguer::{FuzzySelect, Input, Password};
-    use zeroclaw_config::traits::PropKind;
+    use dx_agent_config::traits::PropKind;
     if !desc.help.is_empty() {
         println!("  {}", desc.help);
     }
@@ -2367,7 +2367,7 @@ fn prompt_for_field(
         input = input.default(s.to_string());
     } else if let Some(d) = desc.default.as_deref()
         && !d.is_empty()
-        && d != zeroclaw_config::traits::UNSET_DISPLAY
+        && d != dx_agent_config::traits::UNSET_DISPLAY
     {
         // `<unset>` is a display placeholder for an unset Option, not a
         // real default. Seeding it pre-fills the prompt so a bare Enter
@@ -2857,7 +2857,7 @@ fn validated_locale(locale: &str) -> Result<String> {
     if !ok_shape {
         bail!("invalid locale code '{locale}'");
     }
-    let known = zeroclaw_runtime::i18n::available_locales();
+    let known = dx_agent_runtime::i18n::available_locales();
     if !known.iter().any(|o| o.code == locale) {
         let codes: Vec<&str> = known.iter().map(|o| o.code.as_str()).collect();
         bail!(
@@ -2881,7 +2881,7 @@ async fn fetch_locales(locale: &str, catalog: Option<&str>) -> Result<()> {
     let locale = validated_locale(locale)?;
 
     let selected: Vec<&(&str, &str, &str)> = match catalog {
-        None => zeroclaw_config::schema::FTL_CATALOGS.iter().collect(),
+        None => dx_agent_config::schema::FTL_CATALOGS.iter().collect(),
         Some(list) => {
             let names: Vec<&str> = list
                 .split(',')
@@ -2890,13 +2890,13 @@ async fn fetch_locales(locale: &str, catalog: Option<&str>) -> Result<()> {
                 .collect();
             let mut out = Vec::new();
             for name in &names {
-                match zeroclaw_config::schema::FTL_CATALOGS
+                match dx_agent_config::schema::FTL_CATALOGS
                     .iter()
                     .find(|(n, _, _)| n == name)
                 {
                     Some(entry) => out.push(entry),
                     None => {
-                        let valid = zeroclaw_config::schema::FTL_CATALOGS
+                        let valid = dx_agent_config::schema::FTL_CATALOGS
                             .iter()
                             .map(|(n, _, _)| *n)
                             .collect::<Vec<_>>()
@@ -2909,7 +2909,7 @@ async fn fetch_locales(locale: &str, catalog: Option<&str>) -> Result<()> {
         }
     };
 
-    let dest = zeroclaw_config::schema::ftl_locale_dir(&locale)?;
+    let dest = dx_agent_config::schema::ftl_locale_dir(&locale)?;
     std::fs::create_dir_all(&dest).with_context(|| format!("creating {}", dest.display()))?;
     // Confinement check: the resolved dest must live under the data-dir FTL root.
     let ftl_root = dest
@@ -3025,7 +3025,7 @@ async fn main() -> Result<()> {
             bail!("--config-dir cannot be empty");
         }
         // SAFETY: called early in main before any threads are spawned.
-        unsafe { std::env::set_var("ZEROCLAW_CONFIG_DIR", config_dir) };
+        unsafe { std::env::set_var("DX_AGENT_CONFIG_DIR", config_dir) };
     }
 
     // Completions must remain stdout-only and should not load config or initialize logging.
@@ -3095,7 +3095,7 @@ async fn main() -> Result<()> {
     let default_filter =
         format!("{default_floor},matrix_sdk=warn,matrix_sdk_base=warn,matrix_sdk_crypto=warn");
 
-    zeroclaw_log::install_global_subscriber(
+    dx_agent_log::install_global_subscriber(
         recording_filter.as_deref(),
         &default_filter,
         cli.verbose,
@@ -3142,7 +3142,7 @@ async fn main() -> Result<()> {
         if any_legacy_flag {
             eprintln!(
                 "error: `zeroclaw onboard` is deprecated and its flags no longer apply. \
-                 Use `dx-agents quickstart` to create a new agent, or `dx-agents config set <path>=<value>` \
+                 Use `dx-agent quickstart` to create a new agent, or `dx-agent config set <path>=<value>` \
                  for headless updates."
             );
             std::process::exit(2);
@@ -3151,7 +3151,7 @@ async fn main() -> Result<()> {
             "{}",
             t(
                 "cli-onboard-deprecated",
-                "`zeroclaw onboard` is deprecated — use `dx-agents quickstart`."
+                "`zeroclaw onboard` is deprecated — use `dx-agent quickstart`."
             )
         );
         return Ok(());
@@ -3199,7 +3199,7 @@ async fn main() -> Result<()> {
             } => {
                 if config.agent(&agent_alias).is_none() {
                     anyhow::bail!(
-                        "`dx-agents agent --agent {agent_alias}` is not configured (no [agents.{agent_alias}] entry)"
+                        "`dx-agent agent --agent {agent_alias}` is not configured (no [agents.{agent_alias}] entry)"
                     );
                 }
                 let agent_entry = config.model_provider_for_agent(&agent_alias);
@@ -3214,19 +3214,19 @@ async fn main() -> Result<()> {
                         .models
                         .ensure(type_key, alias_key)
                         .ok_or_else(|| {
-                            ::zeroclaw_log::record!(
+                            ::dx_agent_log::record!(
                                 WARN,
-                                ::zeroclaw_log::Event::new(
+                                ::dx_agent_log::Event::new(
                                     module_path!(),
-                                    ::zeroclaw_log::Action::Reject
+                                    ::dx_agent_log::Action::Reject
                                 )
-                                .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+                                .with_outcome(::dx_agent_log::EventOutcome::Failure)
                                 .with_attrs(::serde_json::json!({"family": type_key})),
                                 "ask CLI refused: --model-provider names an unknown family"
                             );
                             anyhow::Error::msg(format!(
                                 "Unknown model_provider family: {type_key}. \
-                             Configure a provider via `dx-agents quickstart` or the /config editor."
+                             Configure a provider via `dx-agent quickstart` or the /config editor."
                             ))
                         })?;
                     if let Some(m) = &model {
@@ -3240,7 +3240,7 @@ async fn main() -> Result<()> {
                 } else if config.model_provider_for_agent(&agent_alias).is_none() {
                     anyhow::bail!(
                         "No model model_provider configured for agent {agent_alias}. \
-                         Pass --model-provider <type> or run `dx-agents quickstart` to configure one."
+                         Pass --model-provider <type> or run `dx-agent quickstart` to configure one."
                     );
                 }
 
@@ -3302,10 +3302,10 @@ async fn main() -> Result<()> {
         // manually-triggered cron announcements ("no delivery handler
         // registered"). `register_delivery_fn` is idempotent (backed by
         // `OnceLock::set`), so calling it once here is safe.
-        zeroclaw_runtime::cron::scheduler::register_delivery_fn(Box::new(
+        dx_agent_runtime::cron::scheduler::register_delivery_fn(Box::new(
             |config, channel, target, thread_id, output| {
                 Box::pin(async move {
-                    zeroclaw_channels::orchestrator::deliver_announcement(
+                    dx_agent_channels::orchestrator::deliver_announcement(
                         &config, &channel, &target, thread_id, &output,
                     )
                     .await
@@ -3357,28 +3357,28 @@ async fn main() -> Result<()> {
             // catches typos before any subsystem spins up.
             if config.agent(&agent_alias).is_none() {
                 anyhow::bail!(
-                    "`dx-agents agent --agent {agent_alias}` is not configured (no [agents.{agent_alias}] entry)"
+                    "`dx-agent agent --agent {agent_alias}` is not configured (no [agents.{agent_alias}] entry)"
                 );
             }
 
             // Wire CLI channel for interactive mode
-            zeroclaw_runtime::agent::loop_::register_cli_channel_fn(Box::new(|| {
-                Box::new(zeroclaw_channels::cli::CliChannel::new("cli"))
+            dx_agent_runtime::agent::loop_::register_cli_channel_fn(Box::new(|| {
+                Box::new(dx_agent_channels::cli::CliChannel::new("cli"))
             }));
 
             // Wire peripheral tools (gpio_read/gpio_write etc.) for `zeroclaw agent`.
             // Mirrors the registration done for the daemon command.
             #[cfg(feature = "hardware")]
-            zeroclaw_runtime::agent::loop_::register_peripheral_tools_fn(Box::new(|config| {
+            dx_agent_runtime::agent::loop_::register_peripheral_tools_fn(Box::new(|config| {
                 Box::pin(async move {
-                    zeroclaw_hardware::peripherals::create_peripheral_tools(&config).await
+                    dx_agent_hardware::peripherals::create_peripheral_tools(&config).await
                 })
             }));
 
             // Register channel map factory for late-bound tool handle population.
-            zeroclaw_runtime::agent::loop_::register_channel_map_fn(Box::new({
+            dx_agent_runtime::agent::loop_::register_channel_map_fn(Box::new({
                 let config_clone = config.clone();
-                move || zeroclaw_channels::orchestrator::build_channel_map(&config_clone)
+                move || dx_agent_channels::orchestrator::build_channel_map(&config_clone)
             }));
 
             Box::pin(agent::run(
@@ -3392,7 +3392,7 @@ async fn main() -> Result<()> {
                 true,
                 session_state_file,
                 None,
-                zeroclaw_runtime::agent::loop_::AgentRunOverrides::default(),
+                dx_agent_runtime::agent::loop_::AgentRunOverrides::default(),
             ))
             .await
             .map(|_| ())
@@ -3415,16 +3415,16 @@ async fn main() -> Result<()> {
                     acp_config.session_timeout_secs = timeout;
                 }
                 let store =
-                    zeroclaw_infra::acp_session_store::AcpSessionStore::new(&config.data_dir)
+                    dx_agent_infra::acp_session_store::AcpSessionStore::new(&config.data_dir)
                         .map(std::sync::Arc::new)
                         .inspect_err(|e| {
-                            ::zeroclaw_log::record!(
+                            ::dx_agent_log::record!(
                                 WARN,
-                                ::zeroclaw_log::Event::new(
+                                ::dx_agent_log::Event::new(
                                     module_path!(),
-                                    ::zeroclaw_log::Action::Note
+                                    ::dx_agent_log::Action::Note
                                 )
-                                .with_outcome(::zeroclaw_log::EventOutcome::Unknown)
+                                .with_outcome(::dx_agent_log::EventOutcome::Unknown)
                                 .with_attrs(::serde_json::json!({"error": e.to_string()})),
                                 "Failed to open ACP session store"
                             );
@@ -3451,22 +3451,22 @@ async fn main() -> Result<()> {
                 Some(dx_agents::GatewayCommands::Restart { port, host }) => {
                     let (port, host) = resolve_gateway_addr(&config, port, host);
                     let addr = format!("{host}:{port}");
-                    ::zeroclaw_log::record!(
+                    ::dx_agent_log::record!(
                         INFO,
-                        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
+                        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
                             .with_attrs(::serde_json::json!({"addr": addr})),
-                        "🔄 Restarting ZeroClaw Gateway on"
+                        "🔄 Restarting DX Agent Gateway on"
                     );
 
                     // Try to gracefully shutdown existing gateway via admin endpoint
                     match shutdown_gateway(&host, port, config.gateway.path_prefix.as_deref()).await
                     {
                         Ok(()) => {
-                            ::zeroclaw_log::record!(
+                            ::dx_agent_log::record!(
                                 INFO,
-                                ::zeroclaw_log::Event::new(
+                                ::dx_agent_log::Event::new(
                                     module_path!(),
-                                    ::zeroclaw_log::Action::Note
+                                    ::dx_agent_log::Action::Note
                                 )
                                 .with_attrs(::serde_json::json!({"addr": addr})),
                                 "✓ Existing gateway on shut down gracefully"
@@ -3478,13 +3478,13 @@ async fn main() -> Result<()> {
                                 match tokio::net::TcpStream::connect(&addr).await {
                                     Err(_) => break, // port is free
                                     Ok(_) if tokio::time::Instant::now() >= deadline => {
-                                        ::zeroclaw_log::record!(
+                                        ::dx_agent_log::record!(
                                             WARN,
-                                            ::zeroclaw_log::Event::new(
+                                            ::dx_agent_log::Event::new(
                                                 module_path!(),
-                                                ::zeroclaw_log::Action::Note
+                                                ::dx_agent_log::Action::Note
                                             )
-                                            .with_outcome(::zeroclaw_log::EventOutcome::Unknown)
+                                            .with_outcome(::dx_agent_log::EventOutcome::Unknown)
                                             .with_attrs(::serde_json::json!({"port": port})),
                                             "Timed out waiting for port to be released"
                                         );
@@ -3498,11 +3498,11 @@ async fn main() -> Result<()> {
                             }
                         }
                         Err(e) => {
-                            ::zeroclaw_log::record!(
+                            ::dx_agent_log::record!(
                                 INFO,
-                                ::zeroclaw_log::Event::new(
+                                ::dx_agent_log::Event::new(
                                     module_path!(),
-                                    ::zeroclaw_log::Action::Note
+                                    ::dx_agent_log::Action::Note
                                 )
                                 .with_attrs(::serde_json::json!({"error": format!("{}", e)})),
                                 "   No existing gateway to shut down"
@@ -3594,7 +3594,7 @@ async fn main() -> Result<()> {
                                     "   Is the gateway running? Start it with:"
                                 )
                             );
-                            println!("     dx-agents gateway start"); // i18n-exempt: literal command/identifier example
+                            println!("     dx-agent gateway start"); // i18n-exempt: literal command/identifier example
                         }
                     }
                     Ok(())
@@ -3624,16 +3624,16 @@ async fn main() -> Result<()> {
                     .is_some_and(|home| exe.starts_with(&home));
                 if under_home {
                     let install_hint = if cfg!(windows) {
-                        "Consider installing to a system-wide location (e.g. C:\\Program Files\\ZeroClaw) for service use."
+                        "Consider installing to a system-wide location (e.g. C:\\Program Files\\DX Agent) for service use."
                     } else if cfg!(target_os = "macos") {
                         "Consider installing to /usr/local/bin or /opt/homebrew/bin for system-wide service."
                     } else {
                         "Consider installing to /usr/local/bin for system-wide service."
                     };
-                    ::zeroclaw_log::record!(
+                    ::dx_agent_log::record!(
                         WARN,
-                        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
-                            .with_outcome(::zeroclaw_log::EventOutcome::Unknown),
+                        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
+                            .with_outcome(::dx_agent_log::EventOutcome::Unknown),
                         &format!(
                             "Daemon running from user home directory: {}. {install_hint}",
                             exe.display()
@@ -3644,24 +3644,24 @@ async fn main() -> Result<()> {
             let port = port.unwrap_or(config.gateway.port);
             let host = host.unwrap_or_else(|| config.gateway.host.clone());
             if port == 0 {
-                ::zeroclaw_log::record!(
+                ::dx_agent_log::record!(
                     INFO,
-                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
+                    ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
                         .with_attrs(::serde_json::json!({"host": host})),
-                    "🧠 Starting ZeroClaw Daemon on (random port)"
+                    "🧠 Starting DX Agent Daemon on (random port)"
                 );
             } else {
-                ::zeroclaw_log::record!(
+                ::dx_agent_log::record!(
                     INFO,
-                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
+                    ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
                         .with_attrs(::serde_json::json!({"host": host, "port": port})),
-                    "🧠 Starting ZeroClaw Daemon on"
+                    "🧠 Starting DX Agent Daemon on"
                 );
             }
 
             #[cfg(target_os = "linux")]
             {
-                use zeroclaw_config::schema::SandboxBackend;
+                use dx_agent_config::schema::SandboxBackend;
                 // Any enabled agent whose risk_profile uses the docker
                 // sandbox triggers the warning — we just need to know
                 // *some* agent is using it.
@@ -3678,7 +3678,7 @@ async fn main() -> Result<()> {
                         .memory_limit_mb
                         .is_some_and(|mb| mb > 0);
                 if (sandbox_docker || runtime_docker_mem)
-                    && !zeroclaw_runtime::security::linux_memcg_available()
+                    && !dx_agent_runtime::security::linux_memcg_available()
                 {
                     let which = match (sandbox_docker, runtime_docker_mem) {
                         (true, true) => {
@@ -3687,10 +3687,10 @@ async fn main() -> Result<()> {
                         (true, false) => "security.sandbox.backend = \"docker\"",
                         _ => "runtime.kind = \"docker\"",
                     };
-                    ::zeroclaw_log::record!(
+                    ::dx_agent_log::record!(
                         WARN,
-                        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
-                            .with_outcome(::zeroclaw_log::EventOutcome::Unknown)
+                        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
+                            .with_outcome(::dx_agent_log::EventOutcome::Unknown)
                             .with_attrs(::serde_json::json!({"which": which})),
                         "Docker memory limits are configured but the Linux kernel has no memcg support. Affected config: . Consequence: --memory limits are silently ignored; agents can OOM the host. Fix: add 'cgroup_memory=1 cgroup_enable=memory' to /boot/firmware/cmdline.txt (Raspberry Pi) or enable CONFIG_MEMCG in your kernel, then reboot."
                     );
@@ -3699,15 +3699,15 @@ async fn main() -> Result<()> {
 
             // Wire CLI channel for interactive mode
             #[cfg(feature = "agent-runtime")]
-            zeroclaw_runtime::agent::loop_::register_cli_channel_fn(Box::new(|| {
-                Box::new(zeroclaw_channels::cli::CliChannel::new("cli"))
+            dx_agent_runtime::agent::loop_::register_cli_channel_fn(Box::new(|| {
+                Box::new(dx_agent_channels::cli::CliChannel::new("cli"))
             }));
 
-            // Wire peripheral tools from zeroclaw-hardware
+            // Wire peripheral tools from dx-agent-hardware
             #[cfg(feature = "hardware")]
-            zeroclaw_runtime::agent::loop_::register_peripheral_tools_fn(Box::new(|config| {
+            dx_agent_runtime::agent::loop_::register_peripheral_tools_fn(Box::new(|config| {
                 Box::pin(async move {
-                    zeroclaw_hardware::peripherals::create_peripheral_tools(&config).await
+                    dx_agent_hardware::peripherals::create_peripheral_tools(&config).await
                 })
             }));
 
@@ -3719,7 +3719,7 @@ async fn main() -> Result<()> {
             // from Telegram / Discord / Slack reach the same subscribers the
             // web UI serves. Without this, channels build an orphaned
             // CanvasStore::default() and frames are silently dropped.
-            let canvas_store = zeroclaw_runtime::tools::CanvasStore::new();
+            let canvas_store = dx_agent_runtime::tools::CanvasStore::new();
             let canvas_store_for_gateway = canvas_store.clone();
             let canvas_store_for_channels = canvas_store.clone();
 
@@ -3741,7 +3741,7 @@ async fn main() -> Result<()> {
                         move |host, port, config, tx, reload_tx, tui_registry| {
                             let canvas_store = canvas_store_for_gateway.clone();
                             Box::pin(async move {
-                                Box::pin(zeroclaw_gateway::run_gateway(
+                                Box::pin(dx_agent_gateway::run_gateway(
                                     &host,
                                     port,
                                     config,
@@ -3759,7 +3759,7 @@ async fn main() -> Result<()> {
                     channels_start: Some(Box::new(move |config, cancel| {
                         let canvas_store = canvas_store_for_channels.clone();
                         Box::pin(async move {
-                            Box::pin(zeroclaw_channels::orchestrator::start_channels(
+                            Box::pin(dx_agent_channels::orchestrator::start_channels(
                                 config,
                                 Some(canvas_store),
                                 cancel,
@@ -3770,9 +3770,9 @@ async fn main() -> Result<()> {
                     #[cfg(feature = "channel-mqtt")]
                     mqtt_start: Some(Box::new({
                         use std::sync::{Arc, Mutex};
-                        use zeroclaw_config::schema::SopConfig;
-                        use zeroclaw_memory::NoneMemory;
-                        use zeroclaw_runtime::sop::{SopAuditLogger, SopEngine};
+                        use dx_agent_config::schema::SopConfig;
+                        use dx_agent_memory::NoneMemory;
+                        use dx_agent_runtime::sop::{SopAuditLogger, SopEngine};
                         let sop_config = current_config.sop.clone();
                         let workspace_dir = current_config.data_dir.clone();
                         move |mqtt_config| {
@@ -3787,7 +3787,7 @@ async fn main() -> Result<()> {
                             let audit =
                                 Arc::new(SopAuditLogger::new(Arc::new(NoneMemory::new("none"))));
                             Box::pin(async move {
-                                zeroclaw_channels::orchestrator::mqtt::run_mqtt_sop_listener(
+                                dx_agent_channels::orchestrator::mqtt::run_mqtt_sop_listener(
                                     &mqtt_config,
                                     engine,
                                     audit,
@@ -3798,7 +3798,7 @@ async fn main() -> Result<()> {
                     })),
                     socket_start: Some(Box::new(|ctx, cancel, client_count| {
                         Box::pin(async move {
-                            Box::pin(zeroclaw_runtime::rpc::local::run_local_listener(
+                            Box::pin(dx_agent_runtime::rpc::local::run_local_listener(
                                 ctx,
                                 cancel,
                                 client_count,
@@ -3814,13 +3814,13 @@ async fn main() -> Result<()> {
                                 cancel.cancelled().await;
                                 return Ok(());
                             }
-                            let tls_acceptor = zeroclaw_runtime::rpc::wss::build_tls_acceptor(
+                            let tls_acceptor = dx_agent_runtime::rpc::wss::build_tls_acceptor(
                                 &wss_cfg.cert_path,
                                 &wss_cfg.key_path,
                             )?;
                             let bind_addr: std::net::SocketAddr =
                                 format!("{}:{}", wss_cfg.bind, wss_cfg.port).parse()?;
-                            zeroclaw_runtime::rpc::wss::run_wss_listener(
+                            dx_agent_runtime::rpc::wss::run_wss_listener(
                                 ctx,
                                 cancel,
                                 client_count,
@@ -3844,11 +3844,11 @@ async fn main() -> Result<()> {
                 match exit {
                     daemon::DaemonExit::Shutdown => break,
                     daemon::DaemonExit::Reload => {
-                        ::zeroclaw_log::record!(
+                        ::dx_agent_log::record!(
                             INFO,
-                            ::zeroclaw_log::Event::new(
+                            ::dx_agent_log::Event::new(
                                 module_path!(),
-                                ::zeroclaw_log::Action::Note
+                                ::dx_agent_log::Action::Note
                             ),
                             "🔄 Daemon reload — re-reading config from disk"
                         );
@@ -4151,7 +4151,7 @@ async fn main() -> Result<()> {
             println!();
             println!("{}", t("cli-status-channels", "Channels:"));
             println!("{}", t("cli-status-cli-always", "  CLI:      ✅ always"));
-            for entry in zeroclaw_channels::listing::compiled_channels(&config.channels) {
+            for entry in dx_agent_channels::listing::compiled_channels(&config.channels) {
                 println!(
                     "  {:9} {}",
                     entry.name,
@@ -4320,7 +4320,7 @@ async fn main() -> Result<()> {
         Commands::Desktop {
             install: do_install,
         } => {
-            let download_url = "https://www.zeroclawlabs.ai/download";
+            let download_url = "https://www.dx_agentlabs.ai/download";
 
             if do_install {
                 println!(
@@ -4380,13 +4380,13 @@ async fn main() -> Result<()> {
             let desktop_bin = {
                 let mut found = None;
 
-                // 1. macOS: check /Applications/ZeroClaw.app
+                // 1. macOS: check /Applications/DX Agent.app
                 #[cfg(target_os = "macos")]
                 {
                     let app_paths = [
-                        PathBuf::from("/Applications/ZeroClaw.app/Contents/MacOS/ZeroClaw"),
+                        PathBuf::from("/Applications/DX Agent.app/Contents/MacOS/DX Agent"),
                         PathBuf::from(std::env::var("HOME").unwrap_or_default())
-                            .join("Applications/ZeroClaw.app/Contents/MacOS/ZeroClaw"),
+                            .join("Applications/DX Agent.app/Contents/MacOS/DX Agent"),
                     ];
                     for app in &app_paths {
                         if app.is_file() {
@@ -4625,7 +4625,7 @@ async fn main() -> Result<()> {
             ConfigCommands::Get { path, json } => {
                 let known_paths: Vec<String> =
                     config.prop_fields().into_iter().map(|f| f.name).collect();
-                let path = zeroclaw_config::helpers::resolve_field_path(&known_paths, &path);
+                let path = dx_agent_config::helpers::resolve_field_path(&known_paths, &path);
                 if Config::prop_is_secret(&path) {
                     let entries = config.prop_fields();
                     let populated = entries
@@ -4681,7 +4681,7 @@ async fn main() -> Result<()> {
                             // Same single-source-of-truth helper the gateway
                             // uses; never hardcode a code at the call site.
                             let api_err =
-                                zeroclaw_config::api_error::ConfigApiError::from_validation(
+                                dx_agent_config::api_error::ConfigApiError::from_validation(
                                     anyhow::Error::msg(e.to_string()),
                                 )
                                 .with_path(&path);
@@ -4705,23 +4705,23 @@ async fn main() -> Result<()> {
                 crate::config::migration::ensure_disk_at_current_version(&config.config_path)?;
                 let known_paths: Vec<String> =
                     config.prop_fields().into_iter().map(|f| f.name).collect();
-                let mut path = zeroclaw_config::helpers::resolve_field_path(&known_paths, &path);
+                let mut path = dx_agent_config::helpers::resolve_field_path(&known_paths, &path);
                 if ensure_map_key_for_prop_path(&mut config, &path)? {
                     let known_paths: Vec<String> =
                         config.prop_fields().into_iter().map(|f| f.name).collect();
-                    path = zeroclaw_config::helpers::resolve_field_path(&known_paths, &path);
+                    path = dx_agent_config::helpers::resolve_field_path(&known_paths, &path);
                 }
                 if no_interactive {
                     let val = value.ok_or_else(|| {
-                        ::zeroclaw_log::record!(
+                        ::dx_agent_log::record!(
                             WARN,
-                            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Reject)
-                                .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+                            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Reject)
+                                .with_outcome(::dx_agent_log::EventOutcome::Failure)
                                 .with_attrs(::serde_json::json!({"path": path})),
                             "config set --no-interactive refused: positional value missing"
                         );
                         anyhow::Error::msg(format!(
-                            "Value required in --no-interactive mode. Usage: dx-agents config set --no-interactive {path} <value>"
+                            "Value required in --no-interactive mode. Usage: dx-agent config set --no-interactive {path} <value>"
                         ))
                     })?;
                     config.set_prop_persistent(&path, &val)?;
@@ -4750,7 +4750,7 @@ async fn main() -> Result<()> {
                     // (unknown provider, fetch failed, catalog empty).
                     use dialoguer::{FuzzySelect, Input};
                     let (models, live) =
-                        zeroclaw_runtime::quickstart::model_catalog(provider_type).await;
+                        dx_agent_runtime::quickstart::model_catalog(provider_type).await;
                     if live && !models.is_empty() {
                         let current = config.get_prop(&path).unwrap_or_default();
                         let default = models.iter().position(|m| m == &current).unwrap_or(0);
@@ -4830,7 +4830,7 @@ async fn main() -> Result<()> {
                             .join(", ");
                         config.set_prop_persistent(&path, &val)?;
                     } else {
-                        anyhow::bail!("Value required. Usage: dx-agents config set {path} <value>");
+                        anyhow::bail!("Value required. Usage: dx-agent config set {path} <value>");
                     }
                 }
                 Box::pin(config.save_dirty()).await?;
@@ -4891,7 +4891,7 @@ async fn main() -> Result<()> {
                         "\n{}",
                         t(
                             "cli-config-review-hint",
-                            "Run `dx-agents config list` to review, then set required fields."
+                            "Run `dx-agent config list` to review, then set required fields."
                         )
                     );
                 }
@@ -5077,13 +5077,13 @@ async fn main() -> Result<()> {
                     let result_entry: serde_json::Value = match op_name {
                         "add" | "replace" => {
                             let value = op.get("value").ok_or_else(|| {
-                                ::zeroclaw_log::record!(
+                                ::dx_agent_log::record!(
                                     WARN,
-                                    ::zeroclaw_log::Event::new(
+                                    ::dx_agent_log::Event::new(
                                         module_path!(),
-                                        ::zeroclaw_log::Action::Reject
+                                        ::dx_agent_log::Action::Reject
                                     )
-                                    .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+                                    .with_outcome(::dx_agent_log::EventOutcome::Failure)
                                     .with_attrs(
                                         ::serde_json::json!({
                                             "op": op_name,
@@ -5170,7 +5170,7 @@ async fn main() -> Result<()> {
                                     config_patch_fail_json_or_human(json, api_err, human)?
                                 }
                             };
-                            let want_str = match zeroclaw_config::typed_value::coerce_for_set_prop(
+                            let want_str = match dx_agent_config::typed_value::coerce_for_set_prop(
                                 want,
                                 config_patch_prop_kind(&config, &path),
                             ) {
@@ -5301,13 +5301,13 @@ async fn main() -> Result<()> {
             }
             ConfigCommands::Generate { version, encrypt } => {
                 let target = version.unwrap_or(crate::config::migration::CURRENT_SCHEMA_VERSION);
-                let zeroclaw_dir = config
+                let dx_agent_dir = config
                     .config_path
                     .parent()
                     .map(std::path::Path::to_path_buf);
                 let opts = crate::config::migration::GenerateOptions {
                     encrypt_secrets: encrypt,
-                    secret_store_dir: zeroclaw_dir.as_deref(),
+                    secret_store_dir: dx_agent_dir.as_deref(),
                 };
                 let toml_out = crate::config::migration::generate(target, &opts)?;
                 print!("{toml_out}");
@@ -5716,18 +5716,18 @@ fn resolve_gateway_addr(config: &Config, port: Option<u16>, host: Option<String>
 /// Log gateway startup message.
 fn log_gateway_start(host: &str, port: u16) {
     if port == 0 {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             INFO,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
                 .with_attrs(::serde_json::json!({"host": host})),
-            "🚀 Starting ZeroClaw Gateway on (random port)"
+            "🚀 Starting DX Agent Gateway on (random port)"
         );
     } else {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             INFO,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
                 .with_attrs(::serde_json::json!({"host": host, "port": port})),
-            "🚀 Starting ZeroClaw Gateway on"
+            "🚀 Starting DX Agent Gateway on"
         );
     }
 }
@@ -5747,10 +5747,10 @@ async fn shutdown_gateway(host: &str, port: u16, path_prefix: Option<&str>) -> R
         Ok(response) if response.status().is_success() => Ok(()),
         Ok(response) => {
             let status = response.status();
-            ::zeroclaw_log::record!(
+            ::dx_agent_log::record!(
                 WARN,
-                ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Fail)
-                    .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+                ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Fail)
+                    .with_outcome(::dx_agent_log::EventOutcome::Failure)
                     .with_attrs(::serde_json::json!({"endpoint": url, "status": status.as_u16()})),
                 "gateway admin shutdown returned non-success status"
             );
@@ -5759,10 +5759,10 @@ async fn shutdown_gateway(host: &str, port: u16, path_prefix: Option<&str>) -> R
             )))
         }
         Err(e) => {
-            ::zeroclaw_log::record!(
+            ::dx_agent_log::record!(
                 WARN,
-                ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Fail)
-                    .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+                ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Fail)
+                    .with_outcome(::dx_agent_log::EventOutcome::Failure)
                     .with_attrs(::serde_json::json!({"endpoint": url, "error": format!("{}", e)})),
                 "gateway admin shutdown: connect failed"
             );
@@ -5803,10 +5803,10 @@ async fn fetch_paircode(
     };
 
     let response = response.map_err(|e| {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             WARN,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Fail)
-                .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Fail)
+                .with_outcome(::dx_agent_log::EventOutcome::Failure)
                 .with_attrs(::serde_json::json!({"error": format!("{}", e)})),
             "gateway paircode fetch: connect failed"
         );
@@ -5815,10 +5815,10 @@ async fn fetch_paircode(
 
     if !response.status().is_success() {
         let status = response.status();
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             WARN,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Fail)
-                .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Fail)
+                .with_outcome(::dx_agent_log::EventOutcome::Failure)
                 .with_attrs(::serde_json::json!({"status": status.as_u16()})),
             "gateway paircode fetch returned non-success status"
         );
@@ -5826,10 +5826,10 @@ async fn fetch_paircode(
     }
 
     let json: serde_json::Value = response.json().await.map_err(|e| {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             WARN,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Fail)
-                .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Fail)
+                .with_outcome(::dx_agent_log::EventOutcome::Failure)
                 .with_attrs(::serde_json::json!({"error": format!("{}", e)})),
             "gateway paircode response: JSON parse failed"
         );
@@ -5854,7 +5854,7 @@ fn gateway_admin_url(host: &str, port: u16, path_prefix: Option<&str>, admin_pat
 
 // Interactive CLI input helpers used by `auth paste-token` /
 // `auth setup-token` / `auth paste-redirect`. The dialoguer dep belongs
-// to the binary; auth/mod.rs in zeroclaw-providers shouldn't pull it in,
+// to the binary; auth/mod.rs in dx-agent-providers shouldn't pull it in,
 // so reads live here and trait flows accept the resulting string.
 
 #[cfg(feature = "agent-runtime")]
@@ -6299,7 +6299,7 @@ mod tests {
     #[cfg(feature = "agent-runtime")]
     fn quickstart_cli_rejects_value_bearing_api_key_flag() {
         let result = Cli::try_parse_from([
-            "dx-agents",
+            "dx-agent",
             "quickstart",
             "--model-provider",
             "gemini",
@@ -6319,7 +6319,7 @@ mod tests {
     #[cfg(feature = "agent-runtime")]
     fn quickstart_cli_accepts_api_key_env_flag() {
         let cli = Cli::try_parse_from([
-            "dx-agents",
+            "dx-agent",
             "quickstart",
             "--model-provider",
             "gemini",
@@ -6341,7 +6341,7 @@ mod tests {
     #[test]
     #[cfg(feature = "agent-runtime")]
     fn providers_cli_accepts_root_json_flag() {
-        let cli = Cli::try_parse_from(["dx-agents", "providers", "--json"])
+        let cli = Cli::try_parse_from(["dx-agent", "providers", "--json"])
             .expect("providers root should accept JSON output");
 
         match cli.command {
@@ -6359,7 +6359,7 @@ mod tests {
     #[test]
     #[cfg(feature = "agent-runtime")]
     fn providers_cli_accepts_list_json_subcommand() {
-        let cli = Cli::try_parse_from(["dx-agents", "providers", "list", "--json"])
+        let cli = Cli::try_parse_from(["dx-agent", "providers", "list", "--json"])
             .expect("providers list should accept JSON output");
 
         match cli.command {
@@ -6375,7 +6375,7 @@ mod tests {
     #[cfg(feature = "agent-runtime")]
     fn providers_cli_accepts_health_json_subcommand() {
         let cli = Cli::try_parse_from([
-            "dx-agents",
+            "dx-agent",
             "providers",
             "health",
             "--provider",
@@ -6402,7 +6402,7 @@ mod tests {
     #[cfg(feature = "agent-runtime")]
     fn providers_cli_accepts_health_live_json_subcommand() {
         let cli = Cli::try_parse_from([
-            "dx-agents",
+            "dx-agent",
             "providers",
             "health",
             "--provider",
@@ -6430,7 +6430,7 @@ mod tests {
     #[cfg(feature = "agent-runtime")]
     fn models_list_cli_accepts_json_flag() {
         let cli = Cli::try_parse_from([
-            "dx-agents",
+            "dx-agent",
             "models",
             "list",
             "--model-provider",
@@ -6509,7 +6509,7 @@ mod tests {
             .expect("completion generation should succeed");
         let script = String::from_utf8(output).expect("completion output should be valid utf-8");
         assert!(
-            script.contains("dx-agents"),
+            script.contains("dx-agent"),
             "completion script should reference binary name"
         );
     }
@@ -6522,12 +6522,12 @@ mod tests {
             .expect("completion generation should succeed");
         let script = String::from_utf8(output).expect("completion output should be valid utf-8");
         assert!(
-            script.contains("if type _dx-agents &>/dev/null; then"),
-            "bash completion should wrap the dx-agents clap function"
+            script.contains("if type _dx-agent &>/dev/null; then"),
+            "bash completion should wrap the dx-agent clap function"
         );
         assert!(
-            script.contains("dx-agents config complete"),
-            "bash completion should query dx-agents for dynamic config paths"
+            script.contains("dx-agent config complete"),
+            "bash completion should query dx-agent for dynamic config paths"
         );
         assert!(
             !script.contains("_zeroclaw") && !script.contains("zeroclaw config complete"),
@@ -6543,12 +6543,12 @@ mod tests {
             .expect("completion generation should succeed");
         let script = String::from_utf8(output).expect("completion output should be valid utf-8");
         assert!(
-            script.contains("complete -c dx-agents"),
-            "fish completion should register dx-agents"
+            script.contains("complete -c dx-agent"),
+            "fish completion should register dx-agent"
         );
         assert!(
-            script.contains("dx-agents config complete"),
-            "fish completion should query dx-agents for dynamic config paths"
+            script.contains("dx-agent config complete"),
+            "fish completion should query dx-agent for dynamic config paths"
         );
         assert!(
             !script.contains("zeroclaw config complete"),
@@ -6564,12 +6564,12 @@ mod tests {
             .expect("completion generation should succeed");
         let script = String::from_utf8(output).expect("completion output should be valid utf-8");
         assert!(
-            script.contains("functions[_dx-agents_clap_orig]=$functions[_dx-agents]"),
-            "zsh completion should preserve the dx-agents clap function"
+            script.contains("functions[_dx-agent_clap_orig]=$functions[_dx-agent]"),
+            "zsh completion should preserve the dx-agent clap function"
         );
         assert!(
-            script.contains("dx-agents config complete"),
-            "zsh completion should query dx-agents for dynamic config paths"
+            script.contains("dx-agent config complete"),
+            "zsh completion should query dx-agent for dynamic config paths"
         );
         assert!(
             !script.contains("_zeroclaw") && !script.contains("zeroclaw config complete"),
@@ -6585,14 +6585,14 @@ mod tests {
             .expect("completion generation should succeed");
         let script = String::from_utf8(output).expect("completion output should be valid utf-8");
         // The wrapper must capture the original clap-generated function body
-        // (via declare -f) rather than calling the dx-agents wrapper by name,
+        // (via declare -f) rather than calling the dx-agent wrapper by name,
         // which would create an infinite recursion loop after it is redefined.
         assert!(
-            script.contains("declare -f _dx-agents"),
-            "bash completion should use declare -f to capture the original dx-agents function body"
+            script.contains("declare -f _dx-agent"),
+            "bash completion should use declare -f to capture the original dx-agent function body"
         );
         assert!(
-            !script.contains("_dx-agents_clap_orig() { _dx-agents \"$@\"; }"),
+            !script.contains("_dx-agent_clap_orig() { _dx-agent \"$@\"; }"),
             "bash completion must not define the clap fallback as a simple forwarder to the wrapper"
         );
     }
@@ -6709,7 +6709,7 @@ mod tests {
         // section's `as_str()` keys (snake_case) verbatim, set via
         // `#[command(name = $key)]` inside the `sections!` macro that
         // also defines the enum.
-        for w in zeroclaw_config::sections::QUICKSTART_SECTIONS {
+        for w in dx_agent_config::sections::QUICKSTART_SECTIONS {
             let cli = Cli::try_parse_from(["zeroclaw", "onboard", w.as_str()])
                 .unwrap_or_else(|_| panic!("onboard {} should parse", w.as_str()));
             match cli.command {
@@ -6758,9 +6758,9 @@ mod tests {
         let exe = Path::new("/opt/homebrew/Cellar/zeroclaw/0.8.0/bin/zeroclaw");
 
         for var in [
-            "ZEROCLAW_CONFIG_DIR",
-            "ZEROCLAW_DATA_DIR",
-            "ZEROCLAW_WORKSPACE",
+            "DX_AGENT_CONFIG_DIR",
+            "DX_AGENT_DATA_DIR",
+            "DX_AGENT_WORKSPACE",
         ] {
             assert_eq!(
                 resolve_homebrew_onboard_config_dir(exe, |name| {
@@ -6779,7 +6779,7 @@ mod tests {
 
         assert_eq!(
             resolve_homebrew_onboard_config_dir(exe, |name| {
-                (name == "ZEROCLAW_WORKSPACE").then(|| "   ".to_string())
+                (name == "DX_AGENT_WORKSPACE").then(|| "   ".to_string())
             }),
             None,
         );
@@ -6801,7 +6801,7 @@ mod tests {
         assert_eq!(
             applied,
             Some((
-                "ZEROCLAW_CONFIG_DIR",
+                "DX_AGENT_CONFIG_DIR",
                 PathBuf::from("/opt/homebrew/var/zeroclaw"),
             )),
         );
@@ -6815,7 +6815,7 @@ mod tests {
 
         let detected = apply_homebrew_onboard_config_dir_with(
             exe,
-            |name| (name == "ZEROCLAW_CONFIG_DIR").then(|| "/tmp/zeroclaw".to_string()),
+            |name| (name == "DX_AGENT_CONFIG_DIR").then(|| "/tmp/zeroclaw".to_string()),
             |name, value| applied = Some((name, value.to_path_buf())),
         );
 
@@ -6983,7 +6983,7 @@ mod tests {
         );
 
         let known_paths: Vec<String> = config.prop_fields().into_iter().map(|f| f.name).collect();
-        let api_key_path = zeroclaw_config::helpers::resolve_field_path(
+        let api_key_path = dx_agent_config::helpers::resolve_field_path(
             &known_paths,
             "providers.models.deepseek.default.api-key",
         );
@@ -7052,12 +7052,12 @@ mod tests {
         // Mirror the CLI `config set` path exactly: resolve, materialize the
         // map key, then re-resolve so the now-present alias field is found.
         let known: Vec<String> = config.prop_fields().into_iter().map(|f| f.name).collect();
-        let mut path = zeroclaw_config::helpers::resolve_field_path(&known, raw);
+        let mut path = dx_agent_config::helpers::resolve_field_path(&known, raw);
         let created = ensure_map_key_for_prop_path(&mut config, &path)
             .expect("known typed transcription provider path should be materialized");
         assert!(created, "missing transcription alias should be created");
         let known: Vec<String> = config.prop_fields().into_iter().map(|f| f.name).collect();
-        path = zeroclaw_config::helpers::resolve_field_path(&known, &path);
+        path = dx_agent_config::helpers::resolve_field_path(&known, &path);
 
         config
             .set_prop_persistent(&path, "whisper-large-v3")

@@ -56,11 +56,11 @@ impl ModelProvider for MockModelProvider {
         Ok(guard.remove(0))
     }
 }
-impl ::zeroclaw_api::attribution::Attributable for MockModelProvider {
-    fn role(&self) -> ::zeroclaw_api::attribution::Role {
-        ::zeroclaw_api::attribution::Role::Provider(
-            ::zeroclaw_api::attribution::ProviderKind::Model(
-                ::zeroclaw_api::attribution::ModelProviderKind::Custom,
+impl ::dx_agent_api::attribution::Attributable for MockModelProvider {
+    fn role(&self) -> ::dx_agent_api::attribution::Role {
+        ::dx_agent_api::attribution::Role::Provider(
+            ::dx_agent_api::attribution::ProviderKind::Model(
+                ::dx_agent_api::attribution::ModelProviderKind::Custom,
             ),
         )
     }
@@ -121,11 +121,11 @@ impl ModelProvider for RecordingModelProvider {
         Ok(guard.remove(0))
     }
 }
-impl ::zeroclaw_api::attribution::Attributable for RecordingModelProvider {
-    fn role(&self) -> ::zeroclaw_api::attribution::Role {
-        ::zeroclaw_api::attribution::Role::Provider(
-            ::zeroclaw_api::attribution::ProviderKind::Model(
-                ::zeroclaw_api::attribution::ModelProviderKind::Custom,
+impl ::dx_agent_api::attribution::Attributable for RecordingModelProvider {
+    fn role(&self) -> ::dx_agent_api::attribution::Role {
+        ::dx_agent_api::attribution::Role::Provider(
+            ::dx_agent_api::attribution::ProviderKind::Model(
+                ::dx_agent_api::attribution::ModelProviderKind::Custom,
             ),
         )
     }
@@ -227,11 +227,11 @@ impl ModelProvider for TraceLlmModelProvider {
         }
     }
 }
-impl ::zeroclaw_api::attribution::Attributable for TraceLlmModelProvider {
-    fn role(&self) -> ::zeroclaw_api::attribution::Role {
-        ::zeroclaw_api::attribution::Role::Provider(
-            ::zeroclaw_api::attribution::ProviderKind::Model(
-                ::zeroclaw_api::attribution::ModelProviderKind::Custom,
+impl ::dx_agent_api::attribution::Attributable for TraceLlmModelProvider {
+    fn role(&self) -> ::dx_agent_api::attribution::Role {
+        ::dx_agent_api::attribution::Role::Provider(
+            ::dx_agent_api::attribution::ProviderKind::Model(
+                ::dx_agent_api::attribution::ModelProviderKind::Custom,
             ),
         )
     }

@@ -34,7 +34,7 @@ allowed_pubkeys = ["npub1..."]            # empty = deny all, "*" = allow all
 - **Auth:** raw private key (`nsec` bech32 or hex). Store in the encrypted secrets backend — never in a checked-in config.
 - **Inbound:** kind-1 (text), kind-4 (DM, NIP-04), and kind-1059 (gift-wrap, NIP-17).
 - **Outbound:** same kinds. Zap handling is experimental.
-- **Relays:** the agent connects to all listed relays; use 3–5 for reliability. If `relays` is omitted, ZeroClaw connects to a built-in set of popular public relays.
+- **Relays:** the agent connects to all listed relays; use 3–5 for reliability. If `relays` is omitted, DX Agent connects to a built-in set of popular public relays.
 
 ## Twitter / X
 
@@ -77,4 +77,4 @@ Bots on public social networks attract adversarial input. Two precautions:
 
 ## Rate limits and backoff
 
-All social channels are subject to aggressive rate limits. ZeroClaw's outbound queue uses exponential backoff on 429 responses. If you hit persistent rate-limiting, throttle the agent's posting cadence at the source rather than relying on per-channel streaming knobs (none of these channels expose draft-update intervals; their schema is intentionally minimal).
+All social channels are subject to aggressive rate limits. DX Agent's outbound queue uses exponential backoff on 429 responses. If you hit persistent rate-limiting, throttle the agent's posting cadence at the source rather than relying on per-channel streaming knobs (none of these channels expose draft-update intervals; their schema is intentionally minimal).

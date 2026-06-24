@@ -1,6 +1,6 @@
 # Testing
 
-ZeroClaw uses a five-level testing taxonomy backed by filesystem layout. Each level has a different boundary and a different cost — pick the lowest level that proves what you need to prove.
+DX Agent uses a five-level testing taxonomy backed by filesystem layout. Each level has a different boundary and a different cost — pick the lowest level that proves what you need to prove.
 
 ## The five levels
 
@@ -111,7 +111,7 @@ Expects fields: `response_contains`, `response_not_contains`, `tools_used`, `too
 Live tests hit real external services and cost real money — they are `#[ignore]` by default and only run with explicit opt-in.
 
 - Always `#[ignore]`. Never let a live test run on a normal `cargo test`.
-- Read credentials from `env::var("ZEROCLAW_TEST_*")`. Don't read from `~/.zeroclaw/config.toml` — live tests should be hermetic.
+- Read credentials from `env::var("DX_AGENT_TEST_*")`. Don't read from `~/.dx_agent/config.toml` — live tests should be hermetic.
 - Run with `cargo test --test live -- --ignored --nocapture`.
 
 ## Database tests are integration tests

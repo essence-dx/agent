@@ -1,14 +1,14 @@
 # Cost tracking
 
-ZeroClaw records every priced API call to an append-only ledger,
+DX Agent records every priced API call to an append-only ledger,
 attributes spend to the originating agent, enforces daily / monthly
 budgets, and surfaces the rollup on the dashboard `Cost` tab. The
 pricing rules live in config so operators can edit them without a
 rebuild.
 
 This page describes the schema, the lookup pipeline, and the operator
-surfaces. The code lives in `crates/zeroclaw-config/src/cost/` and
-`crates/zeroclaw-runtime/src/agent/cost.rs`.
+surfaces. The code lives in `crates/dx-agent-config/src/cost/` and
+`crates/dx-agent-runtime/src/agent/cost.rs`.
 
 ## Config schema
 
@@ -58,7 +58,7 @@ entry is keyed by the **upstream model id** as it appears in usage telemetry
 the provider's namespace and almost always contain hyphens.
 
 The schema marks every rate-sheet HashMap with `#[resource_key]` (in
-`crates/zeroclaw-macros/src/lib.rs`). That attribute opts the field out of
+`crates/dx-agent-macros/src/lib.rs`). That attribute opts the field out of
 `validate_alias_key` in `create_map_key` / `rename_map_key`, so the
 gateway's `POST /api/config/map-key` accepts hyphenated ids. Without it,
 `create_map_key` rejects every realistic model id and the rate-sheet UI
@@ -73,7 +73,7 @@ The per-provider-type slots under `[cost.rates.providers.models.<type>]`,
 expand from the same macros that drive the `[providers.*]` slot wrappers:
 
 ```rust
-// crates/zeroclaw-config/src/providers.rs
+// crates/dx-agent-config/src/providers.rs
 for_each_model_provider_slot!(emit_model_cost_rates_struct);
 for_each_tts_provider_slot!(emit_tts_cost_rates_struct, super::schema::TtsCostRates);
 for_each_transcription_provider_slot!(emit_transcription_cost_rates_struct, super::schema::TranscriptionCostRates);
@@ -97,12 +97,12 @@ The pipeline from `[cost.rates.*]` to a recorded `cost_usd` value is:
    `[providers.models.<type>.<alias>].pricing` table is merged in too;
    `[cost.rates.*]` wins on conflict because it's the forward-looking
    surface.
-   (See `crates/zeroclaw-channels/src/orchestrator/mod.rs` —
+   (See `crates/dx-agent-channels/src/orchestrator/mod.rs` —
    the closure under `cost_tracking: CostTracker::get_or_init_global(...).map(|tracker| ...)`.)
 
 2. **Recording inside the agent loop.** Every successful LLM response
    reaches `record_tool_loop_cost_usage(provider_name, model, usage)`
-   in `crates/zeroclaw-runtime/src/agent/cost.rs`. The function pulls
+   in `crates/dx-agent-runtime/src/agent/cost.rs`. The function pulls
    the pricing map slot for `provider_name`, calls `resolve_rates(map,
    model)`, multiplies by token counts, and stores a `CostRecord` via
    the global `CostTracker`.
@@ -114,7 +114,7 @@ The pipeline from `[cost.rates.*]` to a recorded `cost_usd` value is:
    `missing_pricing` warn so silent zero-cost records show up in logs.
 
 4. **CostTracker is a process-global singleton** (`OnceLock` in
-   `crates/zeroclaw-config/src/cost/tracker.rs`). Its `CostConfig` is
+   `crates/dx-agent-config/src/cost/tracker.rs`). Its `CostConfig` is
    frozen at first init; if the operator flips `cost.enabled` after
    that, the daemon must restart for the tracker to honor the new
    value. The orchestrator's pricing map, in contrast, is rebuilt on
@@ -218,7 +218,7 @@ after the daemon reload and check **Cost overview > Session** plus
 v0.8.0 daemon mangled hyphenated HashMap keys in the dirty-save path,
 silently dropping every write to the rate sheet. If you see this on
 v0.8.0+ it's a real bug — the dirty-path resolution lives in
-`crates/zeroclaw-config/src/schema.rs::apply_dirty_path`; file an
+`crates/dx-agent-config/src/schema.rs::apply_dirty_path`; file an
 issue with the daemon version and the path that drifted.
 
 **`missing_pricing` warns spam the log.** Emitted once per

@@ -1,6 +1,6 @@
 # Streaming
 
-Every provider in ZeroClaw that speaks a streaming API streams token-by-token. The runtime forwards those streams to channel adapters that support partial updates (Discord, Slack, Telegram, the gateway's WebSocket), so the user sees text appear as the model generates it.
+Every provider in DX Agent that speaks a streaming API streams token-by-token. The runtime forwards those streams to channel adapters that support partial updates (Discord, Slack, Telegram, the gateway's WebSocket), so the user sees text appear as the model generates it.
 
 ## What gets streamed
 
@@ -56,7 +56,7 @@ When both the provider and the channel support streaming, the flow is: provider 
 
 ## Reasoning blocks
 
-Reasoning models (OpenAI o-series, DeepSeek-R1, Qwen-thinking variants) emit `ReasoningDelta` events separate from regular text. By default the runtime strips these from outbound streams — see `<think>…</think>` handling in `crates/zeroclaw-channels/src/orchestrator/mod.rs`. Users see the final answer, not the chain-of-thought.
+Reasoning models (OpenAI o-series, DeepSeek-R1, Qwen-thinking variants) emit `ReasoningDelta` events separate from regular text. By default the runtime strips these from outbound streams — see `<think>…</think>` handling in `crates/dx-agent-channels/src/orchestrator/mod.rs`. Users see the final answer, not the chain-of-thought.
 
 To surface reasoning to the user:
 
@@ -95,8 +95,8 @@ If a provider returns the entire response in one shot (older OpenAI-compat endpo
 
 ## Code references
 
-- `crates/zeroclaw-api/src/provider.rs` — `Provider` trait, `StreamEvent` enum
-- `crates/zeroclaw-providers/src/compatible.rs` — OpenAI-compat SSE parser
-- `crates/zeroclaw-providers/src/anthropic.rs` — Anthropic streaming
-- `crates/zeroclaw-providers/src/ollama.rs` — Ollama streaming
-- `crates/zeroclaw-channels/src/orchestrator/mod.rs` — channel-side stream consumption
+- `crates/dx-agent-api/src/provider.rs` — `Provider` trait, `StreamEvent` enum
+- `crates/dx-agent-providers/src/compatible.rs` — OpenAI-compat SSE parser
+- `crates/dx-agent-providers/src/anthropic.rs` — Anthropic streaming
+- `crates/dx-agent-providers/src/ollama.rs` — Ollama streaming
+- `crates/dx-agent-channels/src/orchestrator/mod.rs` — channel-side stream consumption

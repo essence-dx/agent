@@ -1,6 +1,6 @@
 # Translations
 
-ZeroClaw has two independent translation layers — app strings (Mozilla Fluent `.ftl`) and
+DX Agent has two independent translation layers — app strings (Mozilla Fluent `.ftl`) and
 docs (gettext `.po`). Both are filled locally via a configured AI provider before opening
 a PR; translation is never a CI operation.
 

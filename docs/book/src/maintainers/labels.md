@@ -190,7 +190,7 @@ For PRs, risk labels describe the actual diff under review: touched paths, behav
 | `risk: high` | Touches a high-risk path, or large security-adjacent change |
 | `risk: manual` | Maintainer override that freezes automated risk recalculation |
 
-High-risk paths: `crates/zeroclaw-runtime/src/**`, `crates/zeroclaw-gateway/src/**`, `crates/zeroclaw-tools/src/**`, `crates/zeroclaw-runtime/src/security/**`, `.github/workflows/**`.
+High-risk paths: `crates/dx-agent-runtime/src/**`, `crates/dx-agent-gateway/src/**`, `crates/dx-agent-tools/src/**`, `crates/dx-agent-runtime/src/security/**`, `.github/workflows/**`.
 
 When uncertain, treat as higher risk.
 

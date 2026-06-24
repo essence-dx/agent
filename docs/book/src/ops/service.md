@@ -89,7 +89,7 @@ systemctl --user restart zeroclaw
 
 ### macOS — launchd
 
-Edit `~/Library/LaunchAgents/com.zeroclaw.daemon.plist`:
+Edit `~/Library/LaunchAgents/com.dx_agent.daemon.plist`:
 
 ```xml
 <key>SoftResourceLimits</key>
@@ -102,8 +102,8 @@ Edit `~/Library/LaunchAgents/com.zeroclaw.daemon.plist`:
 Unload + load the plist to apply:
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.zeroclaw.daemon.plist
-launchctl load ~/Library/LaunchAgents/com.zeroclaw.daemon.plist
+launchctl unload ~/Library/LaunchAgents/com.dx_agent.daemon.plist
+launchctl load ~/Library/LaunchAgents/com.dx_agent.daemon.plist
 ```
 
 ### Docker
@@ -122,15 +122,15 @@ services:
 
 ## Running multiple workspaces
 
-Each ZeroClaw instance owns one workspace. To run two:
+Each DX Agent instance owns one workspace. To run two:
 
 1. Install the binary once
-2. Create `~/.zeroclaw-home/` and `~/.zeroclaw-work/` (or wherever)
+2. Create `~/.dx_agent-home/` and `~/.dx_agent-work/` (or wherever)
 3. Run two services pointing at different workspaces:
 
 ```bash
-ZEROCLAW_WORKSPACE=~/.zeroclaw-home zeroclaw service install --name zeroclaw-home
-ZEROCLAW_WORKSPACE=~/.zeroclaw-work zeroclaw service install --name zeroclaw-work
+DX_AGENT_WORKSPACE=~/.dx_agent-home zeroclaw service install --name zeroclaw-home
+DX_AGENT_WORKSPACE=~/.dx_agent-work zeroclaw service install --name zeroclaw-work
 ```
 
 Each gets its own unit file / plist, its own gateway port (configurable in each config), and its own channel bindings. Memory stays separate; a Telegram bot in one workspace doesn't know about the other.

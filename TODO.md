@@ -21,13 +21,13 @@
 - [x] Harden release governance so Docker publishes only after the GitHub release, website redeploys are allowlisted, announcements receive explicit secrets, package-manager workflows default to dry-run, and Homebrew remains audit-only until DX owns a formula path.
 - [x] Rebrand Kubernetes/OpenShift samples plus checked-in AUR and Scoop templates to the DX Agents binary/image contract while keeping provider secrets out of sample ConfigMaps.
 - [x] Rebrand stable release artifacts, CI Docker image entrypoints, Docker Compose, and the Kubernetes deployment sample to the `dx-agents` binary/image contract, while gating package-manager dry-runs, website redeploys, and announcements behind explicit DX release variables.
-- [x] Rebrand installer and Raspberry Pi deploy paths so public installs verify `dx-agents` binaries from the DX Agents repository while preserving the current `.zeroclaw` runtime config compatibility path.
+- [x] Rebrand installer and Raspberry Pi deploy paths so public installs verify `dx-agents` binaries from the DX Agents repository while preserving the current `.dx_agent` runtime config compatibility path.
 - [x] Live-smoke the current `dx-agents` agent path with transient provider credentials: Gemini reached the API but the account was quota-blocked, Groq model discovery worked, a constrained Groq agent message returned the expected smoke token, and quick self-test passed.
 - [x] Recheck the live auth boundary with newly supplied transient credentials: Gemini again reached the API but had quota `0`; Groq quickstart and `llama-3.3-70b-versatile` agent messaging returned the expected smoke token; quick self-test passed against the same temp config and the post-run secret scan found no raw key files.
 - [x] Make fully flag-driven `dx-agents quickstart` non-interactive, using balanced risk/runtime defaults, SQLite memory, and no extra channels when provider/model/agent flags are complete.
 - [x] Restore `dx-agents providers list --json` and `dx-agents models list --json` as secret-safe provider/model discovery surfaces.
-- [x] Make ACP bridge startup DX-first with `DX_AGENTS_ACP_BRIDGE_TOKEN` and `DX_AGENTS_ACP_PAIRING_CODE`, while preserving legacy `ZEROCLAW_*` fallback for existing installs.
-- [x] Rebrand ACP initialize metadata to `dx-agents-acp` and `_meta.dxAgents` while retaining `_meta.zeroclaw` compatibility for older clients.
+- [x] Make ACP bridge startup DX-first with `DX_AGENTS_ACP_BRIDGE_TOKEN` and `DX_AGENTS_ACP_PAIRING_CODE`, while preserving legacy `DX_AGENT_*` fallback for existing installs.
+- [x] Rebrand ACP initialize metadata to `dx-agents-acp` and `_meta.dxAgents` while retaining `_meta.dx_agent` compatibility for older clients.
 - [x] Encrypt upload-bundle/download header maps plus Gmail push webhook and voice-call auth secrets, with focused config classification and save-roundtrip coverage.
 - [x] Sanitize OpenAI-compatible streaming status error bodies and reliable-provider stream forwarding so provider errors cannot echo reflected API keys, authorization headers, or JSON/header credentials.
 - [x] Encrypt, mask, and restore nested route `api_key` values for model and embedding routes across config save/load, object-array display, whole-config API responses, and masked PATCH updates.
@@ -35,7 +35,7 @@
 - [x] Make Unix installer onboarding detection require both a configured model provider and a runnable agent route, so provider-only configs still launch Quickstart.
 - [x] Rebrand Linux/macOS setup docs to the DX Agents install repository, binary, Quickstart, and service command surface while leaving legacy service/config paths where the runtime still owns them.
 - [x] Keep Docker release gateway pairing required, switch container/Kubernetes env examples to DX-first names, and bind Compose host publishing to loopback by default.
-- [x] Replace stale upstream ZeroClaw install/onboard guidance in Quick Start, Windows setup, CLI help, and English help catalog entries.
+- [x] Replace stale upstream DX Agent install/onboard guidance in Quick Start, Windows setup, CLI help, and English help catalog entries.
 - [x] Live-smoke Groq with a transient temp config and confirm `dx-agents-provider-ok` without persisting raw supplied keys.
 
 ## Completed: Desktop Onboarding DX Brand
@@ -159,10 +159,10 @@ This file is the working checklist for recurring continuation runs. Keep it curr
 
 ## Current 100% List
 
-- [x] Clone latest ZeroClaw, OpenClaw, Hermes Agent, and archived Agent references under `G:\Dx\inspirations`.
-- [x] Create active `dx-agents` workspace from latest ZeroClaw.
+- [x] Clone latest DX Agent, OpenClaw, Hermes Agent, and archived Agent references under `G:\Dx\inspirations`.
+- [x] Create active `dx-agents` workspace from latest DX Agent.
 - [x] Rename the root Cargo package, library, primary CLI binary, ACP bridge binary, and high-visibility CLI copy to DX Agents.
-- [x] Preserve legacy ZeroClaw/Agent/OpenClaw/Hermes migration readers while making `DX_AGENTS_*` the preferred env prefix.
+- [x] Preserve legacy DX Agent/Agent/OpenClaw/Hermes migration readers while making `DX_AGENTS_*` the preferred env prefix.
 - [x] Preserve and extend provider registry, Groq/OpenAI-compatible support, provider failover, model profile switching, and auth profiles.
 - [x] Add CLI surfaces for model status/set/list/refresh and session recovery operations.
 - [x] Extend gateway status, pairing, allowlist management, cron/self-test slices, slash commands, and migration importers.
@@ -461,13 +461,13 @@ Decision: Batch 15 is complete. The next continuation run should tighten dashboa
 
 Current status: 100/100.
 
-- [x] Audit dashboard/web surfaces for remaining legacy ZeroClaw branding and env names that need DX-compatible aliases.
+- [x] Audit dashboard/web surfaces for remaining legacy DX Agent branding and env names that need DX-compatible aliases.
 - [x] Add compatibility aliases without breaking existing localStorage, token, or API consumers.
 - [x] Add desktop bridge diagnostics for dashboard branding/env compatibility where useful.
 - [x] Add focused checks for alias preservation and no secret leakage.
 - [x] Keep old compatibility paths readable until a migration plan exists.
 
-Decision: Batch 16 is complete. The dashboard now prefers DX Agents storage, env, global, event, package, and visible brand names while preserving old ZeroClaw-compatible reads and writes until a formal migration cleanup exists.
+Decision: Batch 16 is complete. The dashboard now prefers DX Agents storage, env, global, event, package, and visible brand names while preserving old DX Agent-compatible reads and writes until a formal migration cleanup exists.
 
 ## Batch 17: Dashboard Compatibility Contract Promotion
 
@@ -477,7 +477,7 @@ Current status: 100/100.
 - [x] Add generated diagnostics for storage keys, browser globals, env vars, events, and WebSocket protocols.
 - [x] Wire the desktop bridge to read compatibility metadata from the generated source instead of local constants.
 - [x] Add focused checks that prove the generated metadata and dashboard aliases stay aligned.
-- [x] Keep legacy ZeroClaw-compatible paths readable until a documented migration cleanup exists.
+- [x] Keep legacy DX Agent-compatible paths readable until a documented migration cleanup exists.
 
 Decision: Batch 17 is complete. The DX CLI host contract now exports dashboard compatibility metadata for DX Agents branding, env aliases, window globals, storage aliases, events, and WebSocket protocols while the bridge keeps a local fallback only for older host-contract payloads.
 
@@ -497,7 +497,7 @@ Decision: Batch 18 is complete. Dashboard compatibility now has a capture-friend
 
 Current status: 100/100.
 
-- [x] Add a short operator-facing migration plan for when legacy ZeroClaw dashboard aliases may be removed.
+- [x] Add a short operator-facing migration plan for when legacy DX Agent dashboard aliases may be removed.
 - [x] Document which aliases are read/write compatibility shims and which are fallback-only.
 - [x] Add a cleanup gate that requires a versioned migration note before any legacy alias removal.
 - [x] Link the plan from the bridge status export or release-readiness notes.
@@ -1820,7 +1820,7 @@ Decision: Batch 122 is complete. Retained release-checklist snapshots and histor
 
 Current status: 100/100.
 
-- [x] Add a metadata-only legacy alias inventory that reports active `zeroclaw`, `ZEROCLAW_*`, and archived Agent compatibility surfaces without exporting secret values, config contents, or workspace paths.
+- [x] Add a metadata-only legacy alias inventory that reports active `zeroclaw`, `DX_AGENT_*`, and archived Agent compatibility surfaces without exporting secret values, config contents, or workspace paths.
 - [x] Add retained legacy alias usage snapshots with explicit archive mode so decommission decisions can compare alias usage across runs.
 - [x] Add legacy alias decommission alerts for stale evidence, unexpected active aliases, migration-reader regressions, and unsafe removal attempts.
 - [x] Feed legacy alias inventory, history, and alerts into `dx-agents parity inventory --json` and `dx-agents parity verify --json`.

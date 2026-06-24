@@ -1,6 +1,6 @@
 # Custom Providers
 
-Three ways to add a provider ZeroClaw doesn't ship with:
+Three ways to add a provider DX Agent doesn't ship with:
 
 1. **Use the `custom` slot.** For any OpenAI-compatible endpoint not covered by an existing canonical slot.
 2. **Use the first-class local-server slots** (`lmstudio`, `llamacpp`, `sglang`, `vllm`, `osaurus`, `litellm`). Thin wrappers with sensible defaults.
@@ -29,7 +29,7 @@ This is the same `OpenAiCompatibleModelProvider` runtime impl used by `groq`, `m
 
 ## First-class local-inference servers
 
-ZeroClaw ships canonical slots for popular local-inference stacks. They're all OpenAI-compatible under the hood but with default `uri` values pre-applied so you can usually omit `uri` entirely.
+DX Agent ships canonical slots for popular local-inference stacks. They're all OpenAI-compatible under the hood but with default `uri` values pre-applied so you can usually omit `uri` entirely.
 
 ### llama.cpp — slot `llamacpp`
 
@@ -108,7 +108,7 @@ zeroclaw agent -a <alias> -m "hello"          # smoke-test against the agent at 
 
 If the endpoint isn't OpenAI-compatible and isn't one of the local-server slots, you need code.
 
-The trait lives in `crates/zeroclaw-api/src/model_provider.rs`:
+The trait lives in `crates/dx-agent-api/src/model_provider.rs`:
 
 ```rust
 #[async_trait]
@@ -128,7 +128,7 @@ pub trait ModelProvider: Send + Sync {
 
 Implementation pattern:
 
-1. Define the typed config in `crates/zeroclaw-config/src/schema.rs`:
+1. Define the typed config in `crates/dx-agent-config/src/schema.rs`:
    ```rust
    pub struct MyProviderModelProviderConfig {
        #[serde(flatten)]
@@ -144,9 +144,9 @@ Implementation pattern:
        }
    }
    ```
-2. Add the slot to `for_each_model_provider_slot!` in `crates/zeroclaw-config/src/providers.rs`. Every helper picks up the new slot automatically.
-3. Add the runtime impl in `crates/zeroclaw-providers/src/myprovider.rs`. Translate `Vec<Message>` to the wire format, stream the response, emit `StreamEvent` values.
-4. Wire the factory branch in `crates/zeroclaw-providers/src/lib.rs::create_provider_with_url_and_options`.
+2. Add the slot to `for_each_model_provider_slot!` in `crates/dx-agent-config/src/providers.rs`. Every helper picks up the new slot automatically.
+3. Add the runtime impl in `crates/dx-agent-providers/src/myprovider.rs`. Translate `Vec<Message>` to the wire format, stream the response, emit `StreamEvent` values.
+4. Wire the factory branch in `crates/dx-agent-providers/src/lib.rs::create_provider_with_url_and_options`.
 5. Add a feature flag in `Cargo.toml` if the provider pulls heavy deps.
 
 See `anthropic.rs` as a reference for a provider with a fully custom wire format. See `compatible.rs` for the SSE-streaming OpenAI-compat pattern.
@@ -157,7 +157,7 @@ See `anthropic.rs` as a reference for a provider with a fully custom wire format
 
 - Verify the API key matches the endpoint (many vendors use key prefixes — `sk-`, `gsk_`, `sk-ant-`).
 - Check that `uri` includes the scheme (`http://` / `https://`) and the `/v1` path if the endpoint expects it.
-- Endpoints behind a VPN or proxy? Confirm routing from the ZeroClaw host.
+- Endpoints behind a VPN or proxy? Confirm routing from the DX Agent host.
 
 ### Model not found
 

@@ -1,4 +1,4 @@
-# ZeroClaw Nucleo-F401RE firmware — JSON-over-serial peripheral.
+# DX Agent Nucleo-F401RE firmware — JSON-over-serial peripheral.
 #
 # Listens for newline-delimited JSON on USART2 (PA2/PA3, ST-Link VCP).
 # Protocol: same as Arduino/ESP32 — ping, capabilities, gpio_read, gpio_write.
@@ -14,7 +14,7 @@ name = "nucleo"
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-description = "ZeroClaw Nucleo-F401RE peripheral firmware — GPIO over JSON serial"
+description = "DX Agent Nucleo-F401RE peripheral firmware — GPIO over JSON serial"
 
 [dependencies]
 embassy-executor = { version = "0.9", features = ["arch-cortex-m", "executor-thread", "defmt"] }

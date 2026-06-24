@@ -1,5 +1,5 @@
-# ZeroClaw Robot Kit Configuration
-# Copy to ~/.zeroclaw/robot.toml
+# DX Agent Robot Kit Configuration
+# Copy to ~/.dx_agent/robot.toml
 
 # =============================================================================
 # DRIVE SYSTEM

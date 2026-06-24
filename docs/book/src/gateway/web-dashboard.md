@@ -2,7 +2,7 @@
 
 The gateway daemon ships its HTTP API in the binary, but the web dashboard
 HTML/JS/CSS lives on disk in a `web/dist/` directory produced by Vite. The
-`gateway.web_dist_dir` setting (and its `ZEROCLAW_gateway__web_dist_dir`
+`gateway.web_dist_dir` setting (and its `DX_AGENT_gateway__web_dist_dir`
 schema-mirror env-var override) tells the daemon where that directory is.
 When neither the setting nor a known fallback location contains a built
 `index.html`, the gateway boots in **API-only mode** and the dashboard URL
@@ -18,7 +18,7 @@ web_dist_dir = "/absolute/path/to/zeroclaw/web/dist"   # NOTE: no ~, no $HOME
 
 ```sh
 # Equivalent env-var override (in-memory only, never persisted)
-export ZEROCLAW_gateway__web_dist_dir="/absolute/path/to/zeroclaw/web/dist"
+export DX_AGENT_gateway__web_dist_dir="/absolute/path/to/zeroclaw/web/dist"
 ```
 
 Then build the bundle once:
@@ -66,7 +66,7 @@ contains `index.html`:
 |---|-----------|-----------------|
 | 1 | `./web/dist` (relative to CWD) | Running `cargo run` from the repo root in dev |
 | 2 | `<dir-of-binary>/web/dist` | The packaged binary ships `web/dist` next to itself |
-| 3 | `/zeroclaw-data/web/dist` | Standard Docker / packaged-volume layout |
+| 3 | `/dx-agent-data/web/dist` | Standard Docker / packaged-volume layout |
 | 4 | `/usr/share/zeroclawlabs/web/dist` | AUR / system package install |
 | 5 | `${XDG_DATA_HOME:-~/.local/share}/zeroclaw/web/dist` | Prebuilt-binary installer (per-user) |
 
@@ -75,7 +75,7 @@ don't need to set `gateway.web_dist_dir` at all — the auto-detect found it.
 
 ## How to obtain a `web/dist`
 
-You have three options. Pick whichever matches how you installed ZeroClaw.
+You have three options. Pick whichever matches how you installed DX Agent.
 
 ### A) Source checkout (developers / packagers)
 
@@ -102,7 +102,7 @@ needed.
 
 ### C) Docker image
 
-The official Docker image places the bundle at `/zeroclaw-data/web/dist`
+The official Docker image places the bundle at `/dx-agent-data/web/dist`
 (auto-detect candidate 3). It works out of the box; you only need to set
 `web_dist_dir` if you mount your own volume over that path.
 
@@ -110,7 +110,7 @@ The official Docker image places the bundle at `/zeroclaw-data/web/dist`
 
 The value is resolved with the standard config-layer order:
 
-1. `ZEROCLAW_gateway__web_dist_dir` (schema-mirror env var, see
+1. `DX_AGENT_gateway__web_dist_dir` (schema-mirror env var, see
    [Environment variables](../reference/env-vars.md))
 2. `gateway.web_dist_dir` in `config.toml`
 3. Auto-detect (the five candidates above)
@@ -118,7 +118,7 @@ The value is resolved with the standard config-layer order:
 Env-var overrides apply to the in-memory `Config` only; they are never
 written back to `config.toml`.
 
-## Schema-mirror grammar — deriving `ZEROCLAW_gateway__web_dist_dir`
+## Schema-mirror grammar — deriving `DX_AGENT_gateway__web_dist_dir`
 
 The general operator override grammar (see
 [Environment variables](../reference/env-vars.md)) maps the dotted TOML path
@@ -129,7 +129,7 @@ TOML path:  gateway.web_dist_dir
             ─────── ─────────────
             section field-name (snake_case, kept as-is)
 
-Env var:    ZEROCLAW_gateway__web_dist_dir
+Env var:    DX_AGENT_gateway__web_dist_dir
             ─────────       ──            ────────────
             prefix          path-separator  field-name
                             (`.` → `__`)    (unchanged)
@@ -137,7 +137,7 @@ Env var:    ZEROCLAW_gateway__web_dist_dir
 
 The same three steps produce env-var names for every other gateway knob —
 e.g. `gateway.request_timeout_secs` becomes
-`ZEROCLAW_gateway__request_timeout_secs`.
+`DX_AGENT_gateway__request_timeout_secs`.
 
 ## Common pitfalls
 
@@ -159,7 +159,7 @@ Shell variables (`$HOME`, `%USERPROFILE%`) are likewise not expanded. Pre-expand
 them in the env var if you set the value that way:
 
 ```sh
-export ZEROCLAW_gateway__web_dist_dir="$HOME/zeroclaw/web/dist"   # shell expands $HOME
+export DX_AGENT_gateway__web_dist_dir="$HOME/zeroclaw/web/dist"   # shell expands $HOME
 ```
 
 Companion [PR #6961](https://github.com/zeroclaw-labs/zeroclaw/pull/6961) adds

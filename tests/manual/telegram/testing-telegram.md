@@ -1,6 +1,6 @@
 # Telegram Integration Testing Guide
 
-This guide covers testing the Telegram channel integration for ZeroClaw.
+This guide covers testing the Telegram channel integration for DX Agent.
 
 ## 🚀 Quick Start
 
@@ -86,7 +86,7 @@ After running automated tests, perform these manual checks:
 3. **Unauthorized user blocking**
 
     ```toml
-    # Edit ~/.zeroclaw/config.toml
+    # Edit ~/.dx_agent/config.toml
     allowed_users = ["999999999"]
     ```
 
@@ -104,7 +104,7 @@ After running automated tests, perform these manual checks:
 5. **Mention-only mode (group chats)**
 
     ```toml
-    # Edit ~/.zeroclaw/config.toml
+    # Edit ~/.dx_agent/config.toml
     [channels.telegram]
     mention_only = true
     ```
@@ -268,7 +268,7 @@ curl "https://api.telegram.org/bot<TOKEN>/getMe"
 curl "https://api.telegram.org/bot<TOKEN>/getUpdates"
 
 # Validate config
-cat ~/.zeroclaw/config.toml | grep -A 3 "\[channels_config.telegram\]"
+cat ~/.dx_agent/config.toml | grep -A 3 "\[channels_config.telegram\]"
 ```
 
 ### Debug Build Issues
@@ -347,6 +347,6 @@ zeroclaw channel doctor
 ## 📚 Additional Resources
 
 - [Telegram Bot API Documentation](https://core.telegram.org/bots/api)
-- [ZeroClaw Main README](../../README.md)
+- [DX Agent Main README](../../README.md)
 - [Contributing Guide](../../CONTRIBUTING.md)
 - [Issue Tracker](https://github.com/zeroclaw-labs/zeroclaw/issues)

@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::whatsapp::*;
+pub use dx_agent_channels::whatsapp::*;

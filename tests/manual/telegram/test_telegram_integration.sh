@@ -1,5 +1,5 @@
 #!/bin/bash
-# ZeroClaw Telegram Integration Test Suite
+# DX Agent Telegram Integration Test Suite
 # Automated testing script for Telegram channel functionality
 
 set -e  # Exit on error
@@ -162,7 +162,7 @@ print_header "Phase 3: Configuration Tests"
 
 # Test 9: Config file existence
 print_test "Configuration file check"
-CONFIG_PATH="$HOME/.zeroclaw/config.toml"
+CONFIG_PATH="$HOME/.dx_agent/config.toml"
 if [ -f "$CONFIG_PATH" ]; then
     pass "Config file exists at $CONFIG_PATH"
 

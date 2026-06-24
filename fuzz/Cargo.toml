@@ -11,9 +11,9 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-zeroclaw-config = { path = "../crates/zeroclaw-config" }
+dx-agent-config = { path = "../crates/dx-agent-config" }
 
-[dependencies.zeroclaw]
+[dependencies.dx_agent]
 package = "dx-agents"
 path = ".."
 

@@ -5,7 +5,7 @@
 //! authorization caches on channel handles, snapshot copies of Config
 //! fields, and other "I'll just store a copy here" mistakes.
 //!
-//! The test scans Rust source under `crates/zeroclaw-channels/src/` for
+//! The test scans Rust source under `crates/dx-agent-channels/src/` for
 //! field declarations whose name + type combination indicates a cached
 //! copy of state that already lives in `Config`. New violations fail the
 //! workspace test suite (CI gate) — no human review needed.
@@ -47,7 +47,7 @@ const FORBIDDEN_TYPE_SUBSTRINGS: &[&str] = &[
 
 /// Roots to scan. Channels are the hottest drift surface; we lint there
 /// first. Extending the scan is one entry away.
-const SCAN_ROOTS: &[&str] = &["crates/zeroclaw-channels/src"];
+const SCAN_ROOTS: &[&str] = &["crates/dx-agent-channels/src"];
 
 /// Files / paths that hold the canonical sources of truth and are
 /// therefore allowed to declare these fields. Anything outside these

@@ -1,9 +1,9 @@
-# ZeroClaw — Raspberry Pi production configuration
+# DX Agent — Raspberry Pi production configuration
 #
-# Copy this to ~/.zeroclaw/config.toml on the Pi.
+# Copy this to ~/.dx_agent/config.toml on the Pi.
 # deploy-rpi.sh does this automatically.
 #
-# API key is loaded from ~/.zeroclaw/.env (EnvironmentFile in systemd).
+# API key is loaded from ~/.dx_agent/.env (EnvironmentFile in systemd).
 # Set it there as: ANTHROPIC_API_KEY=your-key-here
 # Or set api_key directly below (not recommended for version control).
 
@@ -150,7 +150,7 @@ challenge_max_attempts = 3
 
 [security.estop]
 enabled = false
-state_file = "~/.zeroclaw/estop-state.json"
+state_file = "~/.dx_agent/estop-state.json"
 require_otp_to_resume = true
 
 [security.syscall_anomaly]
@@ -468,7 +468,7 @@ enabled = false
 allowed_domains = []
 max_response_size = 1000000
 timeout_secs = 30
-user_agent = "ZeroClaw/1.0"
+user_agent = "DX Agent/1.0"
 
 [http_request.credential_profiles]
 
@@ -484,7 +484,7 @@ allowed_domains = ["*"]
 blocked_domains = []
 max_response_size = 500000
 timeout_secs = 30
-user_agent = "ZeroClaw/1.0"
+user_agent = "DX Agent/1.0"
 
 [web_search]
 enabled = false
@@ -603,7 +603,7 @@ max_duration_secs = 120
 
 [agents_ipc]
 enabled = false
-db_path = "~/.zeroclaw/agents.db"
+db_path = "~/.dx_agent/agents.db"
 staleness_secs = 300
 
 [mcp]

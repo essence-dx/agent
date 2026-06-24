@@ -1,1 +1,1 @@
-pub use zeroclaw_api::schema::*;
+pub use dx_agent_api::schema::*;

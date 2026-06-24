@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::signal::*;
+pub use dx_agent_channels::signal::*;

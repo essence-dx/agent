@@ -1,6 +1,6 @@
 # Logs & observability
 
-Every event ZeroClaw emits flows through one crate: `zeroclaw-log`. The crate
+Every event DX Agent emits flows through one crate: `dx-agent-log`. The crate
 owns the on-disk JSONL schema, the in-process broadcast stream the dashboard
 reads, the bridge to the typed `Observer` (Prometheus / OTel), and the
 macros (`record!`, `scope!`, `spawn!`) that subsystems call.
@@ -45,7 +45,7 @@ otel_service_name = "zeroclaw"
 Defaults: `log_persistence = "rolling"`, `log_persistence_max_entries = 200`,
 `log_tool_io = "redacted"`, `log_tool_io_truncate_bytes = 8192`. A fresh
 install produces a 200-event rolling JSONL at
-`~/.zeroclaw/state/runtime-trace.jsonl`, and the dashboard's Logs page
+`~/.dx_agent/state/runtime-trace.jsonl`, and the dashboard's Logs page
 works without further configuration.
 
 `log_persistence = "none"` disables persistence entirely. The broadcast
@@ -58,7 +58,7 @@ JSONL: one event per line, UTF-8, `0o600` permissions on Unix. Every
 line is `sync_data`'d after write — the line is durable before the
 emitting code returns.
 
-Line shape mirrors `zeroclaw_log::event::LogEvent`. Top-level keys:
+Line shape mirrors `dx_agent_log::event::LogEvent`. Top-level keys:
 
 | Key | Type | Notes |
 | --- | --- | --- |
@@ -81,7 +81,7 @@ Line shape mirrors `zeroclaw_log::event::LogEvent`. Top-level keys:
 ### `zeroclaw.*` attribution
 
 The Rust source of truth is `ATTRIBUTION_FIELDS` + `COMPOSITE_PREFIXES`
-in `crates/zeroclaw-log/src/event.rs`. The `/api/logs` response carries
+in `crates/dx-agent-log/src/event.rs`. The `/api/logs` response carries
 the canonical list as `attribution_keys`; fetch it instead of
 hard-coding.
 
@@ -119,16 +119,16 @@ Examples:
 
 ```bash
 # All WARN+ events since the daemon started.
-curl "$ZEROCLAW_GATEWAY/api/logs?severity_min=13"
+curl "$DX_AGENT_GATEWAY/api/logs?severity_min=13"
 
 # A specific agent's events:
-curl "$ZEROCLAW_GATEWAY/api/logs?agent_alias=glados"
+curl "$DX_AGENT_GATEWAY/api/logs?agent_alias=glados"
 
 # Discord traffic for one bot:
-curl "$ZEROCLAW_GATEWAY/api/logs?channel=discord.glados"
+curl "$DX_AGENT_GATEWAY/api/logs?channel=discord.glados"
 
 # A single agent turn:
-curl "$ZEROCLAW_GATEWAY/api/logs?trace_id=<value-from-a-prior-event>"
+curl "$DX_AGENT_GATEWAY/api/logs?trace_id=<value-from-a-prior-event>"
 ```
 
 Pagination is reverse-cursor. The response includes
@@ -147,7 +147,7 @@ The JSONL schema is an OTel-logs + ECS hybrid: `@timestamp`,
 `service.{name,version}`, `attributes`, plus the `zeroclaw.*` vendor
 namespace. Most log viewers ingest it with little or no transform.
 Replace `<install>` with the absolute path to your install dir in the
-examples below (typically `~/.zeroclaw` expanded).
+examples below (typically `~/.dx_agent` expanded).
 
 ### Grafana Loki
 
@@ -245,18 +245,18 @@ volume governor for genuine errors.
 
 ## Files of interest
 
-- `crates/zeroclaw-log/src/event.rs` — the canonical `LogEvent` shape.
-- `crates/zeroclaw-log/src/layer.rs` — the `tracing-subscriber` Layer
+- `crates/dx-agent-log/src/event.rs` — the canonical `LogEvent` shape.
+- `crates/dx-agent-log/src/layer.rs` — the `tracing-subscriber` Layer
   that captures every `tracing::*` call and feeds the pipeline.
-- `crates/zeroclaw-log/src/macro.rs` — `record!`, `scope!`, `spawn!`.
-- `crates/zeroclaw-log/src/writer.rs` — append + rolling trim.
-- `crates/zeroclaw-log/src/reader.rs` — `/api/logs` reader.
-- `crates/zeroclaw-log/src/config.rs` — `StoragePolicy`, `ToolIoPolicy`,
+- `crates/dx-agent-log/src/macro.rs` — `record!`, `scope!`, `spawn!`.
+- `crates/dx-agent-log/src/writer.rs` — append + rolling trim.
+- `crates/dx-agent-log/src/reader.rs` — `/api/logs` reader.
+- `crates/dx-agent-log/src/config.rs` — `StoragePolicy`, `ToolIoPolicy`,
   `ResolvedPolicy`.
-- `crates/zeroclaw-log/src/migrate.rs` — schema-1 → schema-2 streaming
+- `crates/dx-agent-log/src/migrate.rs` — schema-1 → schema-2 streaming
   migration.
-- `crates/zeroclaw-log/src/observer_bridge.rs` — typed `Observer`
+- `crates/dx-agent-log/src/observer_bridge.rs` — typed `Observer`
   projection for Prometheus / OTel consumers.
-- `crates/zeroclaw-gateway/src/api_logs.rs` — the HTTP adapter.
+- `crates/dx-agent-gateway/src/api_logs.rs` — the HTTP adapter.
 
 Touch the source before you trust the prose on this page.

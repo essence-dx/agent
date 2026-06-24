@@ -1,6 +1,6 @@
 # Raspberry Pi 5 Robot Setup Guide
 
-Complete guide to setting up a ZeroClaw-powered robot on Raspberry Pi 5.
+Complete guide to setting up a DX Agent-powered robot on Raspberry Pi 5.
 
 ## Hardware Requirements
 
@@ -130,8 +130,8 @@ bash ./models/download-ggml-model.sh base
 
 # Install
 sudo cp main /usr/local/bin/whisper-cpp
-mkdir -p ~/.zeroclaw/models
-cp models/ggml-base.bin ~/.zeroclaw/models/
+mkdir -p ~/.dx_agent/models
+cp models/ggml-base.bin ~/.dx_agent/models/
 ```
 
 ### 5. Install Piper TTS (Text-to-Speech)
@@ -143,13 +143,13 @@ tar -xzf piper_arm64.tar.gz
 sudo cp piper/piper /usr/local/bin/
 
 # Download voice model
-mkdir -p ~/.zeroclaw/models/piper
-cd ~/.zeroclaw/models/piper
+mkdir -p ~/.dx_agent/models/piper
+cd ~/.dx_agent/models/piper
 wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx
 wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
 
 # Test
-echo "Hello, I am your robot!" | piper --model ~/.zeroclaw/models/piper/en_US-lessac-medium.onnx --output_file test.wav
+echo "Hello, I am your robot!" | piper --model ~/.dx_agent/models/piper/en_US-lessac-medium.onnx --output_file test.wav
 aplay test.wav
 ```
 
@@ -167,7 +167,7 @@ sudo usermod -aG dialout $USER
 # Logout and login for group change to take effect
 ```
 
-### 7. Build ZeroClaw Robot Kit
+### 7. Build DX Agent Robot Kit
 
 ```bash
 # Clone repo (or copy from USB)
@@ -186,12 +186,12 @@ cargo build --release
 ### Create robot.toml
 
 ```bash
-mkdir -p ~/.zeroclaw
-nano ~/.zeroclaw/robot.toml
+mkdir -p ~/.dx_agent
+nano ~/.dx_agent/robot.toml
 ```
 
 ```toml
-# ~/.zeroclaw/robot.toml - Real Hardware Configuration
+# ~/.dx_agent/robot.toml - Real Hardware Configuration
 
 # =============================================================================
 # DRIVE SYSTEM
@@ -292,7 +292,7 @@ arecord -D plughw:1,0 -f S16_LE -r 16000 -c 1 -d 3 test.wav
 aplay test.wav
 
 # Test speaker
-echo "Testing speaker" | piper --model ~/.zeroclaw/models/piper/en_US-lessac-medium.onnx --output_file - | aplay -D plughw:0,0
+echo "Testing speaker" | piper --model ~/.dx_agent/models/piper/en_US-lessac-medium.onnx --output_file - | aplay -D plughw:0,0
 
 # Test Ollama
 curl http://localhost:11434/api/generate -d '{"model":"llama3.2:3b","prompt":"Say hello"}'
@@ -354,13 +354,13 @@ chmod +x ~/sensor_loop.py
 nohup python3 ~/sensor_loop.py &
 ```
 
-### Start ZeroClaw Agent
+### Start DX Agent Agent
 
 ```bash
-# Configure ZeroClaw to use robot tools. The four-section V3 shape
+# Configure DX Agent to use robot tools. The four-section V3 shape
 # (provider entry, agent, risk profile, optional memory) is documented at
 # https://github.com/zeroclaw-labs/zeroclaw/blob/master/docs/book/src/providers/configuration.md#minimal-working-example
-cat > ~/.zeroclaw/config.toml << 'EOF'
+cat > ~/.dx_agent/config.toml << 'EOF'
 schema_version = 3
 
 [providers.models.ollama.local]    # type = ollama; alias = local (you choose)
@@ -381,7 +381,7 @@ embedding_provider = "none"         # keyword-only retrieval; no cloud embedding
 EOF
 
 # Copy robot personality
-cp ~/zeroclaw/crates/robot-kit/SOUL.md ~/.zeroclaw/workspace/
+cp ~/zeroclaw/crates/robot-kit/SOUL.md ~/.dx_agent/workspace/
 
 # Start agent
 ./target/release/zeroclaw agent -a assistant
@@ -430,7 +430,7 @@ wait
 # /etc/systemd/system/zeroclaw-robot.service
 sudo tee /etc/systemd/system/zeroclaw-robot.service << 'EOF'
 [Unit]
-Description=ZeroClaw Robot
+Description=DX Agent Robot
 After=network.target ollama.service
 
 [Service]

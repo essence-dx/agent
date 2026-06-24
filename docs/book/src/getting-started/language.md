@@ -1,20 +1,20 @@
 # Language & translations
 
-ZeroClaw's interface strings (CLI messages, command help, and the `zerocode`
+DX Agent's interface strings (CLI messages, command help, and the `zerocode`
 TUI) can be shown in languages other than English. English is always built in;
 other languages are downloaded on demand.
 
 ## Set your language
 
-ZeroClaw reads a top-level `locale` key from your config. Set it to a locale
+DX Agent reads a top-level `locale` key from your config. Set it to a locale
 code such as `ja`, `fr`, or `zh-CN`:
 
 ```toml
-# ~/.zeroclaw/config.toml
+# ~/.dx_agent/config.toml
 locale = "ja"
 ```
 
-If `locale` is unset, ZeroClaw uses your operating system's language and falls
+If `locale` is unset, DX Agent uses your operating system's language and falls
 back to English when no translation is available.
 
 ## Fetch your language files
@@ -26,9 +26,9 @@ translated files once:
 zeroclaw locales fetch ja
 ```
 
-This downloads the Japanese translation files from the ZeroClaw project and
-installs them under `~/.zeroclaw/data/ftl/ja/`, where ZeroClaw looks for them
-at startup. Restart ZeroClaw (and `zerocode`) afterward to pick them up.
+This downloads the Japanese translation files from the DX Agent project and
+installs them under `~/.dx_agent/data/ftl/ja/`, where DX Agent looks for them
+at startup. Restart DX Agent (and `zerocode`) afterward to pick them up.
 
 Fetch any locale the same way:
 
@@ -60,18 +60,18 @@ and tells you — the catalogues that do exist are still installed.
 
 | Path | What |
 |---|---|
-| `~/.zeroclaw/data/ftl/<locale>/cli.ftl` | CLI message translations |
-| `~/.zeroclaw/data/ftl/<locale>/tools.ftl` | Tool description translations |
-| `~/.zeroclaw/data/ftl/<locale>/zerocode.ftl` | `zerocode` TUI translations |
+| `~/.dx_agent/data/ftl/<locale>/cli.ftl` | CLI message translations |
+| `~/.dx_agent/data/ftl/<locale>/tools.ftl` | Tool description translations |
+| `~/.dx_agent/data/ftl/<locale>/zerocode.ftl` | `zerocode` TUI translations |
 
-If you run ZeroClaw with a custom config directory (`--config-dir` or
-`ZEROCLAW_CONFIG_DIR`), the files install under that directory's `data/ftl/`
+If you run DX Agent with a custom config directory (`--config-dir` or
+`DX_AGENT_CONFIG_DIR`), the files install under that directory's `data/ftl/`
 instead.
 
 ## Troubleshooting
 
 - **Still seeing English after fetching.** Confirm `locale` in your config
-  matches the locale you fetched, and restart the process. ZeroClaw loads
+  matches the locale you fetched, and restart the process. DX Agent loads
   language files at startup.
 - **`fetch` reports a catalogue was skipped.** That catalogue has not been
   translated for your locale yet. The available catalogues are still installed;

@@ -1,6 +1,6 @@
 # WhatsApp
 
-ZeroClaw supports two WhatsApp backends under the same `channels.whatsapp` config family:
+DX Agent supports two WhatsApp backends under the same `channels.whatsapp` config family:
 
 | Mode | Use it when | Required selector |
 |---|---|---|
@@ -26,12 +26,12 @@ The gateway must be reachable by Meta for inbound webhooks. Use `zeroclaw onboar
 
 ## Web mode
 
-WhatsApp Web mode links a regular WhatsApp account through the optional Web backend. It does not need a Meta Business account. It does need a ZeroClaw build with the `whatsapp-web` feature enabled and a persistent session database path.
+WhatsApp Web mode links a regular WhatsApp account through the optional Web backend. It does not need a Meta Business account. It does need a DX Agent build with the `whatsapp-web` feature enabled and a persistent session database path.
 
 ```toml
 [channels.whatsapp.default]
 enabled = true
-session_path = "~/.zeroclaw/state/whatsapp-web/session.db"
+session_path = "~/.dx_agent/state/whatsapp-web/session.db"
 mode = "personal"
 dm_policy = "allowlist"
 group_policy = "allowlist"
@@ -86,7 +86,7 @@ Prefer onboarding or `zeroclaw config set` for WhatsApp:
 
 ```bash
 zeroclaw onboard channels
-zeroclaw config set channels.whatsapp.default.session-path ~/.zeroclaw/state/whatsapp-web/session.db
+zeroclaw config set channels.whatsapp.default.session-path ~/.dx_agent/state/whatsapp-web/session.db
 ```
 
 `zeroclaw channel add <type> <CONFIG>` is not the recommended setup path for WhatsApp. It takes a JSON object at the CLI layer, but current channel setup is routed through onboarding and config editing so secret handling, pairing, and peer authorization stay explicit.

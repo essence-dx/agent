@@ -1,6 +1,6 @@
 # Privacy and PII Discipline
 
-ZeroClaw artifacts are public — git history, releases, fixtures, snapshots, the docs book, every rendered locale. Anything you commit ships with the project forever. Treat privacy as a merge gate, not best-effort.
+DX Agent artifacts are public — git history, releases, fixtures, snapshots, the docs book, every rendered locale. Anything you commit ships with the project forever. Treat privacy as a merge gate, not best-effort.
 
 ## Never commit any of these
 
@@ -22,7 +22,7 @@ Test fixtures, examples, error messages, and snapshots use generic project-scope
 | Use case | Examples |
 |---|---|
 | Actor labels | `zeroclaw_user`, `zeroclaw_operator`, `zeroclaw_maintainer`, `test_user`, `user_a`, `project_bot` |
-| Service / runtime labels | `zeroclaw_bot`, `zeroclaw_service`, `zeroclaw_runtime`, `zeroclaw_node` |
+| Service / runtime labels | `zeroclaw_bot`, `zeroclaw_service`, `dx_agent_runtime`, `zeroclaw_node` |
 | Environment labels | `zeroclaw_project`, `zeroclaw_workspace`, `zeroclaw_channel` |
 | Hostnames | `example.com`, `host.invalid`, `192.0.2.x` (RFC 5737 documentation range) |
 | Email addresses | `user@example.com`, `bot@zeroclaw.invalid` |
@@ -31,7 +31,7 @@ Test names, assertion messages, and fixture content stay impersonal and system-f
 
 ## When you have to reference identity
 
-If a test or doc genuinely needs a role-shaped identity, use ZeroClaw-scoped roles only: `ZeroClawAgent`, `ZeroClawOperator`, `ZeroClawMaintainer`. Don't borrow real names, even pseudonyms — pseudonyms drift back into being real over time.
+If a test or doc genuinely needs a role-shaped identity, use DX Agent-scoped roles only: `DX AgentAgent`, `DX AgentOperator`, `DX AgentMaintainer`. Don't borrow real names, even pseudonyms — pseudonyms drift back into being real over time.
 
 GitHub `@`-mentions in PR/issue comments are different — addressing a contributor by their handle is how you talk to people on GitHub, and `@WareWolf-MoonWall` is not a privacy violation. The rule is about **content stored in the repo** (code, tests, fixtures, docs), not about conversation in PR/issue threads.
 

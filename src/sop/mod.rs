@@ -1,8 +1,8 @@
 #[allow(unused_imports)]
-pub use zeroclaw_runtime::sop::*;
+pub use dx_agent_runtime::sop::*;
 
 use anyhow::Result;
-use zeroclaw_runtime::i18n::{get_required_cli_string, get_required_cli_string_with_args};
+use dx_agent_runtime::i18n::{get_required_cli_string, get_required_cli_string_with_args};
 
 pub fn handle_command(command: crate::SopCommands, config: &crate::config::Config) -> Result<()> {
     let workspace_dir = &config.data_dir;
@@ -92,10 +92,10 @@ pub fn handle_command(command: crate::SopCommands, config: &crate::config::Confi
         }
         crate::SopCommands::Show { name } => {
             let sop = sops.iter().find(|s| s.name == name).ok_or_else(|| {
-                ::zeroclaw_log::record!(
+                ::dx_agent_log::record!(
                     WARN,
-                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Reject)
-                        .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+                    ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Reject)
+                        .with_outcome(::dx_agent_log::EventOutcome::Failure)
                         .with_attrs(::serde_json::json!({"sop": name})),
                     "sop show: name not found in loaded SOPs"
                 );
@@ -440,14 +440,14 @@ type = "manual"
 
     #[test]
     fn resolve_sops_dir_default() {
-        let ws = Path::new("/home/user/.zeroclaw/workspace");
+        let ws = Path::new("/home/user/.dx-agent/workspace");
         let dir = resolve_sops_dir(ws, None);
         assert_eq!(dir, ws.join("sops"));
     }
 
     #[test]
     fn resolve_sops_dir_override() {
-        let ws = Path::new("/home/user/.zeroclaw/workspace");
+        let ws = Path::new("/home/user/.dx-agent/workspace");
         let dir = resolve_sops_dir(ws, Some("/custom/sops"));
         assert_eq!(dir, PathBuf::from("/custom/sops"));
     }

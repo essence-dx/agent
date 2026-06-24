@@ -1,6 +1,6 @@
-# NixOS module for ZeroClaw
+# NixOS module for DX Agent
 
-`nix/module.nix` is a multi-instance NixOS module that runs ZeroClaw under
+`nix/module.nix` is a multi-instance NixOS module that runs DX Agent under
 systemd with sandboxing defaults appropriate for an internet-facing agent
 process. It is designed to be importable from any NixOS configuration —
 nothing in the module assumes a specific deployment topology.
@@ -10,9 +10,9 @@ already in nixpkgs), and the hardening profile mirrors `services.atticd`
 (another Rust server in nixpkgs).
 
 This module pairs with the package work in #5987 — the package gives you
-`pkgs.zeroclaw`, the module gives you `services.zeroclaw.instances.<name>`.
+`pkgs.dx_agent`, the module gives you `services.dx_agent.instances.<name>`.
 Either can land first; once both are merged a single-host user can write
-`services.zeroclaw.instances.me = { settings = { ... }; };` and have a
+`services.dx_agent.instances.me = { settings = { ... }; };` and have a
 running daemon.
 
 ## Quick start (single instance)
@@ -24,14 +24,14 @@ instance:
 { config, pkgs, ... }: {
   imports = [ ./path/to/zeroclaw/nix/module.nix ];
 
-  # If pkgs.zeroclaw isn't yet in nixpkgs, set the package explicitly:
-  # services.zeroclaw.instances.me.package = pkgs.callPackage ./zeroclaw.nix { };
+  # If pkgs.dx_agent isn't yet in nixpkgs, set the package explicitly:
+  # services.dx_agent.instances.me.package = pkgs.callPackage ./zeroclaw.nix { };
 
-  age.secrets.zeroclaw-bot-token.file = ./secrets/zeroclaw-bot-token.age;
+  age.secrets.dx_agent-bot-token.file = ./secrets/zeroclaw-bot-token.age;
 
-  services.zeroclaw.instances.me = {
-    environmentFile = config.age.secrets.zeroclaw-bot-token.path;
-    # `settings` mirrors `~/.zeroclaw/config.toml` as a Nix attrset. The
+  services.dx_agent.instances.me = {
+    environmentFile = config.age.secrets.dx_agent-bot-token.path;
+    # `settings` mirrors `~/.dx_agent/config.toml` as a Nix attrset. The
     # config schema (section headers, type/alias convention, required
     # fields) is documented at
     # https://github.com/zeroclaw-labs/zeroclaw/blob/master/docs/book/src/providers/configuration.md
@@ -69,7 +69,7 @@ After a `nixos-rebuild switch`:
 - The unit `zeroclaw-me.service` is started and enabled.
 - `/var/lib/zeroclaw-me/` exists, owned by the per-instance user `zeroclaw-me`.
 - `/var/lib/zeroclaw-me/config.toml` contains the rendered TOML, mode `0600`.
-- ZeroClaw is invoked as `${pkgs.zeroclaw}/bin/zeroclaw daemon`.
+- DX Agent is invoked as `${pkgs.dx_agent}/bin/zeroclaw daemon`.
 
 ## Multi-instance usage
 
@@ -77,7 +77,7 @@ The module is `attrsOf submodule`-shaped, so multiple instances on one host
 look identical to one instance:
 
 ```nix
-services.zeroclaw.instances = {
+services.dx_agent.instances = {
   alice = { environmentFile = "/run/secrets/alice/identity.env"; settings = { ... }; };
   bob   = { environmentFile = "/run/secrets/bob/identity.env";   settings = { ... }; };
 };
@@ -92,7 +92,7 @@ component names (`[A-Za-z0-9._-]+`).
 
 | Option | Type | Default | Purpose |
 |---|---|---|---|
-| `package` | `package` | `pkgs.zeroclaw` (via `mkPackageOption`) | Override for out-of-tree builds. |
+| `package` | `package` | `pkgs.dx_agent` (via `mkPackageOption`) | Override for out-of-tree builds. |
 | `user` | `str` | `"zeroclaw-<name>"` | System user. |
 | `group` | `str` | `"zeroclaw-<name>"` | System group. |
 | `createUser` | `bool` | `true` | Set `false` to bring your own user. |
@@ -118,7 +118,7 @@ Two paths, both supported, neither leaks secrets to the world-readable
 Nix store:
 
 1. **`environmentFile` + `$VAR` substitution in `settings` strings**
-   (recommended for channel tokens, webhook secrets, anything ZeroClaw
+   (recommended for channel tokens, webhook secrets, anything DX Agent
    doesn't already resolve from the environment natively). Systemd loads
    the file via `EnvironmentFile=` at unit start. The unit's
    `ExecStartPre` then runs `envsubst` over the rendered TOML, expanding
@@ -127,15 +127,15 @@ Nix store:
    per-instance user. The build-time copy in `/nix/store` only ever
    contains the literal placeholders.
 
-   The substitution is performed by *this module*, not by ZeroClaw —
-   ZeroClaw reads `config.toml` verbatim. So this path turns
+   The substitution is performed by *this module*, not by DX Agent —
+   DX Agent reads `config.toml` verbatim. So this path turns
    `bot_token = "$BOT_TOKEN"` into a working configuration regardless
-   of whether ZeroClaw has a native env-var fallback for that field.
+   of whether DX Agent has a native env-var fallback for that field.
 
-2. **`environmentFile` + ZeroClaw-native env-var lookups** for any config
-   keys ZeroClaw natively resolves from the environment (e.g.
-   `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `ZEROCLAW_PROVIDER`,
-   `ZEROCLAW_MODEL` — see `crates/zeroclaw-config/src/schema.rs`
+2. **`environmentFile` + DX Agent-native env-var lookups** for any config
+   keys DX Agent natively resolves from the environment (e.g.
+   `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `DX_AGENT_PROVIDER`,
+   `DX_AGENT_MODEL` — see `crates/dx-agent-config/src/schema.rs`
    upstream for the full list). Same end result — no secret in the
    rendered TOML — and you can omit the field from `settings` entirely.
 
@@ -184,7 +184,7 @@ UMask=0077
 ReadWritePaths=${dataDir}
 ```
 
-`MemoryDenyWriteExecute=yes` is safe because ZeroClaw 0.7.x is a plain
+`MemoryDenyWriteExecute=yes` is safe because DX Agent 0.7.x is a plain
 Rust binary with no JIT; if a future version adopts a JIT (e.g. through a
 WASM plugin host), this single setting will need to flip and that should
 be flagged in the changelog.
@@ -218,6 +218,6 @@ Requires KVM on the builder.
 
 ## Status
 
-Initial drop, not yet wired into ZeroClaw's CI. The CI workflow at
+Initial drop, not yet wired into DX Agent's CI. The CI workflow at
 `.github/workflows/ci.yml` is Rust-only today; adding a `nix-test` job to
 exercise `nix/test.nix` is a natural follow-up.

@@ -1,6 +1,6 @@
-//! # ZeroClaw Robot Kit
+//! # DX Agent Robot Kit
 //!
-//! A standalone robotics toolkit that integrates with ZeroClaw for AI-powered robots.
+//! A standalone robotics toolkit that integrates with DX Agent for AI-powered robots.
 //!
 //! ## Features
 //!
@@ -16,7 +16,7 @@
 //!
 //! ```text
 //! ┌─────────────────────────────────────────────────────────┐
-//! │  ZeroClaw AI Brain (or any controller)                  │
+//! │  DX Agent AI Brain (or any controller)                  │
 //! │  "Move forward, find the ball, tell me what you see"    │
 //! └─────────────────────┬───────────────────────────────────┘
 //!                       │ Tool calls
@@ -72,8 +72,8 @@
 //!
 //! ## Standalone Usage
 //!
-//! This crate can be used independently of ZeroClaw. It defines its own
-//! `Tool` trait that is compatible with ZeroClaw's but doesn't require it.
+//! This crate can be used independently of DX Agent. It defines its own
+//! `Tool` trait that is compatible with DX Agent's but doesn't require it.
 //!
 //! ## Safety
 //!

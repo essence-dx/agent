@@ -36,7 +36,7 @@ The key checkpoints:
 - No unused production code — delete it, wire it into behavior, or track a follow-up issue. Do not silence it with underscore prefixes or `#[allow(dead_code)]`; reserve underscore names for required but intentionally unused API, trait, or callback parameters.
 - Error handling: `anyhow::Result` at binary boundaries, typed errors in library crates. No `unwrap()` / `expect()` in production code paths — propagate with `?` or document the invariant that makes panic impossible.
 - Minimal dependencies — every dep adds to binary size; weigh the trade before adding one
-- Trait-first — define the trait in `zeroclaw-api`, then implement in the right edge crate
+- Trait-first — define the trait in `dx-agent-api`, then implement in the right edge crate
 - Security by default — allowlists, not blocklists. New external surface defaults closed
 - Inline unit tests — `#[cfg(test)] mod tests {}` at the bottom of the file or a sibling `tests.rs`
 - Don't commit secrets, personal data, or real-user identities — the [Privacy & PII discipline](./privacy.md) page is the merge gate
@@ -111,11 +111,11 @@ Risk labels:
 
 | Area | Where to start |
 |---|---|
-| New channel | `crates/zeroclaw-channels/` — copy an existing channel of similar shape |
-| New provider | `crates/zeroclaw-providers/` — `compatible.rs` covers most OpenAI-like ones |
+| New channel | `crates/dx-agent-channels/` — copy an existing channel of similar shape |
+| New provider | `crates/dx-agent-providers/` — `compatible.rs` covers most OpenAI-like ones |
 | Docs | `docs/book/src/` — anything marked outdated or missing |
 | Translations | `cargo fluent fill --locale <code>` — see [Maintainers → Docs & Translations](../maintainers/docs-and-translations.md) |
-| Hardware | `crates/zeroclaw-hardware/` — new board support, new sensor drivers |
+| Hardware | `crates/dx-agent-hardware/` — new board support, new sensor drivers |
 
 ## Code of conduct
 

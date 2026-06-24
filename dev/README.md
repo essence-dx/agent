@@ -1,6 +1,6 @@
-# ZeroClaw Development Environment
+# DX Agent Development Environment
 
-A fully containerized development sandbox for ZeroClaw agents. This environment allows you to develop, test, and debug the agent in isolation without modifying your host system.
+A fully containerized development sandbox for DX Agent agents. This environment allows you to develop, test, and debug the agent in isolation without modifying your host system.
 
 ## Directory Structure
 
@@ -35,7 +35,7 @@ Builds the agent from source and starts both containers.
 
 Use this to run `zeroclaw` CLI commands manually, debug the binary, or check logs internally.
 
-- **Path**: `/zeroclaw-data`
+- **Path**: `/dx-agent-data`
 - **User**: `nobody` (65534)
 
 ### 3. Enter Sandbox (`sandbox`)
@@ -67,12 +67,12 @@ Use this to act as the "user" or "environment" the agent interacts with.
 
 The `playground/` directory (in repo root) is mounted as the shared workspace:
 
-- **Agent**: `/zeroclaw-data/workspace`
+- **Agent**: `/dx-agent-data/workspace`
 - **Sandbox**: `/home/developer/workspace`
 
 Files created by the agent are visible to the sandbox user, and vice versa. The directory is git-ignored and auto-populated on first run — the agent creates `brain.db`, `sessions.db`, personality files (`IDENTITY.md`, `SOUL.md`), and hygiene state automatically.
 
-The agent configuration lives in `target/.zeroclaw` (mounted to `/zeroclaw-data/.zeroclaw`), so settings persist across container rebuilds.
+The agent configuration lives in `target/.dx_agent` (mounted to `/dx-agent-data/.dx_agent`), so settings persist across container rebuilds.
 
 ### 6. Cleanup
 
@@ -82,7 +82,7 @@ Stop containers and remove volumes and generated config:
 ./dev/cli.sh clean
 ```
 
-**Note:** This removes `target/.zeroclaw` (config/DB) but leaves the `playground/` directory intact. To fully wipe workspace data, manually delete `playground/`.
+**Note:** This removes `target/.dx_agent` (config/DB) but leaves the `playground/` directory intact. To fully wipe workspace data, manually delete `playground/`.
 
 ## Local CI/CD (Docker-Only)
 

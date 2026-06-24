@@ -102,11 +102,11 @@ risk_profile   = "hardened"
 level = "supervised"
 ```
 
-If your goal is "one provider goes down, automatically use another", that's OpenRouter's job — not ZeroClaw's. The runtime sees one provider; OpenRouter does the cross-vendor work upstream.
+If your goal is "one provider goes down, automatically use another", that's OpenRouter's job — not DX Agent's. The runtime sees one provider; OpenRouter does the cross-vendor work upstream.
 
 ## Same-vendor retry
 
-For transient errors (network blip, 503, timeout) against the *same* provider, ZeroClaw retries with exponential backoff. This is configurable globally:
+For transient errors (network blip, 503, timeout) against the *same* provider, DX Agent retries with exponential backoff. This is configurable globally:
 
 ```toml
 [reliability]
@@ -118,7 +118,7 @@ Defaults are 2 retries, 500 ms initial backoff. These are inside-one-provider re
 
 ## API key rotation
 
-For providers that frequently encounter rate limits, supply additional API keys that ZeroClaw will rotate through on `429` responses:
+For providers that frequently encounter rate limits, supply additional API keys that DX Agent will rotate through on `429` responses:
 
 ```toml
 [reliability]
@@ -273,7 +273,7 @@ zeroclaw doctor traces --contains "model_provider"
 3. **Keep API key rotation pools homogeneous.** All keys in `[reliability] api_keys` should be from the same provider account — this is rate-limit smoothing, not multi-tenancy.
 4. **Smoke-test each agent in isolation.** `zeroclaw agent -a <alias>` runs an agent without channel plumbing in the way.
 5. **Document agent intent.** Add `# comment` lines explaining which channels each agent serves and why.
-6. **Inject secrets via env, not inline.** `ZEROCLAW_providers__models__<type>__<alias>__api_key=...` sets `api_key` at startup; see [Environment variables](../reference/env-vars.md).
+6. **Inject secrets via env, not inline.** `DX_AGENT_providers__models__<type>__<alias>__api_key=...` sets `api_key` at startup; see [Environment variables](../reference/env-vars.md).
 7. **Separate dev and prod agents.** Each environment gets its own `[agents.<alias>]` entry bound to its own channels.
 
 ## Credential resolution
@@ -281,8 +281,8 @@ zeroclaw doctor traces --contains "model_provider"
 Each provider entry resolves credentials in this order:
 
 1. **Inline `api_key`** on the provider entry.
-2. **Secrets store** at `~/.zeroclaw/secrets`.
-3. **Generic env override** — `ZEROCLAW_providers__models__<type>__<alias>__api_key=...` at startup. See [Environment variables](../reference/env-vars.md) for the full grammar.
+2. **Secrets store** at `~/.dx_agent/secrets`.
+3. **Generic env override** — `DX_AGENT_providers__models__<type>__<alias>__api_key=...` at startup. See [Environment variables](../reference/env-vars.md) for the full grammar.
 4. **Per-vendor env var** when the family supports it (e.g. `ANTHROPIC_API_KEY` / `ANTHROPIC_OAUTH_TOKEN` for Anthropic; `OPENROUTER_API_KEY` for OpenRouter).
 
 Credentials are not shared between providers — set them per provider entry.

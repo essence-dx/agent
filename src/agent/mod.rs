@@ -1,1 +1,1 @@
-pub use zeroclaw_runtime::agent::*;
+pub use dx_agent_runtime::agent::*;

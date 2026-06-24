@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::wecom::*;
+pub use dx_agent_channels::wecom::*;

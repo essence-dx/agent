@@ -102,7 +102,7 @@ pub fn assemble(root: &std::path::Path, tag: Option<&str>) -> anyhow::Result<()>
     let _ = std::fs::remove_dir_all(&api_dest);
     copy_dir_all(root.join("target/doc"), &api_dest)?;
 
-    const INDEX_HTML: &str = "<!doctype html>\n<meta charset=\"utf-8\">\n<meta http-equiv=\"refresh\" content=\"0; url=./en/\">\n<link rel=\"canonical\" href=\"./en/\">\n<title>ZeroClaw Docs</title>\n";
+    const INDEX_HTML: &str = "<!doctype html>\n<meta charset=\"utf-8\">\n<meta http-equiv=\"refresh\" content=\"0; url=./en/\">\n<link rel=\"canonical\" href=\"./en/\">\n<title>DX Agent Docs</title>\n";
     let out_dir = book.join("book").join(tag_dir);
     std::fs::create_dir_all(&out_dir)?;
     std::fs::write(out_dir.join("index.html"), INDEX_HTML)?;

@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::linq::*;
+pub use dx_agent_channels::linq::*;

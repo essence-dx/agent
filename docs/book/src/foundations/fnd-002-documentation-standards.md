@@ -37,7 +37,7 @@ Without an answer to that question, documentation accumulates as a pile of pages
 
 The fix is not to write more documentation. The fix is to decide, before writing anything, what type of artifact you are creating. Type determines format, audience, location, lifecycle, and who is responsible for keeping it current. Once type is established, the rest follows naturally.
 
-This RFC adopts the **EA Artifacts on a Page** framework by Svyatoslav Kotusev (https://eaonapage.com) as the classification lens for all ZeroClaw documentation. The framework is evidence-based, deliberately non-prescriptive, and maps directly onto the kinds of documents an open source infrastructure project actually needs.
+This RFC adopts the **EA Artifacts on a Page** framework by Svyatoslav Kotusev (https://eaonapage.com) as the classification lens for all DX Agent documentation. The framework is evidence-based, deliberately non-prescriptive, and maps directly onto the kinds of documents an open source infrastructure project actually needs.
 
 The core principle, borrowed from the broader development philosophy this team is adopting:
 
@@ -95,9 +95,9 @@ The `docs-contract.md` concept — treating documentation as a governed product 
 
 ## 3. A Classification Framework: EA Artifacts on a Page
 
-The **EA Artifacts on a Page** framework defines five families of architecture artifacts. Every document in the ZeroClaw repository should belong to one of these families, and that family determines everything about where it lives, how it is formatted, and when it becomes stale.
+The **EA Artifacts on a Page** framework defines five families of architecture artifacts. Every document in the DX Agent repository should belong to one of these families, and that family determines everything about where it lives, how it is formatted, and when it becomes stale.
 
-| EA Artifact Family | The Question It Answers | Examples in ZeroClaw | Location |
+| EA Artifact Family | The Question It Answers | Examples in DX Agent | Location |
 |---|---|---|---|
 | **Considerations** | What principles and standards guide our decisions? | `AGENTS.md` files, coding standards, security policy, this doc | `docs/book/src/contributing/` or per-crate |
 | **Landscapes** | What does the system look like right now? | Component maps, crate topology, dependency diagrams | `docs/book/src/architecture/` |
@@ -124,7 +124,7 @@ A useful test for the second question: *would this document become wrong or misl
 
 The case for removing all non-English content from the repository rests on four pillars:
 
-**1. The audience has on-demand translation.** ZeroClaw's primary users are people running an AI assistant. Every such person has access to instant, high-quality machine translation — either through the agent they are running, through their browser, or through any of dozens of free translation services. The practical benefit of shipping translations in the repository is marginal.
+**1. The audience has on-demand translation.** DX Agent's primary users are people running an AI assistant. Every such person has access to instant, high-quality machine translation — either through the agent they are running, through their browser, or through any of dozens of free translation services. The practical benefit of shipping translations in the repository is marginal.
 
 **2. The translations are almost certainly stale.** Machine-translated content was likely generated once and has not been kept synchronised with the English source. Stale documentation is worse than no documentation for AI-assisted development, because language models will confidently derive incorrect conclusions from outdated information.
 
@@ -134,7 +134,7 @@ The case for removing all non-English content from the repository rests on four 
 
 ### 4.2 What Stays
 
-One thing worth preserving: the _structure_ of the i18n approach. The idea of making ZeroClaw accessible in multiple languages is right. Only the _location_ and _ownership model_ is wrong.
+One thing worth preserving: the _structure_ of the i18n approach. The idea of making DX Agent accessible in multiple languages is right. Only the _location_ and _ownership model_ is wrong.
 
 ### 4.3 The Replacement Strategy
 
@@ -261,7 +261,7 @@ date: YYYY-MM-DD
 status: proposed | accepted | deprecated | superseded-by-ADR-NNN
 relates-to:
   - ADR-XXX (optional, list of related decisions)
-  - crates/zeroclaw-api (optional, affected code paths)
+  - crates/dx-agent-api (optional, affected code paths)
 ---
 
 # ADR-NNN: Title
@@ -314,7 +314,7 @@ Retroactive ADRs should be marked with a note:
 
 ### 6.4 Why This Matters for AI-Assisted Development
 
-When an AI coding assistant reads a repository, it sees the code as it is now. It does not see the choices that were rejected, the tradeoffs that were weighed, or the reasons a particular structure was chosen over alternatives. Without ADRs, the AI will suggest changes that violate architectural constraints it has no way of knowing about. With ADRs, the reasoning is explicit and machine-readable. The frontmatter makes ADRs queryable: an AI tool can find all ADRs related to `zeroclaw-api` and load them as context before editing that crate.
+When an AI coding assistant reads a repository, it sees the code as it is now. It does not see the choices that were rejected, the tradeoffs that were weighed, or the reasons a particular structure was chosen over alternatives. Without ADRs, the AI will suggest changes that violate architectural constraints it has no way of knowing about. With ADRs, the reasoning is explicit and machine-readable. The frontmatter makes ADRs queryable: an AI tool can find all ADRs related to `dx-agent-api` and load them as context before editing that crate.
 
 ---
 
@@ -353,13 +353,13 @@ Explicit anti-patterns. What would be a mistake to add to this crate?
 
 ### 7.3 Examples
 
-**For `crates/zeroclaw-api` (once extracted):**
+**For `crates/dx-agent-api` (once extracted):**
 
 ```markdown
-# zeroclaw-api
+# dx-agent-api
 
 ## What this crate is
-Trait definitions and shared data types for the ZeroClaw plugin and kernel
+Trait definitions and shared data types for the DX Agent plugin and kernel
 interfaces. This is the contract layer. Everything else depends on it.
 
 ## What this crate is allowed to depend on
@@ -400,8 +400,8 @@ exposes the local IPC API. The kernel knows nothing about specific channels,
 providers, or tools — only their abstract interfaces.
 
 ## What this crate is allowed to depend on
-- zeroclaw-api (traits only)
-- zeroclaw-tool-call-parser (parsing, no agent state)
+- dx-agent-api (traits only)
+- dx-agent-tool-call-parser (parsing, no agent state)
 - Standard async/runtime crates (tokio, anyhow, tracing)
 - Config and storage crates (toml, serde, rusqlite for core memory)
 NOT: any specific channel, provider, or tool implementation crate.
@@ -426,7 +426,7 @@ Implementations are registered by the binary crate, not by the kernel.
 
 ### 7.4 The AGENTS.md Hierarchy
 
-The root `AGENTS.md` sets project-wide policy. Crate-level `AGENTS.md` files narrow that policy for their specific scope. When an AI tool reads a file in `crates/zeroclaw-api/`, it should read both the root `AGENTS.md` (project policy) and `crates/zeroclaw-api/AGENTS.md` (crate policy). Crate policy is more specific and takes precedence where they conflict.
+The root `AGENTS.md` sets project-wide policy. Crate-level `AGENTS.md` files narrow that policy for their specific scope. When an AI tool reads a file in `crates/dx-agent-api/`, it should read both the root `AGENTS.md` (project policy) and `crates/dx-agent-api/AGENTS.md` (crate policy). Crate policy is more specific and takes precedence where they conflict.
 
 ---
 
@@ -603,7 +603,7 @@ These documentation-specific standards complement the broader standards proposed
 
 **How it applies:** User-facing documentation on the Wiki should follow Diátaxis structure. Code-adjacent documentation in the repository follows EA Artifacts. The two frameworks operate at different levels and do not conflict.
 
-| Diátaxis Type | Purpose | Example in ZeroClaw | Location |
+| Diátaxis Type | Purpose | Example in DX Agent | Location |
 |---|---|---|---|
 | **Tutorial** | Learning-oriented, leads through an experience | "Build your first tool plugin" | Wiki |
 | **How-to Guide** | Goal-oriented, solves a specific problem | "Set up Telegram integration" | Wiki |
@@ -621,7 +621,7 @@ status: draft | proposed | accepted | deprecated | superseded
 last-reviewed: YYYY-MM-DD
 relates-to:
   - ADR-NNN
-  - crates/zeroclaw-api
+  - crates/dx-agent-api
 ---
 ```
 
@@ -676,7 +676,7 @@ The documentation migration follows the same Strangler Fig pattern as the archit
 - [ ] Migrate `docs/setup-guides/` content to the GitHub Wiki
 - [ ] Migrate `docs/ops/` content to the GitHub Wiki
 - [ ] Update `SUMMARY.md` to reflect the new structure (repo-only content)
-- [ ] Write root-level `AGENTS.md` for `crates/zeroclaw-api` (in anticipation of extraction)
+- [ ] Write root-level `AGENTS.md` for `crates/dx-agent-api` (in anticipation of extraction)
 
 **Success metrics:**
 - ADR-001 through ADR-007 exist and are accepted
@@ -752,6 +752,6 @@ The documentation migration follows the same Strangler Fig pattern as the archit
 
 ---
 
-*This proposal was developed from direct analysis of the ZeroClaw documentation system at v0.6.8. The metrics cited (169 i18n files, 2.2 MB, 31 language README variants) are based on direct measurement. The recommendations reflect established practices in technical documentation for open source infrastructure projects, adapted to the specific constraints and goals of ZeroClaw.*
+*This proposal was developed from direct analysis of the DX Agent documentation system at v0.6.8. The metrics cited (169 i18n files, 2.2 MB, 31 language README variants) are based on direct measurement. The recommendations reflect established practices in technical documentation for open source infrastructure projects, adapted to the specific constraints and goals of DX Agent.*
 
 *Feedback, corrections, and counterproposals are welcome. Good documentation is a community effort, and the best structure is the one the team will actually maintain.*

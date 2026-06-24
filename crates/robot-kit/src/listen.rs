@@ -18,7 +18,7 @@ pub struct ListenTool {
 impl ListenTool {
     pub fn new(config: RobotConfig) -> Self {
         let recordings_dir = directories::UserDirs::new()
-            .map(|d| d.home_dir().join(".zeroclaw/recordings"))
+            .map(|d| d.home_dir().join(".dx-agent/recordings"))
             .unwrap_or_else(|| PathBuf::from("/tmp/zeroclaw_recordings"));
 
         let _ = std::fs::create_dir_all(&recordings_dir);
@@ -71,11 +71,11 @@ impl ListenTool {
         let whisper_path = &self.config.audio.whisper_path;
         let model = &self.config.audio.whisper_model;
 
-        // whisper.cpp model path (typically in ~/.zeroclaw/models/)
+        // whisper.cpp model path (typically in ~/.dx-agent/models/)
         let model_path = directories::UserDirs::new()
             .map(|d| {
                 d.home_dir()
-                    .join(format!(".zeroclaw/models/ggml-{}.bin", model))
+                    .join(format!(".dx-agent/models/ggml-{}.bin", model))
             })
             .unwrap_or_else(|| {
                 PathBuf::from(format!("/usr/local/share/whisper/ggml-{}.bin", model))
@@ -147,9 +147,9 @@ impl Tool for ListenTool {
         let duration = args["duration"].as_u64().unwrap_or(5).clamp(1, 30);
 
         // Record audio
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             INFO,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
             &format!("Recording audio for {} seconds...", duration)
         );
         let audio_path = match self.record_audio(duration).await {
@@ -164,9 +164,9 @@ impl Tool for ListenTool {
         };
 
         // Transcribe
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             INFO,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
             "Transcribing audio..."
         );
         match self.transcribe(&audio_path).await {

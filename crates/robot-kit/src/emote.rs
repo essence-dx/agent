@@ -123,7 +123,7 @@ pub struct EmoteTool {
 impl EmoteTool {
     pub fn new(config: RobotConfig) -> Self {
         let sounds_dir = directories::UserDirs::new()
-            .map(|d| d.home_dir().join(".zeroclaw/sounds"))
+            .map(|d| d.home_dir().join(".dx-agent/sounds"))
             .unwrap_or_else(|| PathBuf::from("/usr/local/share/zeroclaw/sounds"));
 
         Self { config, sounds_dir }
@@ -154,9 +154,9 @@ impl EmoteTool {
         match output {
             Ok(out) if out.status.success() => Ok(()),
             _ => {
-                ::zeroclaw_log::record!(
+                ::dx_agent_log::record!(
                     INFO,
-                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+                    ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
                     &format!("LED display: {:?} (hardware not connected)", expr)
                 );
                 Ok(()) // Don't fail if LED hardware isn't available
@@ -169,9 +169,9 @@ impl EmoteTool {
         let sound_file = self.sounds_dir.join(format!("{}.wav", emotion));
 
         if !sound_file.exists() {
-            ::zeroclaw_log::record!(
+            ::dx_agent_log::record!(
                 DEBUG,
-                ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+                ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
                 &format!("No sound file for emotion: {}", emotion)
             );
             return Ok(());
@@ -197,16 +197,16 @@ impl EmoteTool {
             }
             "nod" => {
                 // Would control servo if available
-                ::zeroclaw_log::record!(
+                ::dx_agent_log::record!(
                     INFO,
-                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+                    ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
                     "Animation: nod"
                 );
             }
             "shake" => {
-                ::zeroclaw_log::record!(
+                ::dx_agent_log::record!(
                     INFO,
-                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+                    ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
                     "Animation: shake"
                 );
             }

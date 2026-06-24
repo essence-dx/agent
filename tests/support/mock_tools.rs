@@ -6,7 +6,7 @@ use dx_agents::tools::{Tool, ToolResult};
 use serde_json::json;
 use std::sync::{Arc, Mutex};
 
-zeroclaw_api::mock_tool_attribution!(EchoTool, CountingTool, FailingTool, RecordingTool);
+dx_agent_api::mock_tool_attribution!(EchoTool, CountingTool, FailingTool, RecordingTool);
 
 /// Simple tool that echoes its input argument.
 pub struct EchoTool;

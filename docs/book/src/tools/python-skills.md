@@ -1,6 +1,6 @@
 # Running Python Skills
 
-ZeroClaw can run Python skills, but realistic Python work usually needs one of two explicit deployment choices:
+DX Agent can run Python skills, but realistic Python work usually needs one of two explicit deployment choices:
 
 - run the skill on a trusted host Python environment, or
 - run it inside a custom Docker runtime image that already contains Python and the packages the skill needs.
@@ -42,7 +42,7 @@ Prefer installing Python packages at image build time, in a reviewed local virtu
 
 ## What Stays Blocked
 
-ZeroClaw deliberately blocks inline interpreter execution such as:
+DX Agent deliberately blocks inline interpreter execution such as:
 
 ```bash
 python3 -c 'print("hello")'
@@ -79,7 +79,7 @@ sandbox_enabled = false
 sandbox_backend = "none"
 ```
 
-This is appropriate for local development, a single-user workstation, or a home lab where you wrote the skill. It removes OS-level sandboxing for tool runs under that profile, so normal user permissions and ZeroClaw policy checks are the remaining guardrails.
+This is appropriate for local development, a single-user workstation, or a home lab where you wrote the skill. It removes OS-level sandboxing for tool runs under that profile, so normal user permissions and DX Agent policy checks are the remaining guardrails.
 
 Do not use this pattern for unreviewed third-party skills or multi-tenant deployments.
 
@@ -107,7 +107,7 @@ Build it:
 docker build -f Dockerfile.skill-exec -t zeroclaw-python-skills:local .
 ```
 
-Point ZeroClaw at the image:
+Point DX Agent at the image:
 
 ```toml
 [agents.assistant]
@@ -144,7 +144,7 @@ If a skill needs to write package caches, reports, or temporary state outside th
 
 ## Workspace Mounts
 
-When `runtime.docker.mount_workspace = true`, ZeroClaw mounts the configured workspace at `/workspace` in the container and sets the container workdir there. Skill scripts should use workspace-relative paths whenever possible.
+When `runtime.docker.mount_workspace = true`, DX Agent mounts the configured workspace at `/workspace` in the container and sets the container workdir there. Skill scripts should use workspace-relative paths whenever possible.
 
 If your workspace path must be constrained further, configure:
 
@@ -153,7 +153,7 @@ If your workspace path must be constrained further, configure:
 allowed_workspace_roots = ["/srv/zeroclaw-workspaces"]
 ```
 
-ZeroClaw validates the host workspace path against that allowlist before adding the Docker volume mount.
+DX Agent validates the host workspace path against that allowlist before adding the Docker volume mount.
 
 ## Choosing a Pattern
 

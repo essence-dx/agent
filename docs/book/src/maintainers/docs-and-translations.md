@@ -1,19 +1,19 @@
 # Docs & Translations
 
-ZeroClaw has two independent translation layers:
+DX Agent has two independent translation layers:
 
 | Layer | Format | What it covers |
 |---|---|---|
 | **App strings** | Mozilla Fluent (`.ftl`) | CLI help text, command descriptions, runtime messages |
 | **Docs** | gettext (`.po`) | Everything in this mdBook |
 
-They are filled separately and stored separately. Both use a provider-agnostic fill pipeline: configure any OpenAI-compatible endpoint in `~/.zeroclaw/config.toml` under `[providers.models.<kind>.<alias>]` and pass `--model-provider <alias>` to the fill commands. Any configured alias is choosable — a bare alias (`--model-provider <alias>`), or a `kind.alias` qualifier (`--model-provider anthropic.<alias>`) when the same alias exists under more than one kind. The resolver reads `uri`, `model`, and `api_key` straight from the matched entry; a missing `uri` or `model` is a hard error, not a guessed default.
+They are filled separately and stored separately. Both use a provider-agnostic fill pipeline: configure any OpenAI-compatible endpoint in `~/.dx_agent/config.toml` under `[providers.models.<kind>.<alias>]` and pass `--model-provider <alias>` to the fill commands. Any configured alias is choosable — a bare alias (`--model-provider <alias>`), or a `kind.alias` qualifier (`--model-provider anthropic.<alias>`) when the same alias exists under more than one kind. The resolver reads `uri`, `model`, and `api_key` straight from the matched entry; a missing `uri` or `model` is a hard error, not a guessed default.
 
 Local models via [Ollama](https://ollama.com) are a first-class option — no API keys required, no per-call cost. A hosted provider is also fine for release-grade quality. Translation is a local operation. Run `cargo mdbook sync` for dedicated translation-cache PRs, release translation passes, and new locales; routine English docs PRs may defer broad generated `.po` churn to a focused follow-up.
 
 ## Provider configuration
 
-Ollama is the current canonical source for docs. Ensure you have [Ollama](https://ollama.com/) installed and have `qwen3.6:35-a3b` pulled. Then, in `~/.zeroclaw/config.toml` (or your established config home):
+Ollama is the current canonical source for docs. Ensure you have [Ollama](https://ollama.com/) installed and have `qwen3.6:35-a3b` pulled. Then, in `~/.dx_agent/config.toml` (or your established config home):
 
 ```toml
 # Local via Ollama — free, runs on your machine
@@ -30,9 +30,9 @@ model = "qwen3.6:35b-a3b" # Current preferred model
 
 ## Filling app strings (Fluent)
 
-App strings live in `crates/zeroclaw-runtime/locales/`. English is the source of truth and is embedded at compile time.
+App strings live in `crates/dx-agent-runtime/locales/`. English is the source of truth and is embedded at compile time.
 
-> **Runtime loading caveat (verify before relying on this).** As of this writing, only `en` and `zh-CN` are wired into the runtime: `crates/zeroclaw-runtime/src/i18n.rs` embeds them via `include_str!`, and `builtin_cli_ftl_source()` returns `None` for every other locale. A disk-override path exists (`load_ftl_from_disk` → `workspace_dir_from_config`) but it resolves a top-level `workspace_dir` config key that no longer exists in v0.8.0 and falls back to `~/.zeroclaw/workspace`, which v0.8.0 does not create. **So a freshly filled `ja/cli.ftl` is generated and committed, but is not actually loaded at runtime** until either the locale is added to `builtin_cli_ftl_source()` or the disk-override path is repaired. Confirm the current state in `i18n.rs` rather than trusting this note.
+> **Runtime loading caveat (verify before relying on this).** As of this writing, only `en` and `zh-CN` are wired into the runtime: `crates/dx-agent-runtime/src/i18n.rs` embeds them via `include_str!`, and `builtin_cli_ftl_source()` returns `None` for every other locale. A disk-override path exists (`load_ftl_from_disk` → `workspace_dir_from_config`) but it resolves a top-level `workspace_dir` config key that no longer exists in v0.8.0 and falls back to `~/.dx_agent/workspace`, which v0.8.0 does not create. **So a freshly filled `ja/cli.ftl` is generated and committed, but is not actually loaded at runtime** until either the locale is added to `builtin_cli_ftl_source()` or the disk-override path is repaired. Confirm the current state in `i18n.rs` rather than trusting this note.
 
 > The `apps/zerocode` TUI maintains an independent Fluent catalogue (`apps/zerocode/locales/`) — see [zerocode strings](#zerocode-strings-fluent-independent) below. `cargo fluent` walks **both** catalogue roots (runtime + zerocode), so every subcommand below covers both by default.
 
@@ -56,13 +56,13 @@ An unknown `--catalog` value errors with the valid choices.
 
 `fill` generates `<locale>/<domain>.ftl` for every selected catalogue root that has an `en/` directory — the runtime's `cli.ftl`/`tools.ftl` and zerocode's `zerocode.ftl`.
 
-**Provider resolution is shared with the runtime.** `--model-provider` accepts any alias configured under `[providers.models.<kind>.<alias>]` — a bare alias (`<alias>`) or a `kind.alias` qualifier (`anthropic.<alias>`) when ambiguous. The tool builds the actual runtime provider, so the endpoint, auth header, and wire protocol are resolved per family (Anthropic `/v1/messages` + `x-api-key`, OpenAI-compatible `/v1/chat/completions` + `Bearer`, etc.) — nothing is assumed. Encrypted `api_key` values are decrypted through the canonical `SecretStore`. Use `--config-dir <dir>` (mirrors `zeroclaw --config-dir`) to read config + `.secret-key` from a non-default location; defaults to `~/.zeroclaw` then `~/.config/zeroclaw`.
+**Provider resolution is shared with the runtime.** `--model-provider` accepts any alias configured under `[providers.models.<kind>.<alias>]` — a bare alias (`<alias>`) or a `kind.alias` qualifier (`anthropic.<alias>`) when ambiguous. The tool builds the actual runtime provider, so the endpoint, auth header, and wire protocol are resolved per family (Anthropic `/v1/messages` + `x-api-key`, OpenAI-compatible `/v1/chat/completions` + `Bearer`, etc.) — nothing is assumed. Encrypted `api_key` values are decrypted through the canonical `SecretStore`. Use `--config-dir <dir>` (mirrors `zeroclaw --config-dir`) to read config + `.secret-key` from a non-default location; defaults to `~/.dx_agent` then `~/.config/zeroclaw`.
 
 **Batching:** `fill` sends one request per batch (all N entries as a single JSON object); `--batch` lowers N to ease provider rate limits or response truncation on long entries. Each batch is written to disk before the next request, so a mid-run failure only loses the in-flight batch. Re-running skips keys that already exist in the target `.ftl`, so resume is automatic — no `--force` needed.
 
 ## zerocode strings (Fluent, independent)
 
-`apps/zerocode` carries its own self-contained Fluent setup, separate from the runtime catalogues above. The TUI is intentionally decoupled from the rest of the workspace — it has no `zeroclaw-*` crate dependency, and its strings live next to its source rather than under `zeroclaw-runtime/locales/`.
+`apps/zerocode` carries its own self-contained Fluent setup, separate from the runtime catalogues above. The TUI is intentionally decoupled from the rest of the workspace — it has no `zeroclaw-*` crate dependency, and its strings live next to its source rather than under `dx-agent-runtime/locales/`.
 
 | Where | What |
 |---|---|
@@ -70,7 +70,7 @@ An unknown `--catalog` value errors with the valid choices.
 | `apps/zerocode/locales/<locale>/zerocode.ftl` | Other locales, embedded if present in-tree |
 | `$ZEROCODE_LOCALE_DIR/<locale>/zerocode.ftl` | Explicit override, useful for testing translations |
 | `<config-dir>/zerocode/locales/<locale>/zerocode.ftl` | Per-user catalogue override |
-| `~/.zeroclaw/zerocode/locales/<locale>/zerocode.ftl` | Alternate per-user location |
+| `~/.dx_agent/zerocode/locales/<locale>/zerocode.ftl` | Alternate per-user location |
 | `<install-prefix>/share/zerocode/locales/<locale>/zerocode.ftl` | System install path |
 
 ### Key namespace
@@ -87,7 +87,7 @@ Chord glyphs like `Ctrl+C`, `Esc`, `Shift+Up` are protocol, not language. The `H
 
 ### Locale resolution
 
-Locale comes from a top-level `locale` field in `zerocode-config.toml`. When unset, `i18n::detect_locale()` walks (in order) `<config-dir>/zerocode/zerocode-config.toml`, `~/.zeroclaw/zerocode-config.toml`, `~/.zeroclaw/config.toml`, then `<config-dir>/zeroclaw/config.toml`, finally falling back to `en`. The same lookup matches how the daemon resolves its own locale.
+Locale comes from a top-level `locale` field in `zerocode-config.toml`. When unset, `i18n::detect_locale()` walks (in order) `<config-dir>/zerocode/zerocode-config.toml`, `~/.dx_agent/zerocode-config.toml`, `~/.dx_agent/config.toml`, then `<config-dir>/zeroclaw/config.toml`, finally falling back to `en`. The same lookup matches how the daemon resolves its own locale.
 
 ### Adding strings
 
@@ -108,7 +108,7 @@ cargo mdbook sync --model-provider anthropic.<alias>              # delta fill
 cargo mdbook sync --model-provider anthropic.<alias> --force      # quality pass: retranslate all entries
 cargo mdbook sync --model-provider anthropic.<alias> --batch 1    # write after every entry (safest resume)
 cargo mdbook sync --locale ja --model-provider anthropic.<alias>  # single locale
-cargo mdbook sync --model-provider anthropic.<alias> --config-dir ~/.zeroclaw  # qualified alias + explicit config dir
+cargo mdbook sync --model-provider anthropic.<alias> --config-dir ~/.dx_agent  # qualified alias + explicit config dir
 ```
 
 `--model-provider` resolves through the same shared runtime provider path as `cargo fluent` (any configured family/alias, per-family endpoint + auth + wire protocol, `SecretStore` decryption, `--config-dir` support). Unlike `cargo fluent` — which sends a whole batch as one JSON object — the gettext filler issues **one request per source string** to keep the `msgid → msgstr` mapping unambiguous, so `--batch` controls how often the `.po` is flushed to disk (the checkpoint interval), not the request size. A full-catalogue locale is thousands of sequential requests; for routine delta fills a cheap local Ollama alias is the economical choice.

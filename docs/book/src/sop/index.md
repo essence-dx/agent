@@ -46,8 +46,8 @@ graph LR
 2. Create a SOP directory, for example:
 
    ```text
-   ~/.zeroclaw/workspace/sops/deploy-prod/SOP.toml
-   ~/.zeroclaw/workspace/sops/deploy-prod/SOP.md
+   ~/.dx_agent/workspace/sops/deploy-prod/SOP.toml
+   ~/.dx_agent/workspace/sops/deploy-prod/SOP.md
    ```
 
 3. Validate and inspect definitions:

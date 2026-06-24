@@ -1,6 +1,6 @@
 # Provider Configuration
 
-Every model provider lives at `[providers.models.<type>.<alias>]` in `~/.zeroclaw/config.toml`. `<type>` is the canonical family slot (`anthropic`, `openai`, `azure`, `gemini`, `groq`, `moonshot`, ...). `<alias>` is your operator-assigned instance name — pick any descriptive name (`home`, `work`, `cn`, `gpt5`, ...).
+Every model provider lives at `[providers.models.<type>.<alias>]` in `~/.dx_agent/config.toml`. `<type>` is the canonical family slot (`anthropic`, `openai`, `azure`, `gemini`, `groq`, `moonshot`, ...). `<alias>` is your operator-assigned instance name — pick any descriptive name (`home`, `work`, `cn`, `gpt5`, ...).
 
 ## Minimal working example
 
@@ -36,7 +36,7 @@ For every family, the URL is resolved in this order:
 
 ## Family slots
 
-Run `cargo doc --open -p zeroclaw-config` (or read [`crates/zeroclaw-config/src/providers.rs`](https://github.com/zeroclaw-labs/zeroclaw/blob/master/crates/zeroclaw-config/src/providers.rs)) for the complete list. Highlights:
+Run `cargo doc --open -p dx-agent-config` (or read [`crates/dx-agent-config/src/providers.rs`](https://github.com/zeroclaw-labs/zeroclaw/blob/master/crates/dx-agent-config/src/providers.rs)) for the complete list. Highlights:
 
 | Slot | Notes |
 |---|---|
@@ -59,8 +59,8 @@ There is one canonical key per vendor — no synonyms.
 Three ways to supply credentials, in resolution order:
 
 1. **Inline `api_key = "..."`** in the alias entry (fine for dev, risky for checked-in configs).
-2. **Config-level secrets store** — encrypted at `~/.zeroclaw/secrets` via a local key file.
-3. **Generic env override** — `ZEROCLAW_providers__models__<type>__<alias>__api_key=...` sets `providers.models.<type>.<alias>.api_key` at startup. See [Environment variables](../reference/env-vars.md) for the full grammar.
+2. **Config-level secrets store** — encrypted at `~/.dx_agent/secrets` via a local key file.
+3. **Generic env override** — `DX_AGENT_providers__models__<type>__<alias>__api_key=...` sets `providers.models.<type>.<alias>.api_key` at startup. See [Environment variables](../reference/env-vars.md) for the full grammar.
 
 `zeroclaw onboard` writes credentials to the secrets store by default. Configs you commit should not contain inline keys. For ecosystem-default names you already export in your shell (`$ANTHROPIC_API_KEY`, `$OPENROUTER_API_KEY`, …), the [env-vars reference](../reference/env-vars.md#bridging-ecosystem-default-env-vars) shows the one-line bash expansions that point a schema-mirror name at the existing value.
 
@@ -75,7 +75,7 @@ Several providers accept OAuth or subscription-style tokens instead of raw API k
 
 ## Container-friendly overrides
 
-When ZeroClaw runs inside a container and a provider is on the host (e.g. Ollama), set `uri` to a host-reachable address:
+When DX Agent runs inside a container and a provider is on the host (e.g. Ollama), set `uri` to a host-reachable address:
 
 ```toml
 [providers.models.ollama.local]
@@ -83,10 +83,10 @@ uri   = "http://host.docker.internal:11434"
 model = "qwen3.6:35b-a3b"
 ```
 
-The generic env-override mechanism (`ZEROCLAW_<dotted_path_with_double_underscores>=<value>`) can set the same field at runtime without editing `config.toml`:
+The generic env-override mechanism (`DX_AGENT_<dotted_path_with_double_underscores>=<value>`) can set the same field at runtime without editing `config.toml`:
 
 ```bash
-ZEROCLAW_providers__models__ollama__home__uri=http://ollama:11434 zeroclaw agent -a assistant
+DX_AGENT_providers__models__ollama__home__uri=http://ollama:11434 zeroclaw agent -a assistant
 ```
 
 The `__` is the path separator; the example above sets `providers.models.ollama.home.uri`. See [Environment variables](../reference/env-vars.md) for the full grammar.

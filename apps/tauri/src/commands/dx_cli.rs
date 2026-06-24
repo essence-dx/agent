@@ -2633,7 +2633,7 @@ fn dx_agents_embedded_terminal_tui_canary_runner_args() -> Vec<String> {
 fn tui_canary_runner_contract(contract: &serde_json::Value) -> TuiCanaryRunnerContract {
     let fallback_args = dx_agents_embedded_terminal_tui_canary_runner_args();
     let fallback_fixed_command = vec![
-        "dx-agents".to_string(),
+        "dx-agent".to_string(),
         "tui-canary".to_string(),
         "--json".to_string(),
     ];
@@ -2675,7 +2675,7 @@ fn tui_canary_runner_contract(contract: &serde_json::Value) -> TuiCanaryRunnerCo
     let declared_argv_text = declared_argv.iter().map(String::as_str).collect::<Vec<_>>();
     let accepted_argv = matches!(
         declared_argv_text.as_slice(),
-        ["dx-agents", "tui-canary", "--json"] | ["tui-canary", "--json"]
+        ["dx-agent", "tui-canary", "--json"] | ["tui-canary", "--json"]
     );
     let shell_free = runner
         .get("shell_free")
@@ -2712,7 +2712,7 @@ fn tui_canary_runner_contract(contract: &serde_json::Value) -> TuiCanaryRunnerCo
     let expected_message_ok = runner
         .get("expected_message")
         .and_then(serde_json::Value::as_str)
-        .is_none_or(|message| message == "dx-agents-tui-canary-ok");
+        .is_none_or(|message| message == "dx-agent-tui-canary-ok");
     let expected_runner_ok = runner
         .get("expected_runner")
         .and_then(serde_json::Value::as_str)
@@ -2805,7 +2805,7 @@ fn tui_canary_runner_contract(contract: &serde_json::Value) -> TuiCanaryRunnerCo
 
     if accepted {
         contract.fixed_command = declared_argv.clone();
-        contract.args = if declared_argv.first().is_some_and(|arg| arg == "dx-agents") {
+        contract.args = if declared_argv.first().is_some_and(|arg| arg == "dx-agent") {
             declared_argv.into_iter().skip(1).collect()
         } else {
             declared_argv
@@ -6867,7 +6867,7 @@ fn dashboard_compatibility_source_text(repo_dir: &Path) -> Result<String, String
     append_dashboard_source_file(&repo_dir.join("web").join("index.html"), &mut source)?;
     append_dashboard_source_files_under(&repo_dir.join("web").join("src"), &mut source)?;
     append_dashboard_source_files_under(
-        &repo_dir.join("crates").join("zeroclaw-gateway").join("src"),
+        &repo_dir.join("crates").join("dx-agent-gateway").join("src"),
         &mut source,
     )?;
     Ok(source)
@@ -8735,7 +8735,7 @@ fn release_readiness_report() -> DxAgentsReleaseReadiness {
             status: "warn".to_string(),
             detail: summarize_error(&String::from_utf8_lossy(&output.stderr)),
             recovery_hint: Some(
-                "Run `dx-agents migrate --help` locally and repair migration command wiring."
+                "Run `dx-agent migrate --help` locally and repair migration command wiring."
                     .to_string(),
             ),
         },
@@ -9452,7 +9452,7 @@ fn run_embedded_terminal_echo_pilot(
         .as_ref()
         .and_then(|value| value.get("message"))
         .and_then(serde_json::Value::as_str)
-        == Some("dx-agents-embedded-terminal-echo-ok");
+        == Some("dx-agent-embedded-terminal-echo-ok");
     let success = output.status.success() && json_error.is_none() && payload_ok;
 
     Ok(DxAgentsEmbeddedTerminalEchoPilot {
@@ -9548,7 +9548,7 @@ fn run_embedded_terminal_tui_canary_runner(
     let stderr = redact_sensitive_text(&String::from_utf8_lossy(&output.stderr));
     let (json, json_error) = parse_optional_json(&stdout);
     let payload_ok = json.as_ref().is_some_and(|value| {
-        value.get("message").and_then(serde_json::Value::as_str) == Some("dx-agents-tui-canary-ok")
+        value.get("message").and_then(serde_json::Value::as_str) == Some("dx-agent-tui-canary-ok")
             && value.get("runner").and_then(serde_json::Value::as_str)
                 == Some("developer_tui_canary")
             && value
@@ -10684,43 +10684,43 @@ fn dashboard_recovery_hint(
 
     if command.starts_with("models health") {
         return Some(
-            "Check provider profile config and API-key environment, then rerun `dx-agents models health --mode dry-run --json` before trying live mode."
+            "Check provider profile config and API-key environment, then rerun `dx-agent models health --mode dry-run --json` before trying live mode."
                 .to_string(),
         );
     }
     if command.starts_with("agent ") || label.contains("provider live smoke") {
         return Some(
-            "Confirm the `dx` agent exists and the selected provider/model works with `dx-agents models health --mode live --json`, then retry the live smoke."
+            "Confirm the `dx` agent exists and the selected provider/model works with `dx-agent models health --mode live --json`, then retry the live smoke."
                 .to_string(),
         );
     }
     if command.starts_with("gateway get-paircode") || label.contains("gateway") {
         return Some(
-            "Start the gateway with `dx-agents gateway start`, then request a fresh pairing code with `dx-agents gateway get-paircode --new`."
+            "Start the gateway with `dx-agent gateway start`, then request a fresh pairing code with `dx-agent gateway get-paircode --new`."
                 .to_string(),
         );
     }
     if command.starts_with("cron history") {
         return Some(
-            "Run `dx-agents cron list` to confirm jobs exist, then inspect scheduler output or run history after the next job completes."
+            "Run `dx-agent cron list` to confirm jobs exist, then inspect scheduler output or run history after the next job completes."
                 .to_string(),
         );
     }
     if command.starts_with("cron preview") {
         return Some(
-            "Run `dx-agents cron list` and verify the cron database/config path before using scheduler preview."
+            "Run `dx-agent cron list` and verify the cron database/config path before using scheduler preview."
                 .to_string(),
         );
     }
     if command.starts_with("status --compact") {
         return Some(
-            "Run `dx-agents status --compact --json` in a terminal to see the failing subsystem and confirm config paths are readable."
+            "Run `dx-agent status --compact --json` in a terminal to see the failing subsystem and confirm config paths are readable."
                 .to_string(),
         );
     }
     if command.starts_with("workloop status") {
         return Some(
-            "Check `TODO.md`, `CHANGELOG.md`, and the continuation journal path, then rerun `dx-agents workloop status --json`."
+            "Check `TODO.md`, `CHANGELOG.md`, and the continuation journal path, then rerun `dx-agent workloop status --json`."
                 .to_string(),
         );
     }
@@ -11053,10 +11053,10 @@ fn dashboard_compatibility_contract() -> serde_json::Value {
     serde_json::json!({
         "supported": true,
         "schema_version": "dx.dashboard_compatibility.v1",
-        "source": "dx-agents.host_contract",
+        "source": "dx-agent.host_contract",
         "product_name": "DX Agents",
-        "package_name": "dx-agents-web",
-        "legacy_product_names": ["ZeroClaw"],
+        "package_name": "dx-agent-web",
+        "legacy_product_names": ["DX Agent"],
         "compatibility_policy": {
             "legacy_readable": true,
             "legacy_writable": true,
@@ -11067,19 +11067,19 @@ fn dashboard_compatibility_contract() -> serde_json::Value {
             {
                 "label": "Gateway port env",
                 "primary": "DX_AGENTS_GATEWAY_PORT",
-                "legacy": ["ZEROCLAW_GATEWAY_PORT"]
+                "legacy": ["DX_AGENT_GATEWAY_PORT"]
             }
         ],
         "window_globals": [
             {
                 "label": "Dashboard base path",
                 "primary": "__DX_AGENTS_BASE__",
-                "legacy": ["__ZEROCLAW_BASE__"]
+                "legacy": ["__DX_AGENT_BASE__"]
             },
             {
                 "label": "Gateway base URL",
                 "primary": "__DX_AGENTS_GATEWAY__",
-                "legacy": ["__ZEROCLAW_GATEWAY__"]
+                "legacy": ["__DX_AGENT_GATEWAY__"]
             }
         ],
         "storage_aliases": [
@@ -11150,7 +11150,7 @@ fn dashboard_compatibility_contract() -> serde_json::Value {
         "event_aliases": [
             {
                 "label": "Unauthorized event",
-                "primary": "dx-agents-unauthorized",
+                "primary": "dx-agent-unauthorized",
                 "legacy": ["zeroclaw-unauthorized"]
             }
         ],
@@ -11158,13 +11158,13 @@ fn dashboard_compatibility_contract() -> serde_json::Value {
             {
                 "label": "Chat WebSocket protocol",
                 "route": "/ws/chat",
-                "primary": "dx-agents.v1",
+                "primary": "dx-agent.v1",
                 "legacy": ["zeroclaw.v1"]
             },
             {
                 "label": "Canvas WebSocket protocol",
                 "route": "/ws/canvas/:id",
-                "primary": "dx-agents.v1",
+                "primary": "dx-agent.v1",
                 "legacy": ["zeroclaw.v1"]
             }
         ]
@@ -11411,9 +11411,9 @@ fn dx_agents_repo_dir() -> PathBuf {
 
 fn dx_agents_cli_file_name() -> &'static str {
     if cfg!(windows) {
-        "dx-agents.exe"
+        "dx-agent.exe"
     } else {
-        "dx-agents"
+        "dx-agent"
     }
 }
 
@@ -11612,7 +11612,7 @@ mod tests {
             contract["websocket_protocols"]
                 .as_array()
                 .is_some_and(|protocols| protocols.iter().any(|protocol| {
-                    protocol["primary"] == "dx-agents.v1"
+                    protocol["primary"] == "dx-agent.v1"
                         && protocol["legacy"]
                             .as_array()
                             .is_some_and(|legacy| legacy.iter().any(|value| value == "zeroclaw.v1"))
@@ -11624,7 +11624,7 @@ mod tests {
     fn dashboard_compatibility_contract_covers_dashboard_alias_categories() {
         let contract = dashboard_compatibility_contract();
 
-        assert_eq!(contract["package_name"].as_str(), Some("dx-agents-web"));
+        assert_eq!(contract["package_name"].as_str(), Some("dx-agent-web"));
         assert_eq!(
             contract
                 .pointer("/compatibility_policy/legacy_readable")
@@ -11644,7 +11644,7 @@ mod tests {
         assert!(env_aliases.iter().any(|alias| {
             alias["primary"] == "DX_AGENTS_GATEWAY_PORT"
                 && alias["legacy"].as_array().is_some_and(|legacy| {
-                    legacy.iter().any(|value| value == "ZEROCLAW_GATEWAY_PORT")
+                    legacy.iter().any(|value| value == "DX_AGENT_GATEWAY_PORT")
                 })
         }));
 
@@ -11655,12 +11655,12 @@ mod tests {
             alias["primary"] == "__DX_AGENTS_BASE__"
                 && alias["legacy"]
                     .as_array()
-                    .is_some_and(|legacy| legacy.iter().any(|value| value == "__ZEROCLAW_BASE__"))
+                    .is_some_and(|legacy| legacy.iter().any(|value| value == "__DX_AGENT_BASE__"))
         }));
         assert!(window_globals.iter().any(|alias| {
             alias["primary"] == "__DX_AGENTS_GATEWAY__"
                 && alias["legacy"].as_array().is_some_and(|legacy| {
-                    legacy.iter().any(|value| value == "__ZEROCLAW_GATEWAY__")
+                    legacy.iter().any(|value| value == "__DX_AGENT_GATEWAY__")
                 })
         }));
 
@@ -11668,7 +11668,7 @@ mod tests {
             .as_array()
             .expect("event aliases must be an array");
         assert!(event_aliases.iter().any(|alias| {
-            alias["primary"] == "dx-agents-unauthorized"
+            alias["primary"] == "dx-agent-unauthorized"
                 && alias["legacy"].as_array().is_some_and(|legacy| {
                     legacy.iter().any(|value| value == "zeroclaw-unauthorized")
                 })
@@ -11818,12 +11818,12 @@ mod tests {
 
     fn write_dashboard_compatibility_source_fixture(dir: &Path, source: &str) {
         let web_src = dir.join("web").join("src");
-        let gateway_src = dir.join("crates").join("zeroclaw-gateway").join("src");
+        let gateway_src = dir.join("crates").join("dx-agent-gateway").join("src");
         fs::create_dir_all(&web_src).unwrap();
         fs::create_dir_all(&gateway_src).unwrap();
         fs::write(
             dir.join("web").join("package.json"),
-            r#"{"name":"dx-agents-web"}"#,
+            r#"{"name":"dx-agent-web"}"#,
         )
         .unwrap();
         fs::write(dir.join("web").join("vite.config.ts"), source).unwrap();
@@ -12142,7 +12142,7 @@ mod tests {
         assert_eq!(runner.contract_source, "local_fallback");
         assert_eq!(
             runner.contract_fixed_command,
-            vec!["dx-agents", "tui-canary", "--json"]
+            vec!["dx-agent", "tui-canary", "--json"]
         );
         assert_eq!(
             runner.contract_result_states,
@@ -12168,9 +12168,9 @@ mod tests {
         contract["embedded_terminal_tui_canary_runner"] = serde_json::json!({
             "supported": true,
             "schema_version": "dx.embedded_terminal_tui_canary_runner.v1",
-            "fixed_command": ["dx-agents", "tui-canary", "--json"],
+            "fixed_command": ["dx-agent", "tui-canary", "--json"],
             "result_schema_version": "dx.embedded_terminal_tui_canary_runner.v1",
-            "expected_message": "dx-agents-tui-canary-ok",
+            "expected_message": "dx-agent-tui-canary-ok",
             "expected_runner": "developer_tui_canary",
             "default_enabled": false,
             "developer_only": true,
@@ -12204,7 +12204,7 @@ mod tests {
         assert_eq!(runner_contract.args, vec!["tui-canary", "--json"]);
         assert_eq!(
             runner_contract.fixed_command,
-            vec!["dx-agents", "tui-canary", "--json"]
+            vec!["dx-agent", "tui-canary", "--json"]
         );
         assert_eq!(runner_contract.stdout_limit_bytes, 4096);
         assert_eq!(runner_contract.stderr_limit_bytes, 2048);
@@ -12224,7 +12224,7 @@ mod tests {
         );
         assert_eq!(
             runner.contract_fixed_command,
-            vec!["dx-agents", "tui-canary", "--json"]
+            vec!["dx-agent", "tui-canary", "--json"]
         );
         assert_eq!(
             runner.contract_result_states,
@@ -12243,7 +12243,7 @@ mod tests {
         contract["embedded_terminal_tui_canary_runner"] = serde_json::json!({
             "supported": true,
             "schema_version": "dx.embedded_terminal_tui_canary_runner.v1",
-            "fixed_command": ["dx-agents", "tui-canary", "--json", "{{input}}"],
+            "fixed_command": ["dx-agent", "tui-canary", "--json", "{{input}}"],
             "result_schema_version": "bad.schema",
             "expected_message": "wrong",
             "expected_runner": "wrong",
@@ -13135,7 +13135,7 @@ mod tests {
 
     #[test]
     fn provider_smoke_history_reads_newest_first_and_stays_redacted() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-provider-smoke-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-provider-smoke-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("smoke.jsonl");
         let mut command = DxAgentsDashboardCommand {
@@ -13172,7 +13172,7 @@ mod tests {
 
     #[test]
     fn tool_safety_drill_history_retains_newest_redacted_trend_records() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-safety-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-safety-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
 
@@ -13230,7 +13230,7 @@ mod tests {
 
     #[test]
     fn tool_safety_drill_history_alerts_empty_history() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-safety-empty-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-safety-empty-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let history = read_tool_safety_drill_history(&dir.join("missing.jsonl"), 8).unwrap();
 
@@ -13242,7 +13242,7 @@ mod tests {
 
     #[test]
     fn tool_safety_drill_history_alerts_worsening_blockers() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-safety-alerts-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-safety-alerts-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
 
@@ -13279,7 +13279,7 @@ mod tests {
     #[test]
     fn tool_safety_drill_history_alerts_improving_state() {
         let dir =
-            std::env::temp_dir().join(format!("dx-agents-tool-safety-improving-{}", now_ms()));
+            std::env::temp_dir().join(format!("dx-agent-tool-safety-improving-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
 
@@ -13303,7 +13303,7 @@ mod tests {
 
     #[test]
     fn tool_safety_drill_history_alerts_stable_state() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-safety-stable-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-safety-stable-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
 
@@ -13341,7 +13341,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_reports_missing_history() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-missing-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-missing-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let history = read_tool_safety_drill_history(&dir.join("missing.jsonl"), 8).unwrap();
         let audit = tool_safety_audit_summary(&history, true);
@@ -13357,7 +13357,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_reports_blocked_alerts() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-blocked-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-blocked-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
         let mut record =
@@ -13378,7 +13378,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_reports_missing_runbook() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-runbook-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-runbook-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
         let mut record =
@@ -13398,7 +13398,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_reports_ready_state() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-ready-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-ready-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
         let mut previous =
@@ -13423,7 +13423,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_reports_redaction_review() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-redaction-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-redaction-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
         let mut record =
@@ -13445,7 +13445,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_stays_metadata_only_and_redacted() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-redacted-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-redacted-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tool-safety.jsonl");
         let mut record =
@@ -13472,7 +13472,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_history_retains_newest_metadata_only_summaries() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-history-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-history-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("audit.jsonl");
 
@@ -13507,7 +13507,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_digest_reports_empty_history_without_rows() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-empty-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-empty-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let history = read_tool_safety_audit_history(&dir.join("missing.jsonl"), 8).unwrap();
         let body = serde_json::to_string(&history.digest).unwrap();
@@ -13524,7 +13524,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_digest_reports_stable_ready_history() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-stable-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-stable-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("audit.jsonl");
         let drill_path = dir.join("tool-safety.jsonl");
@@ -13558,7 +13558,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_history_trend_reports_ready_to_blocked() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-trend-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-trend-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("audit.jsonl");
         let drill_path = dir.join("tool-safety.jsonl");
@@ -13607,7 +13607,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_digest_reports_empty_stable_blocked_and_runbook_states() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-digest-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-digest-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let audit_path = dir.join("audit.jsonl");
         let drill_path = dir.join("tool-safety.jsonl");
@@ -13668,7 +13668,7 @@ mod tests {
 
     #[test]
     fn tool_safety_audit_review_alerts_cover_digest_states_and_severity() {
-        let dir = std::env::temp_dir().join(format!("dx-agents-tool-audit-alerts-{}", now_ms()));
+        let dir = std::env::temp_dir().join(format!("dx-agent-tool-audit-alerts-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let empty = read_tool_safety_audit_history(&dir.join("missing-audit.jsonl"), 8).unwrap();
 
@@ -13732,7 +13732,7 @@ mod tests {
     #[test]
     fn tool_safety_audit_review_alerts_stay_redacted() {
         let dir =
-            std::env::temp_dir().join(format!("dx-agents-tool-audit-alert-redaction-{}", now_ms()));
+            std::env::temp_dir().join(format!("dx-agent-tool-audit-alert-redaction-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let empty = read_tool_safety_audit_history(&dir.join("missing-audit.jsonl"), 8).unwrap();
         let mut digest = empty.digest.clone();

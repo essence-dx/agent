@@ -29,7 +29,7 @@ RUN --mount=type=cache,id=zeroclaw-cargo-registry,target=/usr/local/cargo/regist
 FROM rust:1.94-slim@sha256:da9dab7a6b8dd428e71718402e97207bb3e54167d37b5708616050b1e8f60ed6 AS builder
 
 WORKDIR /app
-ARG ZEROCLAW_CARGO_FEATURES="channel-lark,whatsapp-web"
+ARG DX_AGENT_CARGO_FEATURES="channel-lark,whatsapp-web"
 
 # Install build dependencies
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -74,8 +74,8 @@ RUN mkdir -p src src/bin benches apps/tauri/src tools/fill-translations/src xtas
 RUN --mount=type=cache,id=zeroclaw-cargo-registry,target=/usr/local/cargo/registry,sharing=locked \
     --mount=type=cache,id=zeroclaw-cargo-git,target=/usr/local/cargo/git,sharing=locked \
     --mount=type=cache,id=zeroclaw-target,target=/app/target,sharing=locked \
-    if [ -n "$ZEROCLAW_CARGO_FEATURES" ]; then \
-      cargo build --release --locked --features "$ZEROCLAW_CARGO_FEATURES"; \
+    if [ -n "$DX_AGENT_CARGO_FEATURES" ]; then \
+      cargo build --release --locked --features "$DX_AGENT_CARGO_FEATURES"; \
     else \
       cargo build --release --locked; \
     fi
@@ -102,8 +102,8 @@ RUN --mount=type=cache,id=zeroclaw-cargo-registry,target=/usr/local/cargo/regist
            target/release/deps/xtask-* \
            target/release/.fingerprint/fill-translations-* \
            target/release/deps/fill_translations-* && \
-    if [ -n "$ZEROCLAW_CARGO_FEATURES" ]; then \
-      cargo build --release --locked --features "$ZEROCLAW_CARGO_FEATURES"; \
+    if [ -n "$DX_AGENT_CARGO_FEATURES" ]; then \
+      cargo build --release --locked --features "$DX_AGENT_CARGO_FEATURES"; \
     else \
       cargo build --release --locked; \
     fi && \
@@ -114,8 +114,8 @@ RUN size=$(stat -c%s /app/dx-agents) && \
 
 # Prepare runtime directory structure and default config inline (no extra stage).
 # Dashboard assets live at /usr/share/zeroclawlabs/web/dist (outside the documented
-# /zeroclaw-data mount point) so a bind mount on /zeroclaw-data cannot shadow them.
-RUN mkdir -p /zeroclaw-data/.zeroclaw /zeroclaw-data/data && \
+# /dx-agent-data mount point) so a bind mount on /dx-agent-data cannot shadow them.
+RUN mkdir -p /dx-agent-data/.dx_agent /dx-agent-data/data && \
     printf '%s\n' \
         'api_key = ""' \
         'default_provider = "openrouter"' \
@@ -132,8 +132,8 @@ RUN mkdir -p /zeroclaw-data/.zeroclaw /zeroclaw-data/data && \
         '[risk_profiles.default]' \
         'level = "supervised"' \
         'auto_approve = ["file_read", "file_write", "file_edit", "memory_recall", "memory_store", "web_search_tool", "web_fetch", "calculator", "glob_search", "content_search", "image_info", "weather", "git_operations"]' \
-        > /zeroclaw-data/.zeroclaw/config.toml && \
-    chown -R 65534:65534 /zeroclaw-data
+        > /dx-agent-data/.dx_agent/config.toml && \
+    chown -R 65534:65534 /dx-agent-data
 
 # ── Stage 2: Development Runtime (Debian) ────────────────────
 FROM debian:trixie-slim@sha256:f6e2cfac5cf956ea044b4bd75e6397b4372ad88fe00908045e9a0d21712ae3ba AS dev
@@ -144,32 +144,32 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /zeroclaw-data /zeroclaw-data
+COPY --from=builder /dx-agent-data /dx-agent-data
 COPY --from=builder /app/dx-agents /usr/local/bin/dx-agents
 # Install the dashboard at /usr/share/zeroclawlabs/web/dist (outside the
-# documented /zeroclaw-data mount) so user volumes do not shadow it (#6400).
+# documented /dx-agent-data mount) so user volumes do not shadow it (#6400).
 COPY --from=web-builder /app/web/dist /usr/share/zeroclawlabs/web/dist
 
 # Overwrite minimal config with DEV template (Ollama defaults)
-COPY dev/config.template.toml /zeroclaw-data/.zeroclaw/config.toml
-RUN chown 65534:65534 /zeroclaw-data/.zeroclaw/config.toml
+COPY dev/config.template.toml /dx-agent-data/.dx_agent/config.toml
+RUN chown 65534:65534 /dx-agent-data/.dx_agent/config.toml
 
 # Environment setup
 # Ensure UTF-8 locale so CJK / multibyte input is handled correctly
 ENV LANG=C.UTF-8
 # Bootstrap (uppercase tail) — pre-load: decides where the config file lives.
-ENV DX_AGENTS_DATA_DIR=/zeroclaw-data/data
-ENV HOME=/zeroclaw-data
+ENV DX_AGENTS_DATA_DIR=/dx-agent-data/data
+ENV HOME=/dx-agent-data
 # V0.8.0 env-var grammar: `DX_AGENTS_<dotted_path_with_double_underscores>=<value>`
 # mirrors the TOML config 1:1; `__` is the path separator. Operators inject
 # credentials and runtime knobs at `docker run -e ...` (or via docker-compose
-# `environment:`). Legacy `PROVIDER`, `ZEROCLAW_MODEL`, `ANTHROPIC_API_KEY`,
-# `API_KEY`, etc. fallbacks were eradicated; `ZEROCLAW_*` remains a compatibility
+# `environment:`). Legacy `PROVIDER`, `DX_AGENT_MODEL`, `ANTHROPIC_API_KEY`,
+# `API_KEY`, etc. fallbacks were eradicated; `DX_AGENT_*` remains a compatibility
 # prefix only for existing deployments. Example:
 #   docker run -e DX_AGENTS_providers__models__anthropic__default__api_key=sk-ant-... ...
 ENV DX_AGENTS_gateway__port=42617
 
-WORKDIR /zeroclaw-data
+WORKDIR /dx-agent-data
 USER 65534:65534
 EXPOSE 42617
 HEALTHCHECK --interval=60s --timeout=10s --retries=3 --start-period=10s \
@@ -181,16 +181,16 @@ CMD ["daemon"]
 FROM gcr.io/distroless/cc-debian13:nonroot@sha256:84fcd3c223b144b0cb6edc5ecc75641819842a9679a3a58fd6294bec47532bf7 AS release
 
 COPY --from=builder /app/dx-agents /usr/local/bin/dx-agents
-COPY --from=builder /zeroclaw-data /zeroclaw-data
+COPY --from=builder /dx-agent-data /dx-agent-data
 # Install the dashboard at /usr/share/zeroclawlabs/web/dist (outside the
-# documented /zeroclaw-data mount) so user volumes do not shadow it (#6400).
+# documented /dx-agent-data mount) so user volumes do not shadow it (#6400).
 COPY --from=web-builder /app/web/dist /usr/share/zeroclawlabs/web/dist
 
 # Environment setup
 # Ensure UTF-8 locale so CJK / multibyte input is handled correctly
 ENV LANG=C.UTF-8
-ENV DX_AGENTS_DATA_DIR=/zeroclaw-data/data
-ENV HOME=/zeroclaw-data
+ENV DX_AGENTS_DATA_DIR=/dx-agent-data/data
+ENV HOME=/dx-agent-data
 # Default provider and model are set in config.toml, not here,
 # so config file edits are not silently overridden
 #ENV PROVIDER=
@@ -198,7 +198,7 @@ ENV DX_AGENTS_gateway__port=42617
 
 # API_KEY must be provided at runtime!
 
-WORKDIR /zeroclaw-data
+WORKDIR /dx-agent-data
 USER 65534:65534
 EXPOSE 42617
 HEALTHCHECK --interval=60s --timeout=10s --retries=3 --start-period=10s \

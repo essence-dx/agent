@@ -4,7 +4,7 @@ The workspace is split into layers. Edge crates talk to the outside world; core 
 
 ## Layer: Core
 
-### `zeroclaw-runtime`
+### `dx-agent-runtime`
 
 The agent loop, security-policy enforcement, SOP engine, cron scheduler, onboarding sections, and RPC layer for zerocode. Depends on every other core and edge crate.
 
@@ -14,10 +14,10 @@ Notable submodules:
 - `security/` — policy types, sandbox detection, OTP, emergency stop
 - `sop/` — Standard Operating Procedure engine (see [SOP → Overview](../sop/index.md))
 - `onboard/` — the interactive onboarding sections (`mod.rs`, plus per-shape UIs under `ui/`)
-- `memory/` — wraps `zeroclaw-memory` with runtime-level caching and consolidation schedules
+- `memory/` — wraps `dx-agent-memory` with runtime-level caching and consolidation schedules
 - `service/` — systemd / launchctl / Windows Service integration
 
-### `zeroclaw-config`
+### `dx-agent-config`
 
 TOML schema and its validation. Handles:
 
@@ -28,7 +28,7 @@ TOML schema and its validation. Handles:
 
 All user-facing config keys are documented in [Reference → Config](../reference/config.md), which is generated from this crate.
 
-### `zeroclaw-api`
+### `dx-agent-api`
 
 The kernel ABI. Defines three public traits:
 
@@ -40,28 +40,28 @@ The runtime depends only on these traits, not on concrete implementations. This 
 
 ## Layer: Edge
 
-### `zeroclaw-providers`
+### `dx-agent-providers`
 
 All LLM client implementations plus the routing and retry wrappers. See [Model Providers → Overview](../providers/overview.md) for the list.
 
 Structure:
 
-- `traits.rs` — re-exports from `zeroclaw-api` plus provider-internal helpers
+- `traits.rs` — re-exports from `dx-agent-api` plus provider-internal helpers
 - `anthropic.rs`, `openai.rs`, `ollama.rs`, … — one file per native provider
 - `compatible.rs` — a single OpenAI-compatible implementation reused by 20+ providers (Groq, Mistral, xAI, Venice, etc.)
 - `router.rs` — hint-based per-call model route selection
 - `reliable.rs` — same-provider retry / backoff / API-key rotation wrapper
 - `streaming.rs` — SSE parsing, token estimation, tool-call deltas
 
-### `zeroclaw-channels`
+### `dx-agent-channels`
 
 30+ messaging integrations. See [Channels → Overview](../channels/overview.md) for the catalogue.
 
-All channels implement the `Channel` trait from `zeroclaw-api`. Each is feature-gated — a minimal build includes only the channels you compile in.
+All channels implement the `Channel` trait from `dx-agent-api`. Each is feature-gated — a minimal build includes only the channels you compile in.
 
 The `orchestrator/` submodule handles message streaming, draft updates, multi-message splits, and the ACP server.
 
-### `zeroclaw-gateway`
+### `dx-agent-gateway`
 
 HTTP/WebSocket gateway. Exposes the runtime over:
 
@@ -72,7 +72,7 @@ HTTP/WebSocket gateway. Exposes the runtime over:
 
 Pairing is required by default; `[gateway.allow_public_bind = true]` enables binding to `0.0.0.0`.
 
-### `zeroclaw-tools`
+### `dx-agent-tools`
 
 Callable tools the agent invokes. Not to be confused with CLI `zeroclaw` subcommands.
 
@@ -82,7 +82,7 @@ Each tool is registered via factory and described to the model via Fluent-locali
 
 ## Layer: Support
 
-### `zeroclaw-memory`
+### `dx-agent-memory`
 
 Conversation memory and retrieval. SQLite is the default backend; PostgreSQL is available behind `--features memory-postgres` for multi-instance deployments that need a shared, concurrent-write store. Optional:
 
@@ -90,7 +90,7 @@ Conversation memory and retrieval. SQLite is the default backend; PostgreSQL is 
 - Vector retrieval over stored conversations (pgvector when on PostgreSQL)
 - Memory consolidation (summaries, fact extraction)
 
-### `zeroclaw-tool-call-parser`
+### `dx-agent-tool-call-parser`
 
 Model-side tool-call syntax parsing. Handles variations between providers:
 
@@ -99,15 +99,15 @@ Model-side tool-call syntax parsing. Handles variations between providers:
 - Qwen/Ollama's function-call formats
 - Native tool-call streaming deltas
 
-### `zeroclaw-plugins`
+### `dx-agent-plugins`
 
 Dynamic plugin loader for out-of-process tool implementations. See [Developing → Plugin protocol](../developing/plugin-protocol.md).
 
-### `zeroclaw-hardware`
+### `dx-agent-hardware`
 
 Hardware abstraction — GPIO, I2C, SPI, USB. Platform-gated. See [Hardware → Overview](../hardware/index.md).
 
-### `zeroclaw-log`
+### `dx-agent-log`
 
 The single emission surface for every log event in the workspace. Owns
 the on-disk JSONL schema (`LogEvent`), the alias-bound attribution
@@ -118,12 +118,12 @@ paginated cursor reader behind `/api/logs`, and the bridge to the
 typed `Observer` for Prometheus / OTel consumers. See
 [`architecture/logging.md`](./logging.md).
 
-### `zeroclaw-infra`
+### `dx-agent-infra`
 
 Process-level support: debouncers, watchdogs, the SQLite session
-backend. Not a tracing/metrics layer — that's `zeroclaw-log`.
+backend. Not a tracing/metrics layer — that's `dx-agent-log`.
 
-### `zeroclaw-macros`
+### `dx-agent-macros`
 
 Derive macros for config schema, tool registration, and channel registration. Saves boilerplate across the workspace.
 

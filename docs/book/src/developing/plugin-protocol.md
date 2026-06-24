@@ -4,12 +4,12 @@ status: accepted
 last-reviewed: 2026-04-19
 relates-to:
   - ADR-003
-  - crates/zeroclaw-plugins
+  - crates/dx-agent-plugins
 ---
 
 # Plugin Protocol
 
-This document defines the protocol between ZeroClaw's plugin host and WASM
+This document defines the protocol between DX Agent's plugin host and WASM
 plugin modules.
 
 ## Plugin structure
@@ -22,7 +22,7 @@ my-plugin/
   plugin.wasm      # Compiled WASM module (optional for skill-only plugins)
 ```
 
-Plugins are discovered from `~/.zeroclaw/plugins/` (configurable via
+Plugins are discovered from `~/.dx_agent/plugins/` (configurable via
 `plugins.plugins_dir` in config).
 
 ### Skill-only plugin layout (markdown bundle)
@@ -145,7 +145,7 @@ On failure:
 
 ## Host functions
 
-Host functions are provided by the ZeroClaw runtime and callable from within
+Host functions are provided by the DX Agent runtime and callable from within
 the WASM plugin. Each is gated on a manifest permission — calling without the
 required permission returns an error.
 
@@ -281,7 +281,7 @@ The output `.wasm` file is at
 zeroclaw plugin install /path/to/my-plugin/
 
 # Or manually
-cp -r my-plugin/ ~/.zeroclaw/plugins/my-plugin/
+cp -r my-plugin/ ~/.dx_agent/plugins/my-plugin/
 ```
 
 ## Configuration

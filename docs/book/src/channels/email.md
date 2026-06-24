@@ -59,7 +59,7 @@ Real-time delivery via Google Cloud Pub/Sub — no polling.
 [channels.gmail_push]
 enabled = true
 account = "you@gmail.com"
-client_secret_json = "~/.zeroclaw/gmail-client-secret.json"
+client_secret_json = "~/.dx_agent/gmail-client-secret.json"
 pubsub_topic = "projects/my-project/topics/gmail-inbox"
 pubsub_subscription = "projects/my-project/subscriptions/zeroclaw-sub"
 allowed_senders = ["boss@example.com"]
@@ -69,7 +69,7 @@ allowed_senders = ["boss@example.com"]
 
 1. Create a Google Cloud project, enable Gmail API and Pub/Sub API
 2. Create a Pub/Sub topic the Gmail service can publish to
-3. Create a pull subscription on that topic for ZeroClaw
+3. Create a pull subscription on that topic for DX Agent
 4. Create OAuth client credentials (desktop app type), download JSON
 5. On first run, `zeroclaw channel auth gmail-push` opens a browser for the OAuth consent
 6. The agent watches the subscription for new-mail notifications

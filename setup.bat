@@ -22,7 +22,7 @@ if defined DX_AGENTS_HOME (
     set "INSTALL_HOME=%USERPROFILE%\.dx-agents"
 )
 set "INSTALL_BIN_DIR=%INSTALL_HOME%\bin"
-set "CONFIG_PATH=%USERPROFILE%\.zeroclaw\config.toml"
+set "CONFIG_PATH=%USERPROFILE%\.dx_agent\config.toml"
 
 :: Colors via ANSI (Windows 10+ Terminal)
 set "GREEN=[32m"

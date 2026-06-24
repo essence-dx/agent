@@ -35,20 +35,20 @@ spec:
             - name: LANG
               value: "C.UTF-8"
             - name: HOME
-              value: "/zeroclaw-data"
+              value: "/dx-agent-data"
             - name: DX_AGENTS_DATA_DIR
-              value: "/zeroclaw-data/data"
+              value: "/dx-agent-data/data"
             - name: DX_AGENTS_gateway__port
               value: "42617"
           volumeMounts:
             - name: state
-              mountPath: /zeroclaw-data/.zeroclaw
+              mountPath: /dx-agent-data/.dx_agent
             - name: config
-              mountPath: /zeroclaw-data/.zeroclaw/config.toml
+              mountPath: /dx-agent-data/.dx_agent/config.toml
               subPath: config.toml
               readOnly: true
             - name: workspace
-              mountPath: /zeroclaw-data/workspace
+              mountPath: /dx-agent-data/workspace
           resources:
             requests:
               memory: "64Mi"

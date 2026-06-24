@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 use std::path::Path;
-use zeroclaw_runtime::i18n::get_required_cli_string_with_args;
+use dx_agent_runtime::i18n::get_required_cli_string_with_args;
 
 /// Result of a single diagnostic check.
 pub struct CheckResult {
@@ -217,7 +217,7 @@ fn check_tool_registry(config: &crate::config::Config) -> CheckResult {
 }
 
 fn check_channel_config(config: &crate::config::Config) -> CheckResult {
-    let channels = zeroclaw_channels::listing::compiled_channels(&config.channels);
+    let channels = dx_agent_channels::listing::compiled_channels(&config.channels);
     let configured = channels.iter().filter(|e| e.configured).count();
     CheckResult::pass(
         "channels",
@@ -282,23 +282,23 @@ fn check_web_dist_dir(config: &crate::config::Config) -> CheckResult {
     match config.gateway.web_dist_dir.as_deref() {
         None => CheckResult::pass(
             name,
-            zeroclaw_runtime::i18n::get_required_cli_string(
+            dx_agent_runtime::i18n::get_required_cli_string(
                 "cli-self-test-web-dist-dir-pass-unset",
             ),
         ),
         Some(value) => match web_dist_dir_expansion_reason_key(value) {
             None => CheckResult::pass(
                 name,
-                zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+                dx_agent_runtime::i18n::get_required_cli_string_with_args(
                     "cli-self-test-web-dist-dir-pass-literal",
                     &[("path", value)],
                 ),
             ),
             Some(reason_key) => {
-                let reason = zeroclaw_runtime::i18n::get_required_cli_string(reason_key);
+                let reason = dx_agent_runtime::i18n::get_required_cli_string(reason_key);
                 CheckResult::fail(
                     name,
-                    zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+                    dx_agent_runtime::i18n::get_required_cli_string_with_args(
                         "cli-self-test-web-dist-dir-fail-expansion",
                         &[("path", value), ("reason", reason.as_str())],
                     ),
@@ -317,7 +317,7 @@ fn web_dist_dir_check_name() -> &'static str {
     static CACHED: OnceLock<&'static str> = OnceLock::new();
     CACHED.get_or_init(|| {
         let resolved =
-            zeroclaw_runtime::i18n::get_required_cli_string("cli-self-test-web-dist-dir-name");
+            dx_agent_runtime::i18n::get_required_cli_string("cli-self-test-web-dist-dir-name");
         Box::leak(resolved.into_boxed_str())
     })
 }
@@ -485,15 +485,15 @@ mod tests {
         assert!(!result.passed, "tilde path must fail the check");
 
         let expected_reason =
-            zeroclaw_runtime::i18n::get_required_cli_string("cli-web-dist-dir-reason-tilde");
-        let expected_detail = zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+            dx_agent_runtime::i18n::get_required_cli_string("cli-web-dist-dir-reason-tilde");
+        let expected_detail = dx_agent_runtime::i18n::get_required_cli_string_with_args(
             "cli-self-test-web-dist-dir-fail-expansion",
             &[("path", "~/web-dist"), ("reason", expected_reason.as_str())],
         );
         assert_eq!(result.detail, expected_detail);
 
         let expected_name =
-            zeroclaw_runtime::i18n::get_required_cli_string("cli-self-test-web-dist-dir-name");
+            dx_agent_runtime::i18n::get_required_cli_string("cli-self-test-web-dist-dir-name");
         assert_eq!(result.name, expected_name.as_str());
     }
 
@@ -505,7 +505,7 @@ mod tests {
         let result = super::check_web_dist_dir(&config);
         assert!(result.passed);
 
-        let expected_detail = zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+        let expected_detail = dx_agent_runtime::i18n::get_required_cli_string_with_args(
             "cli-self-test-web-dist-dir-pass-literal",
             &[("path", "/srv/zeroclaw/web-dist")],
         );
@@ -518,7 +518,7 @@ mod tests {
         let result = super::check_web_dist_dir(&config);
         assert!(result.passed);
 
-        let expected_detail = zeroclaw_runtime::i18n::get_required_cli_string(
+        let expected_detail = dx_agent_runtime::i18n::get_required_cli_string(
             "cli-self-test-web-dist-dir-pass-unset",
         );
         assert_eq!(result.detail, expected_detail);

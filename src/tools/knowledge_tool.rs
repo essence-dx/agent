@@ -1,1 +1,1 @@
-pub use zeroclaw_tools::knowledge_tool::*;
+pub use dx_agent_tools::knowledge_tool::*;

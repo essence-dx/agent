@@ -16,7 +16,7 @@ webhook_secret = "..."                         # optional: shared secret for inb
 
 Full-duplex SIP voice powered by Telnyx. The agent talks over a real phone call (inbound or outbound). Supports barge-in, mid-turn tool use, and regional number provisioning.
 
-**Pair with:** a `telnyx` model provider for the brain (`crates/zeroclaw-providers/src/telnyx.rs`) and ensure your Telnyx account has a SIP connection with the correct webhook URL pointed at the ZeroClaw gateway.
+**Pair with:** a `telnyx` model provider for the brain (`crates/dx-agent-providers/src/telnyx.rs`) and ensure your Telnyx account has a SIP connection with the correct webhook URL pointed at the DX Agent gateway.
 
 ## Voice Call (Twilio / Telnyx / Plivo)
 
@@ -55,7 +55,7 @@ Runs locally, listens on the mic, triggers agent interaction when it hears the w
 
 The agent doesn't send audio anywhere — wake detection is local. Only post-wake speech is captured and (separately) transcribed before reaching the LLM.
 
-> **Build flag:** Voice Wake is gated by the `voice-wake` cargo feature on `zeroclaw-channels`. Build with `--features voice-wake` to include it.
+> **Build flag:** Voice Wake is gated by the `voice-wake` cargo feature on `dx-agent-channels`. Build with `--features voice-wake` to include it.
 
 ## TTS (outbound speech synthesis)
 

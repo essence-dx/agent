@@ -41,7 +41,7 @@ Flags:
 
 ### Option 3 — Homebrew (Linuxbrew)
 
-DX Agents does not currently publish a DX-owned Homebrew formula. Use `install.sh` for release installs; legacy ZeroClaw Homebrew paths remain migration-only compatibility data.
+DX Agents does not currently publish a DX-owned Homebrew formula. Use `install.sh` for release installs; legacy DX Agent Homebrew paths remain migration-only compatibility data.
 
 ## System dependencies
 
@@ -131,7 +131,7 @@ rm ~/.cargo/bin/dx-agents
 Remove config and workspace (optional — this deletes conversation history):
 
 ```bash
-rm -rf ~/.zeroclaw ~/.config/zeroclaw
+rm -rf ~/.dx_agent ~/.config/zeroclaw
 ```
 
 ## Next

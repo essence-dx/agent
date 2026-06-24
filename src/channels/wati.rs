@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::wati::*;
+pub use dx_agent_channels::wati::*;

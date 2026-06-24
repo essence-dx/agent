@@ -120,10 +120,10 @@ and WebSocket connections. Bind address defaults to the values in \
 your config file (gateway.host / gateway.port).
 
 Examples:
-  dx-agents gateway start              # use config defaults
-  dx-agents gateway start -p 8080      # listen on port 8080
-  dx-agents gateway start --host 0.0.0.0   # requires [gateway].allow_public_bind=true or a tunnel
-  dx-agents gateway start -p 0         # random available port")]
+  dx-agent gateway start              # use config defaults
+  dx-agent gateway start -p 8080      # listen on port 8080
+  dx-agent gateway start --host 0.0.0.0   # requires [gateway].allow_public_bind=true or a tunnel
+  dx-agent gateway start -p 0         # random available port")]
     Start {
         /// Port to listen on (use 0 for random available port); defaults to config gateway.port
         #[arg(short, long)]
@@ -143,8 +143,8 @@ Stops the running gateway if present, then starts a new instance \
 with the current configuration.
 
 Examples:
-  dx-agents gateway restart            # restart with config defaults
-  dx-agents gateway restart -p 8080    # restart on port 8080")]
+  dx-agent gateway restart            # restart with config defaults
+  dx-agent gateway restart -p 8080    # restart on port 8080")]
     Restart {
         /// Port to listen on (use 0 for random available port); defaults to config gateway.port
         #[arg(short, long)]
@@ -167,9 +167,9 @@ With --new, generates a fresh pairing code even if the gateway \
 was previously paired (useful for adding additional clients).
 
 Examples:
-  dx-agents gateway get-paircode       # show current pairing code
-  dx-agents gateway get-paircode --new # generate a new pairing code
-  dx-agents gateway get-paircode --new --port 3001 # target alternate-port gateway")]
+  dx-agent gateway get-paircode       # show current pairing code
+  dx-agent gateway get-paircode --new # generate a new pairing code
+  dx-agent gateway get-paircode --new --port 3001 # target alternate-port gateway")]
     GetPaircode {
         /// Generate a new pairing code (even if already paired)
         #[arg(long)]
@@ -231,8 +231,8 @@ configuration keys for that channel type.
 Supported types: telegram, discord, slack, whatsapp, matrix, imessage, email.
 
 Examples:
-  dx-agents channel add telegram '{\"bot_token\":\"...\",\"name\":\"my-bot\"}'
-  dx-agents channel add discord '{\"bot_token\":\"...\",\"name\":\"my-discord\"}'")]
+  dx-agent channel add telegram '{\"bot_token\":\"...\",\"name\":\"my-bot\"}'
+  dx-agent channel add discord '{\"bot_token\":\"...\",\"name\":\"my-discord\"}'")]
     Add {
         /// Channel type (telegram, discord, slack, whatsapp, matrix, imessage, email)
         channel_type: String,
@@ -254,8 +254,8 @@ ID to the channel allowlist so the agent will respond to messages \
 from that identity.
 
 Examples:
-  dx-agents channel bind-telegram dx_user
-  dx-agents channel bind-telegram 123456789")]
+  dx-agent channel bind-telegram dx_user
+  dx-agent channel bind-telegram 123456789")]
     BindTelegram {
         /// Telegram identity to allow (username without '@' or numeric user ID)
         identity: String,
@@ -274,8 +274,8 @@ The --channel-id selects the channel by its config section name \
 platform-specific destination (e.g. a Telegram chat ID).
 
 Examples:
-  dx-agents channel send 'Someone is near your device.' --channel-id telegram --recipient 123456789
-  dx-agents channel send 'Build succeeded!' --channel-id discord --recipient 987654321")]
+  dx-agent channel send 'Someone is near your device.' --channel-id telegram --recipient 123456789
+  dx-agent channel send 'Build succeeded!' --channel-id discord --recipient 987654321")]
     Send {
         /// Message text to send
         message: String,
@@ -406,7 +406,7 @@ pub enum SkillBundleCommands {
 /// Migration subcommands
 #[derive(Subcommand, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum MigrateCommands {
-    /// Import memory from an `OpenClaw` workspace into this `ZeroClaw` workspace
+    /// Import memory from an `OpenClaw` workspace into this `DX Agent` workspace
     Openclaw {
         /// Optional path to `OpenClaw` workspace (defaults to ~/.openclaw/workspace)
         #[arg(long)]
@@ -433,9 +433,9 @@ When --tz is omitted, cron schedules use the runtime local timezone. \
 For user-facing schedules, pass --tz with an explicit IANA timezone.
 
 Examples:
-  dx-agents cron add '0 9 * * 1-5' 'Good morning' --tz America/New_York --agent
-  dx-agents cron add '*/30 * * * *' 'Check system health' --agent
-  dx-agents cron add '*/5 * * * *' 'echo ok'")]
+  dx-agent cron add '0 9 * * 1-5' 'Good morning' --tz America/New_York --agent
+  dx-agent cron add '*/30 * * * *' 'Check system health' --agent
+  dx-agent cron add '*/5 * * * *' 'echo ok'")]
     Add {
         /// Cron expression
         expression: String,
@@ -464,8 +464,8 @@ The timestamp must include an explicit Z or numeric offset \
 (e.g. 2025-01-15T14:00:00Z or 2025-01-15T09:00:00-05:00).
 
 Examples:
-  dx-agents cron add-at --agent morning-shift 2025-01-15T14:00:00Z 'Send reminder'
-  dx-agents cron add-at --agent morning-shift --prompt 2025-12-31T23:59:00Z 'Happy New Year!'")]
+  dx-agent cron add-at --agent morning-shift 2025-01-15T14:00:00Z 'Send reminder'
+  dx-agent cron add-at --agent morning-shift --prompt 2025-12-31T23:59:00Z 'Happy New Year!'")]
     AddAt {
         /// One-shot RFC3339 timestamp with explicit Z or offset
         at: String,
@@ -489,8 +489,8 @@ Add a task that repeats at a fixed interval.
 Interval is specified in milliseconds. For example, 60000 = 1 minute.
 
 Examples:
-  dx-agents cron add-every --agent triage 60000 'Ping heartbeat'
-  dx-agents cron add-every --agent triage 3600000 'Hourly report'")]
+  dx-agent cron add-every --agent triage 60000 'Ping heartbeat'
+  dx-agent cron add-every --agent triage 3600000 'Hourly report'")]
     AddEvery {
         /// Interval in milliseconds
         every_ms: u64,
@@ -515,8 +515,8 @@ Accepts human-readable durations: s (seconds), m (minutes), \
 h (hours), d (days).
 
 Examples:
-  dx-agents cron once --agent ops-bot 30m 'Run backup in 30 minutes'
-  dx-agents cron once --agent researcher --prompt 2h 'Follow up on deployment'")]
+  dx-agent cron once --agent ops-bot 30m 'Run backup in 30 minutes'
+  dx-agent cron once --agent researcher --prompt 2h 'Follow up on deployment'")]
     Once {
         /// Delay duration
         delay: String,
@@ -545,9 +545,9 @@ Update one or more fields of an existing scheduled task.
 Only the fields you specify are changed; others remain unchanged.
 
 Examples:
-  dx-agents cron update TASK_ID --expression '0 8 * * *'
-  dx-agents cron update TASK_ID --tz Europe/London --name 'Morning check'
-  dx-agents cron update TASK_ID --command 'Updated message'")]
+  dx-agent cron update TASK_ID --expression '0 8 * * *'
+  dx-agent cron update TASK_ID --tz Europe/London --name 'Morning check'
+  dx-agent cron update TASK_ID --command 'Updated message'")]
     Update {
         /// Task ID
         id: String,
@@ -712,10 +712,10 @@ Examples:
         /// Path for serial transport (/dev/ttyACM0) or "native" for local GPIO
         path: String,
     },
-    /// Flash ZeroClaw firmware to Arduino (creates .ino, installs arduino-cli if needed, uploads)
+    /// Flash DX Agent firmware to Arduino (creates .ino, installs arduino-cli if needed, uploads)
     // i18n-exempt: clap derive help — framework requires a compile-time literal
     #[command(long_about = "\
-Flash ZeroClaw firmware to an Arduino board.
+Flash DX Agent firmware to an Arduino board.
 
 Generates the .ino sketch, installs arduino-cli if it is not \
 already available, compiles, and uploads the firmware.
@@ -735,7 +735,7 @@ Examples:
         #[arg(long)]
         host: Option<String>,
     },
-    /// Flash ZeroClaw firmware to Nucleo-F401RE (builds + probe-rs run)
+    /// Flash DX Agent firmware to Nucleo-F401RE (builds + probe-rs run)
     FlashNucleo,
 }
 

@@ -22,7 +22,7 @@ cargo web install       # npm install in web/
 | `target/openapi.json`           | `cargo web gen-api`      | gitignored |
 | `web/dist/`                     | `cargo web build`        | gitignored |
 
-`cargo web gen-api` renders the OpenAPI spec in-process from `zeroclaw_gateway::openapi::build_spec()`, writes it to `target/openapi.json`, and feeds that file to `openapi-typescript`. The same `build_spec()` serves `/api/openapi.json` at runtime, so the spec on disk is never the source of truth — it is a transient handoff between Rust and the TS codegen.
+`cargo web gen-api` renders the OpenAPI spec in-process from `dx_agent_gateway::openapi::build_spec()`, writes it to `target/openapi.json`, and feeds that file to `openapi-typescript`. The same `build_spec()` serves `/api/openapi.json` at runtime, so the spec on disk is never the source of truth — it is a transient handoff between Rust and the TS codegen.
 
 ## Why nothing is committed
 
@@ -36,7 +36,7 @@ Generating on demand keeps the runtime `build_spec()` as the single contract sou
 
 ## Editing flow
 
-1. Change a gateway handler or schema in `crates/zeroclaw-gateway/`.
+1. Change a gateway handler or schema in `crates/dx-agent-gateway/`.
 2. Run `cargo web check` — `gen-api` regenerates `api-generated.ts` from the new spec, then `tsc -b` typechecks the dashboard against it. Any consumer that relies on a now-removed field fails to compile.
 3. Update consumers in `web/src/` to match.
 4. `cargo web build` for the final bundle.

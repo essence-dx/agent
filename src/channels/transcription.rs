@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::transcription::*;
+pub use dx_agent_channels::transcription::*;

@@ -1,1 +1,1 @@
-pub use zeroclaw_tools::cli_discovery::*;
+pub use dx_agent_tools::cli_discovery::*;

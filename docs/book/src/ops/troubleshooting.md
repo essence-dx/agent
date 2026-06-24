@@ -41,7 +41,7 @@ Full per-distro list: [Setup → Linux](../setup/linux.md).
 
 ### Build OOMs on low-RAM hosts
 
-Compiling ZeroClaw from source needs ~2 GB RAM at peak. On a 512 MB Raspberry Pi, you will OOM.
+Compiling DX Agent from source needs ~2 GB RAM at peak. On a 512 MB Raspberry Pi, you will OOM.
 
 Options:
 
@@ -81,7 +81,7 @@ Persist in your shell profile.
 
 ### Wizard insists on a config that doesn't exist
 
-If an earlier install left `~/.zeroclaw/config.toml`, re-run with `--force`:
+If an earlier install left `~/.dx_agent/config.toml`, re-run with `--force`:
 
 ```bash
 zeroclaw onboard --force
@@ -90,23 +90,23 @@ zeroclaw onboard --force
 Or just delete the directory and start over:
 
 ```bash
-rm -rf ~/.zeroclaw
+rm -rf ~/.dx_agent
 zeroclaw onboard
 ```
 
 ### Homebrew install: config path mismatch
 
-Homebrew installs prefer `$HOMEBREW_PREFIX/var/zeroclaw/` (so `brew services` works) while the default config dir is `~/.zeroclaw/`. Set `ZEROCLAW_WORKSPACE` to the Homebrew path before onboarding so the two paths line up:
+Homebrew installs prefer `$HOMEBREW_PREFIX/var/zeroclaw/` (so `brew services` works) while the default config dir is `~/.dx_agent/`. Set `DX_AGENT_WORKSPACE` to the Homebrew path before onboarding so the two paths line up:
 
 ```bash
-export ZEROCLAW_WORKSPACE="$HOMEBREW_PREFIX/var/zeroclaw"
+export DX_AGENT_WORKSPACE="$HOMEBREW_PREFIX/var/zeroclaw"
 zeroclaw onboard
 ```
 
 Or manually symlink once:
 
 ```bash
-ln -s "$HOMEBREW_PREFIX/var/zeroclaw" ~/.zeroclaw
+ln -s "$HOMEBREW_PREFIX/var/zeroclaw" ~/.dx_agent
 ```
 
 ---
@@ -142,7 +142,7 @@ Notes:
 
 - Subscription auth uses stored auth profiles — set `requires_openai_auth = true` on the alias and leave `api_key` unset.
 - `api_key` / `uri` on the alias entry are only needed for custom OpenAI-compatible gateways or other explicit endpoint overrides.
-- The streaming-disabled warning by itself is not an auth failure; ZeroClaw retries the request in non-streaming mode.
+- The streaming-disabled warning by itself is not an auth failure; DX Agent retries the request in non-streaming mode.
 
 ### Daemon starts, then immediately exits
 
@@ -199,7 +199,7 @@ zeroclaw channel doctor slack
 If you re-onboarded without keeping device keys, the homeserver sees a new device that hasn't been verified. Re-verify from another logged-in client, or reset the key store:
 
 ```bash
-rm -rf ~/.zeroclaw/workspace/matrix-crypto
+rm -rf ~/.dx_agent/workspace/matrix-crypto
 # re-run pairing flow on next channel start
 ```
 
@@ -244,7 +244,7 @@ See [Security → Autonomy levels](../security/autonomy.md).
 ### Tool invocations fail inside Docker sandbox
 
 - Container image isn't pulled — run `docker pull <image>` for whatever you have configured under `[security.sandbox].image` (default: `alpine:latest`)
-- Docker daemon not reachable from the ZeroClaw user — check `docker info`
+- Docker daemon not reachable from the DX Agent user — check `docker info`
 - Tool needs a device that's not passed through — extend `allow_devices`
 
 ### Browser tool hangs on first use
@@ -284,7 +284,7 @@ zeroclaw config list
 
 If the paths differ between `zeroclaw config list` (as you) and the service (as its user), either:
 
-- Set `ZEROCLAW_CONFIG_DIR` in the service unit's `Environment=`
+- Set `DX_AGENT_CONFIG_DIR` in the service unit's `Environment=`
 - Run the service as you (lingering-enabled user service)
 - Copy/symlink the config to the path the service expects
 
@@ -298,10 +298,10 @@ Gather diagnostics and file an issue:
 zeroclaw --version
 zeroclaw doctor
 zeroclaw channel doctor
-journalctl --user -u zeroclaw --since "1 hour ago" > zeroclaw-log.txt
+journalctl --user -u zeroclaw --since "1 hour ago" > dx-agent-log.txt
 ```
 
-Sanitise `zeroclaw-log.txt` (redact channel tokens if any slipped through — they shouldn't) and attach it to the issue. See [Contributing → Communication](../contributing/communication.md) for where.
+Sanitise `dx-agent-log.txt` (redact channel tokens if any slipped through — they shouldn't) and attach it to the issue. See [Contributing → Communication](../contributing/communication.md) for where.
 
 ## See also
 

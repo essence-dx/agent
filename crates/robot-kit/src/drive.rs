@@ -40,9 +40,9 @@ impl DriveBackend for MockDrive {
         angular_z: f64,
         duration_ms: u64,
     ) -> Result<()> {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             INFO,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
             &format!(
                 "MOCK DRIVE: linear=({:.2}, {:.2}), angular={:.2}, duration={}ms",
                 linear_x, linear_y, angular_z, duration_ms
@@ -53,9 +53,9 @@ impl DriveBackend for MockDrive {
     }
 
     async fn stop(&self) -> Result<()> {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             INFO,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
             "MOCK DRIVE: STOP"
         );
         Ok(())

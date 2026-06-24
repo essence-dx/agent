@@ -1,25 +1,25 @@
 #[allow(unused_imports)]
-pub use zeroclaw_runtime::skills::*;
+pub use dx_agent_runtime::skills::*;
 
 use anyhow::{Context, Result};
 use std::path::PathBuf;
-use zeroclaw_runtime::i18n::{get_required_cli_string, get_required_cli_string_with_args};
-use zeroclaw_runtime::skills::{ScaffoldOptions, SkillFrontmatter, SkillsService};
+use dx_agent_runtime::i18n::{get_required_cli_string, get_required_cli_string_with_args};
+use dx_agent_runtime::skills::{ScaffoldOptions, SkillFrontmatter, SkillsService};
 pub mod creator {
     #[allow(unused_imports)]
-    pub use zeroclaw_runtime::skills::creator::*;
+    pub use dx_agent_runtime::skills::creator::*;
 }
 pub mod audit {
     #[allow(unused_imports)]
-    pub use zeroclaw_runtime::skills::audit::*;
+    pub use dx_agent_runtime::skills::audit::*;
 }
 pub mod skill_tool {
     #[allow(unused_imports)]
-    pub use zeroclaw_runtime::skills::skill_tool::*;
+    pub use dx_agent_runtime::skills::skill_tool::*;
 }
 pub mod skill_http {
     #[allow(unused_imports)]
-    pub use zeroclaw_runtime::skills::skill_http::*;
+    pub use dx_agent_runtime::skills::skill_http::*;
 }
 
 // The lib target sees this as dead; only the bin target calls it from main.rs.
@@ -37,7 +37,7 @@ pub async fn handle_command(
                 println!();
                 println!("{}", get_required_cli_string("cli-skills-create-hint"));
                 println!(
-                    "              echo '# My Skill' > ~/.zeroclaw/workspace/skills/my-skill/SKILL.md" // i18n-exempt: literal shell command example
+                    "              echo '# My Skill' > ~/.dx-agent/workspace/skills/my-skill/SKILL.md" // i18n-exempt: literal shell command example
                 );
                 println!();
                 println!("{}", get_required_cli_string("cli-skills-install-hint"));
@@ -328,7 +328,7 @@ fn handle_add(
 
     println!(
         "{}",
-        zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+        dx_agent_runtime::i18n::get_required_cli_string_with_args(
             "cli-skills-add-scaffolded",
             &[
                 ("target", &target.to_string()),
@@ -339,7 +339,7 @@ fn handle_add(
 
     if edit {
         open_in_editor(
-            &skill_dir.join(zeroclaw_runtime::skills::constants::SKILL_MANIFEST_FILENAME),
+            &skill_dir.join(dx_agent_runtime::skills::constants::SKILL_MANIFEST_FILENAME),
         )?;
     }
     Ok(())
@@ -360,10 +360,10 @@ fn handle_edit(
         .into_iter()
         .find(|s| s.r#ref.name() == target.name())
         .ok_or_else(|| {
-            ::zeroclaw_log::record!(
+            ::dx_agent_log::record!(
                 WARN,
-                ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Reject)
-                    .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+                ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Reject)
+                    .with_outcome(::dx_agent_log::EventOutcome::Failure)
                     .with_attrs(::serde_json::json!({"skill_ref": target.to_string()})),
                 "skill show: target ref not found"
             );
@@ -374,7 +374,7 @@ fn handle_edit(
         Some(rel) => summary.directory.join(rel),
         None => summary
             .directory
-            .join(zeroclaw_runtime::skills::constants::SKILL_MANIFEST_FILENAME),
+            .join(dx_agent_runtime::skills::constants::SKILL_MANIFEST_FILENAME),
     };
     if !path.exists() {
         anyhow::bail!("file not found: {}", path.display());
@@ -389,7 +389,7 @@ fn handle_bundle_add(alias: String, directory: Option<String>) -> Result<()> {
     let directory_path = directory.unwrap_or_else(|| format!("shared/skills/{alias}"));
     println!(
         "{}",
-        zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+        dx_agent_runtime::i18n::get_required_cli_string_with_args(
             "cli-skills-bundle-add-prompt",
             &[("alias", &alias), ("dir", &directory_path)],
         )
@@ -400,7 +400,7 @@ fn handle_bundle_add(alias: String, directory: Option<String>) -> Result<()> {
 fn handle_bundle_remove(alias: String) -> Result<()> {
     println!(
         "{}",
-        zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+        dx_agent_runtime::i18n::get_required_cli_string_with_args(
             "cli-skills-bundle-remove-prompt",
             &[("alias", &alias)],
         )
@@ -412,7 +412,7 @@ fn print_bundle_include_exclude(include: &[String], exclude: &[String]) {
     if !include.is_empty() {
         println!(
             "  {}",
-            zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+            dx_agent_runtime::i18n::get_required_cli_string_with_args(
                 "cli-skills-bundle-include",
                 &[("values", &include.join(", "))],
             )
@@ -421,7 +421,7 @@ fn print_bundle_include_exclude(include: &[String], exclude: &[String]) {
     if !exclude.is_empty() {
         println!(
             "  {}",
-            zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+            dx_agent_runtime::i18n::get_required_cli_string_with_args(
                 "cli-skills-bundle-exclude",
                 &[("values", &exclude.join(", "))],
             )
@@ -436,13 +436,13 @@ fn handle_bundle_list(config: &crate::config::Config) -> Result<()> {
     if bundles.is_empty() {
         println!(
             "{}",
-            zeroclaw_runtime::i18n::get_required_cli_string("cli-skills-bundle-list-empty")
+            dx_agent_runtime::i18n::get_required_cli_string("cli-skills-bundle-list-empty")
         );
         return Ok(());
     }
     println!(
         "{}",
-        zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+        dx_agent_runtime::i18n::get_required_cli_string_with_args(
             "cli-skills-bundle-list-header",
             &[("count", &bundles.len().to_string())],
         )
@@ -450,7 +450,7 @@ fn handle_bundle_list(config: &crate::config::Config) -> Result<()> {
     for b in &bundles {
         println!(
             "  {}",
-            zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+            dx_agent_runtime::i18n::get_required_cli_string_with_args(
                 "cli-skills-bundle-entry",
                 &[
                     ("alias", &b.alias),
@@ -471,10 +471,10 @@ fn handle_bundle_show(config: &crate::config::Config, alias: String) -> Result<(
         .into_iter()
         .find(|b| b.alias == alias)
         .ok_or_else(|| {
-            ::zeroclaw_log::record!(
+            ::dx_agent_log::record!(
                 WARN,
-                ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Reject)
-                    .with_outcome(::zeroclaw_log::EventOutcome::Failure)
+                ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Reject)
+                    .with_outcome(::dx_agent_log::EventOutcome::Failure)
                     .with_attrs(::serde_json::json!({"skill_bundle": alias})),
                 "skill bundle lookup failed: alias not in config"
             );
@@ -483,7 +483,7 @@ fn handle_bundle_show(config: &crate::config::Config, alias: String) -> Result<(
 
     println!(
         "{}",
-        zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+        dx_agent_runtime::i18n::get_required_cli_string_with_args(
             "cli-skills-bundle-entry",
             &[
                 ("alias", &bundle.alias),
@@ -497,12 +497,12 @@ fn handle_bundle_show(config: &crate::config::Config, alias: String) -> Result<(
     if skills.is_empty() {
         println!(
             "  {}",
-            zeroclaw_runtime::i18n::get_required_cli_string("cli-skills-bundle-show-no-skills")
+            dx_agent_runtime::i18n::get_required_cli_string("cli-skills-bundle-show-no-skills")
         );
     } else {
         println!(
             "  {}",
-            zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+            dx_agent_runtime::i18n::get_required_cli_string_with_args(
                 "cli-skills-bundle-show-skills-header",
                 &[("count", &skills.len().to_string())],
             )
@@ -510,7 +510,7 @@ fn handle_bundle_show(config: &crate::config::Config, alias: String) -> Result<(
         for s in &skills {
             println!(
                 "    {}",
-                zeroclaw_runtime::i18n::get_required_cli_string_with_args(
+                dx_agent_runtime::i18n::get_required_cli_string_with_args(
                     "cli-skills-bundle-show-skill",
                     &[
                         ("name", s.r#ref.name()),

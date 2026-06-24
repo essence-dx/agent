@@ -59,7 +59,7 @@ Every project without an intentional coordination system develops an accidental 
 
 This is not a criticism of anyone's effort. It is a description of what happens by default. The solution is not more process — it is the right process, applied at the right level for the size and maturity of the team.
 
-ZeroClaw needs three things:
+DX Agent needs three things:
 
 1. **A pipeline** for turning ideas into shipped code, with visible stages and clear gates at each transition
 2. **A maintained discussion lane** for community questions, ideas, showcases, and early exploration that are not ready for the pipeline yet, without losing them or cluttering the active work
@@ -443,7 +443,7 @@ fmt                     ← cargo fmt --all -- --check
 clippy                  ← cargo clippy --all-targets -- -D warnings
 ```
 
-As the workspace decomposes into crates (per the architecture RFC), add per-crate checks. A change to `crates/zeroclaw-api` should run that crate's test suite independently.
+As the workspace decomposes into crates (per the architecture RFC), add per-crate checks. A change to `crates/dx-agent-api` should run that crate's test suite independently.
 
 ### 6.4 Architectural Compliance: Human Review, AI Support
 
@@ -542,7 +542,7 @@ body:
     attributes:
       label: Environment
       placeholder: |
-        - ZeroClaw version:
+        - DX Agent version:
         - OS and version:
         - Rust version (if built from source):
         - Provider:
@@ -715,7 +715,7 @@ body:
         ## ⚠️ Do not report security vulnerabilities as public issues.
 
         Security vulnerabilities disclosed publicly before a fix is available
-        put all ZeroClaw users at risk. Please follow the private disclosure
+        put all DX Agent users at risk. Please follow the private disclosure
         process described in [SECURITY.md](https://github.com/zeroclaw-labs/zeroclaw/blob/master/SECURITY.md).
 
         If you have already filed this as a public issue by mistake, please
@@ -1114,6 +1114,6 @@ By v1.0.0, the governance model should be self-sustaining — the team should no
 
 ---
 
-*This proposal was developed in the context of ZeroClaw v0.6.8 and the two preceding architecture and documentation RFCs. The governance model proposed here is intentionally lightweight for a student-led project at an early stage of community growth. It is designed to scale — adding process as the team grows, not all at once.*
+*This proposal was developed in the context of DX Agent v0.6.8 and the two preceding architecture and documentation RFCs. The governance model proposed here is intentionally lightweight for a student-led project at an early stage of community growth. It is designed to scale — adding process as the team grows, not all at once.*
 
 *The best governance model is the simplest one the team will actually follow. Start here. Adjust based on what you learn.*

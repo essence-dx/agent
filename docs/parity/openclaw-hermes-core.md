@@ -8,7 +8,7 @@ For the current Batch 71 implementation backlog, see `docs/parity/openclaw-herme
 
 | Reference | Local path | How it is used |
 | --- | --- | --- |
-| Latest ZeroClaw | `G:\Dx\inspirations\zeroclaw` | Primary Rust upstream for `dx-agents`. |
+| Latest DX Agent | `G:\Dx\inspirations\zeroclaw` | Primary Rust upstream for `dx-agents`. |
 | Archived custom Agent fork | `G:\Dx\inspirations\agent-archive` | Migration source for previous CLI/UI, provider, memory, gateway, cron, and skills behavior. |
 | OpenClaw | `G:\Dx\inspirations\openclaw` | Feature reference for sessions, pairing, control-plane behavior, skill layout, and multi-agent routing concepts. |
 | Hermes Agent | `G:\Dx\inspirations\hermes-agent` | Feature reference for slash-command flow, memory/skills learning loops, cron delivery, provider switching, and interruption semantics. |
@@ -18,7 +18,7 @@ For the current Batch 71 implementation backlog, see `docs/parity/openclaw-herme
 | Area | DX Agents status | Notes |
 | --- | --- | --- |
 | Package and CLI branding | Implemented | Root Cargo package is `dx-agents`, library is `dx_agents`, primary binary is `dx-agents`, ACP bridge binary is `dx-agents-acp-bridge`. High-visibility English CLI help, daemon, interactive mode, doctor, channel, service, cron, provider-auth, desktop companion app, and config-reference prompts now use DX Agents names while legacy readers remain. |
-| Config and env prefix | Implemented | `DX_AGENTS_*` is the preferred prefix. Legacy `ZEROCLAW_*` readers remain for migration. |
+| Config and env prefix | Implemented | `DX_AGENTS_*` is the preferred prefix. Legacy `DX_AGENT_*` readers remain for migration. |
 | Provider registry | Preserved and extended | Upstream Rust provider registry already includes Groq, OpenAI-compatible providers, OpenRouter, Anthropic, OpenAI, Gemini, Ollama, and many long-tail providers. |
 | Groq support | Preserved | Groq has provider-specific credential resolution through `GROQ_API_KEY`; `DX_AGENTS_API_KEY` is now the generic fallback. |
 | Provider failover/model profiles | Preserved and extended | Existing provider fallback/profile machinery is retained. DX env aliases can override provider/model/timeout/headers. `dx-agents models status/set/list/refresh` now exposes provider/model switching and catalog checks from the CLI. |
@@ -38,7 +38,7 @@ For the current Batch 71 implementation backlog, see `docs/parity/openclaw-herme
 | Cron scheduler | Preserved | Existing cron command and delivery registration remain in Rust. |
 | Skills and skillforge hooks | Preserved | Existing skills/open-skills settings remain, now with `DX_AGENTS_OPEN_SKILLS_*` aliases. |
 | Slash-command flow | Extended | Interactive mode now centralizes slash parsing and supports `/help`, `/status`, `/model`, `/provider`, `/clear`, `/quit`, and existing `/think:<level>` directives. Runtime provider/model switches now resolve the selected provider profile's own API key and base URL instead of reusing the previous fallback profile. |
-| Migration readers | Preserved and extended | `dx-agents migrate openclaw`, `agent`, `zeroclaw`, and `hermes` now share the Rust importer. OpenClaw/Agent/ZeroClaw import SQLite/markdown memory layouts; Hermes imports `state.db` session messages as conversation memory plus markdown memory where present. |
+| Migration readers | Preserved and extended | `dx-agents migrate openclaw`, `agent`, `zeroclaw`, and `hermes` now share the Rust importer. OpenClaw/Agent/DX Agent import SQLite/markdown memory layouts; Hermes imports `state.db` session messages as conversation memory plus markdown memory where present. |
 | Self-update source | Implemented | `dx-agents update` now targets `millercarla211-ctrl/dx-agents` by default, accepts `DX_AGENTS_UPDATE_REPO` for release testing, and recognizes `dx-agents-*` release assets while allowing legacy `zeroclaw-*` assets during migration. |
 | Service packaging names | Implemented | New service installs use `dx-agents.service`, `com.dx-agents.daemon`, `DX Agents Daemon`, `/etc/dx-agents`, `/var/log/dx-agents`, `/var/lib/dx-agents`, and `dx-agents` OpenRC service/user names. Channel allowlist reload now targets the DX Agents managed service. |
 | Isolated checks | Implemented and expanding | Targeted checks cover provider config, env aliases, CLI parsing, gateway pairing, migration surfaces, focused `dx-agents agent -a <alias> --model-provider ... --model ... --message ...` live smoke, provider/model JSON discovery, and a deterministic mock OpenAI-compatible provider request/response test. |

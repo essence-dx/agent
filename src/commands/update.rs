@@ -1,11 +1,11 @@
-//! `dx-agents update` - self-update pipeline with rollback.
+//! `dx-agent update` - self-update pipeline with rollback.
 
 use anyhow::{Context, Result, bail};
 use sha2::{Digest, Sha256};
 use std::path::Path;
 
 #[cfg(feature = "agent-runtime")]
-use zeroclaw_runtime::i18n::get_required_cli_string_with_args;
+use dx_agent_runtime::i18n::get_required_cli_string_with_args;
 
 fn update_already_current_message(version: &str) -> String {
     #[cfg(feature = "agent-runtime")]
@@ -33,7 +33,7 @@ fn update_success_message(version: &str) -> String {
 
 const DEFAULT_UPDATE_REPOSITORY: &str = "millercarla211-ctrl/dx-agents";
 const UPDATE_REPOSITORY_ENV: &str = "DX_AGENTS_UPDATE_REPO";
-const PRIMARY_BINARY_NAME: &str = "dx-agents";
+const PRIMARY_BINARY_NAME: &str = "dx-agent";
 const LEGACY_BINARY_NAME: &str = "zeroclaw";
 
 fn update_repository() -> String {
@@ -146,9 +146,9 @@ pub async fn check(target_version: Option<&str>) -> Result<UpdateInfo> {
 /// If `target_version` is `Some`, fetch that specific version instead of latest.
 pub async fn run(target_version: Option<&str>) -> Result<()> {
     // Phase 1: Preflight
-    ::zeroclaw_log::record!(
+    ::dx_agent_log::record!(
         INFO,
-        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
         "Phase 1/6: Preflight checks..."
     );
     let update_info = check(target_version).await?;
@@ -174,9 +174,9 @@ pub async fn run(target_version: Option<&str>) -> Result<()> {
         std::env::current_exe().context("cannot determine current executable path")?;
 
     // Phase 2: Download
-    ::zeroclaw_log::record!(
+    ::dx_agent_log::record!(
         INFO,
-        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
         "Phase 2/6: Downloading..."
     );
     let temp_dir = tempfile::tempdir().context("failed to create temp dir")?;
@@ -189,9 +189,9 @@ pub async fn run(target_version: Option<&str>) -> Result<()> {
     .await?;
 
     // Phase 3: Backup
-    ::zeroclaw_log::record!(
+    ::dx_agent_log::record!(
         INFO,
-        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
         "Phase 3/6: Creating backup..."
     );
     let backup_path = current_exe.with_extension("bak");
@@ -200,25 +200,25 @@ pub async fn run(target_version: Option<&str>) -> Result<()> {
         .context("failed to backup current binary")?;
 
     // Phase 4: Validate
-    ::zeroclaw_log::record!(
+    ::dx_agent_log::record!(
         INFO,
-        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
         "Phase 4/6: Validating download..."
     );
     validate_binary(&download_path).await?;
 
     // Phase 5: Swap
-    ::zeroclaw_log::record!(
+    ::dx_agent_log::record!(
         INFO,
-        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
         "Phase 5/6: Swapping binary..."
     );
     if let Err(e) = swap_binary(&download_path, &current_exe).await {
         // Rollback
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             WARN,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
-                .with_outcome(::zeroclaw_log::EventOutcome::Unknown)
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
+                .with_outcome(::dx_agent_log::EventOutcome::Unknown)
                 .with_attrs(::serde_json::json!({"error": format!("{}", e)})),
             "Swap failed, rolling back"
         );
@@ -234,9 +234,9 @@ pub async fn run(target_version: Option<&str>) -> Result<()> {
     }
 
     // Phase 6: Smoke test
-    ::zeroclaw_log::record!(
+    ::dx_agent_log::record!(
         INFO,
-        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
         "Phase 6/6: Smoke test..."
     );
     match smoke_test(&current_exe).await {
@@ -247,10 +247,10 @@ pub async fn run(target_version: Option<&str>) -> Result<()> {
             Ok(())
         }
         Err(e) => {
-            ::zeroclaw_log::record!(
+            ::dx_agent_log::record!(
                 WARN,
-                ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
-                    .with_outcome(::zeroclaw_log::EventOutcome::Unknown)
+                ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
+                    .with_outcome(::dx_agent_log::EventOutcome::Unknown)
                     .with_attrs(::serde_json::json!({"error": format!("{}", e)})),
                 "Smoke test failed, rolling back"
             );
@@ -386,10 +386,10 @@ async fn download_binary(url: &str, sha256sums_url: Option<&str>, dest: &Path) -
     if let Some(sums_url) = sha256sums_url {
         verify_download_checksum(&bytes, url, sums_url, &client).await?;
     } else {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             WARN,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
-                .with_outcome(::zeroclaw_log::EventOutcome::Unknown),
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
+                .with_outcome(::dx_agent_log::EventOutcome::Unknown),
             "No SHA256SUMS asset found; skipping update download checksum verification"
         );
     }
@@ -442,10 +442,10 @@ async fn verify_download_checksum(
         .context("failed to read SHA256SUMS body")?;
     verify_checksum_bytes(bytes, &asset_name, &sums_text)?;
 
-    ::zeroclaw_log::record!(
+    ::dx_agent_log::record!(
         INFO,
-        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
-            .with_outcome(::zeroclaw_log::EventOutcome::Success)
+        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
+            .with_outcome(::dx_agent_log::EventOutcome::Success)
             .with_attrs(::serde_json::json!({"asset": asset_name})),
         "Update download checksum verified"
     );
@@ -564,7 +564,7 @@ fn extract_zip(archive_bytes: &[u8], dest: &Path) -> Result<()> {
 fn is_expected_binary_file_name(file_name: &str) -> bool {
     matches!(
         file_name,
-        PRIMARY_BINARY_NAME | "dx-agents.exe" | LEGACY_BINARY_NAME | "zeroclaw.exe"
+        PRIMARY_BINARY_NAME | "dx-agent.exe" | LEGACY_BINARY_NAME | "zeroclaw.exe"
     )
 }
 
@@ -793,7 +793,7 @@ mod tests {
 
     #[test]
     fn update_user_agent_uses_dx_agents_name() {
-        assert_eq!(update_user_agent("0.8.0"), "dx-agents/0.8.0");
+        assert_eq!(update_user_agent("0.8.0"), "dx-agent/0.8.0");
     }
 
     #[test]
@@ -878,12 +878,12 @@ mod tests {
         let target = current_target_triple().expect("supported test platform");
         let release = make_release(&[
             &format!("zeroclaw-{target}.tar.gz"),
-            &format!("dx-agents-{target}.tar.gz"),
+            &format!("dx-agent-{target}.tar.gz"),
         ]);
 
         let url = find_asset_url(&release).expect("should select dx-agents asset");
         assert!(
-            url.contains(&format!("dx-agents-{target}.tar.gz")),
+            url.contains(&format!("dx-agent-{target}.tar.gz")),
             "should prefer dx-agents archive, got: {url}"
         );
     }
@@ -891,7 +891,7 @@ mod tests {
     #[test]
     fn installable_release_asset_accepts_dx_agents_windows_zip() {
         assert!(is_installable_release_asset(
-            "dx-agents-x86_64-pc-windows-msvc.zip",
+            "dx-agent-x86_64-pc-windows-msvc.zip",
             "x86_64-pc-windows-msvc"
         ));
     }
@@ -1262,7 +1262,7 @@ mod tests {
             header.set_mode(0o755);
             header.set_cksum();
             builder
-                .append_data(&mut header, "dx-agents", &fake_binary[..])
+                .append_data(&mut header, "dx-agent", &fake_binary[..])
                 .unwrap();
             builder.finish().unwrap();
         }
@@ -1290,7 +1290,7 @@ mod tests {
         let cursor = std::io::Cursor::new(Vec::new());
         let mut zip = zip::ZipWriter::new(cursor);
         let options = zip::write::SimpleFileOptions::default();
-        zip.start_file("dx-agents.exe", options).unwrap();
+        zip.start_file("dx-agent.exe", options).unwrap();
         zip.write_all(fake_binary).unwrap();
         let archive_bytes = zip.finish().unwrap().into_inner();
 
@@ -1304,7 +1304,7 @@ mod tests {
 
     #[test]
     fn version_output_accepts_dx_agents_and_legacy_names() {
-        assert!(version_output_identifies_expected_binary("dx-agents 0.8.0"));
+        assert!(version_output_identifies_expected_binary("dx-agent 0.8.0"));
         assert!(version_output_identifies_expected_binary("zeroclaw 0.8.0"));
         assert!(!version_output_identifies_expected_binary("helper 0.8.0"));
     }

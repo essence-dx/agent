@@ -13,7 +13,7 @@ Think of it as "LSP for agents": the editor launches `dx-agents acp`, sends prom
 
 ## Protocol shape — v1
 
-All messages are JSON-RPC 2.0 (newline-delimited). ZeroClaw implements **protocol version 1**.
+All messages are JSON-RPC 2.0 (newline-delimited). DX Agent implements **protocol version 1**.
 
 ### `initialize`
 
@@ -52,7 +52,7 @@ Handshake. Returns server capabilities.
 
 `loadSession: true` and `sessionCapabilities: {"resume": {}, "close": {}}` indicate that session persistence is active. If the SQLite store could not be opened at startup, all three are absent or false and `session/load`, `session/resume`, and `session/close` will return `SESSION_NOT_FOUND` errors.
 
-`_meta.dxAgents` carries DX Agents-specific extension fields not in the base ACP spec. `_meta.zeroclaw` remains available for older clients. Clients that only implement the base spec can ignore both objects.
+`_meta.dxAgents` carries DX Agents-specific extension fields not in the base ACP spec. `_meta.dx_agent` remains available for older clients. Clients that only implement the base spec can ignore both objects.
 
 The server always responds `protocolVersion: 1`. If you send a client-side `protocolVersion: 0`, you still get `1` back — v0 clients will see parse errors on the new message shapes; see [version compatibility](#version-compatibility) below.
 
@@ -112,7 +112,7 @@ The `prompt` parameter accepts either a plain string or an array of content part
   }}
 ```
 
-`stopReason` is `"end_turn"` on normal completion and `"cancelled"` when the turn was interrupted by `session/cancel`. The ACP completion signal is `stopReason`; ZeroClaw also includes the current final `content` string for existing clients.
+`stopReason` is `"end_turn"` on normal completion and `"cancelled"` when the turn was interrupted by `session/cancel`. The ACP completion signal is `stopReason`; DX Agent also includes the current final `content` string for existing clients.
 
 Errors:
 
@@ -125,7 +125,7 @@ Errors:
 
 ### `session/update` notifications (agent → client)
 
-ZeroClaw sends four kinds of `session/update` notification during a prompt turn. The discriminant is the `sessionUpdate` field inside `update`:
+DX Agent sends four kinds of `session/update` notification during a prompt turn. The discriminant is the `sessionUpdate` field inside `update`:
 
 | `sessionUpdate` value | When emitted | Key fields |
 |---|---|---|
@@ -136,11 +136,11 @@ ZeroClaw sends four kinds of `session/update` notification during a prompt turn.
 
 `toolCallId` on `tool_call` and `tool_call_update` are stable and correlated — the update completing a call carries the same `toolCallId` as the one that opened it.
 
-The `name` field on `tool_call_update` is a ZeroClaw extension (not required by the base ACP spec). Clients can use it for display; it's safe to ignore.
+The `name` field on `tool_call_update` is a DX Agent extension (not required by the base ACP spec). Clients can use it for display; it's safe to ignore.
 
 ### `session/request_permission` (agent → client, outbound request)
 
-When a tool requires user approval (via `always_ask` in the autonomy config, or the `ask_user`/`escalate_to_human` tools), ZeroClaw issues a **JSON-RPC request** from agent to client. The client must reply with a result before the tool call proceeds.
+When a tool requires user approval (via `always_ask` in the autonomy config, or the `ask_user`/`escalate_to_human` tools), DX Agent issues a **JSON-RPC request** from agent to client. The client must reply with a result before the tool call proceeds.
 
 ```json
 ← {"jsonrpc":"2.0","id":"zc-out-0","method":"session/request_permission","params":{
@@ -174,11 +174,11 @@ If the client never replies (crash, network drop, user closes IDE), the request 
 
 `ask_user` uses the same `session/request_permission` mechanism, mapping the question's `choices` to permission options. Free-form (no-choices) `ask_user` is not supported until the [ACP elicitation RFD](https://github.com/zed-industries/agent-client-protocol/blob/main/docs/rfds/elicitation.mdx) lands. Calling `ask_user` without `choices` on an ACP session fast-fails with a clear error.
 
-### `session/cancel` _(ZeroClaw extension)_
+### `session/cancel` _(DX Agent extension)_
 
-Abort an in-flight `session/prompt` turn. This method is a ZeroClaw extension,
+Abort an in-flight `session/prompt` turn. This method is a DX Agent extension,
 not part of the base ACP spec. If ACP later standardizes a conflicting
-`session/cancel`, ZeroClaw will move its extension to `_meta/session/cancel`.
+`session/cancel`, DX Agent will move its extension to `_meta/session/cancel`.
 
 **Cancel vs. stop:** `session/cancel` aborts an in-flight prompt turn and returns `stopReason: "cancelled"` with any streamed text accumulated up to the interrupt point. `session/stop` gracefully ends the session after the current turn completes — it waits for the turn to finish rather than interrupting it.
 
@@ -199,18 +199,18 @@ The canonical parameter is `sessionId`; `session_id` is accepted as a compatibil
 
 If no turn is active for the session, the cancel is a noop — it succeeds silently without error. This follows ACP notification semantics: notifications must not produce errors.
 
-### `session/stop` _(ZeroClaw extension)_
+### `session/stop` _(DX Agent extension)_
 
-Cleanly end a session. Not in the base ACP spec — ZeroClaw-specific. If a future ACP spec revision adds `session/stop` with different semantics, this will be renamed `_meta/session/stop`.
+Cleanly end a session. Not in the base ACP spec — DX Agent-specific. If a future ACP spec revision adds `session/stop` with different semantics, this will be renamed `_meta/session/stop`.
 
 ```json
 → {"jsonrpc":"2.0","id":4,"method":"session/stop","params":{"sessionId":"s-ab12cd"}}
 ← {"jsonrpc":"2.0","id":4,"result":{"sessionId": "s-ab12cd", "stopped":true}}
 ```
 
-### `session/update` (client → server) _(ZeroClaw extension)_
+### `session/update` (client → server) _(DX Agent extension)_
 
-ZeroClaw also accepts inbound `session/update` (and the legacy `session/event` alias) notifications from the client for custom event injection. Not in the base ACP spec — ZeroClaw-specific. If the ACP spec later defines an inbound `session/update` with different semantics, this will be renamed `_meta/session/update`.
+DX Agent also accepts inbound `session/update` (and the legacy `session/event` alias) notifications from the client for custom event injection. Not in the base ACP spec — DX Agent-specific. If the ACP spec later defines an inbound `session/update` with different semantics, this will be renamed `_meta/session/update`.
 
 ## Session persistence
 
@@ -225,7 +225,7 @@ Sessions survive process restarts. A session created in one `dx-agents acp` invo
 
 Sessions are not automatically deleted. Use `session/close` to deactivate a session without deleting it, then `session/load` or `session/resume` to bring it back.
 
-### `session/load` _(ZeroClaw extension)_
+### `session/load` _(DX Agent extension)_
 
 Restore a previously persisted session with **full history replay**. The server seeds the agent with the stored conversation history, then streams that history back to the client as a sequence of `session/update` notifications before returning. The client receives the same update stream it would have seen had the session never ended.
 
@@ -252,7 +252,7 @@ Errors:
 | `-32602` `INVALID_PARAMS` | Session is already active — call `session/close` first |
 | `-32603` `INTERNAL_ERROR` | SQLite read failure |
 
-### `session/resume` _(ZeroClaw extension)_
+### `session/resume` _(DX Agent extension)_
 
 Restore a previously persisted session **without history replay**. The agent is seeded with the stored conversation history so it has full context for the next turn, but no `session/update` notifications are emitted. Use this when the client already has the history from a previous connection and only needs the agent state restored.
 
@@ -265,7 +265,7 @@ After `session/resume` returns, the session is active and ready to accept `sessi
 
 **Load vs. resume:** use `session/load` when reconnecting after an unexpected disconnect and the client needs to rebuild its UI from the stored history. Use `session/resume` when the client already has the history (e.g., it stored it locally) and only needs the server-side agent state restored.
 
-### `session/close` _(ZeroClaw extension)_
+### `session/close` _(DX Agent extension)_
 
 Deactivate an active session: cancels any in-flight turn, removes the session from the in-memory active set, and unregisters the ACP back-channel. The session record in the SQLite store is **not deleted** — the session can still be restored with `session/load` or `session/resume` later.
 
@@ -322,7 +322,7 @@ dx-agents-acp-bridge --config-dir /tmp/zeroclaw
 dx-agents-acp-bridge --config-dir=/tmp/zeroclaw
 ```
 
-You can also supply the bearer token directly via `DX_AGENTS_ACP_BRIDGE_TOKEN` if you prefer not to rely on the cached token file. `ZEROCLAW_ACP_BRIDGE_TOKEN` remains supported for older installations.
+You can also supply the bearer token directly via `DX_AGENTS_ACP_BRIDGE_TOKEN` if you prefer not to rely on the cached token file. `DX_AGENT_ACP_BRIDGE_TOKEN` remains supported for older installations.
 
 ## Version compatibility
 
@@ -357,12 +357,12 @@ This separation ensures that ephemeral coding-assist conversations do not pollut
 
 ## Code reference
 
-- ACP server: `crates/zeroclaw-channels/src/orchestrator/acp_server.rs`
-- ACP back-channel: `crates/zeroclaw-channels/src/acp_channel.rs`
-- Session store (SQLite): `crates/zeroclaw-infra/src/acp_session_store.rs`
-- Gateway ACP-over-WebSocket endpoint: `crates/zeroclaw-gateway/src/acp.rs`
-- Per-session path enforcement: `crates/zeroclaw-config/src/policy.rs` (`SecurityPolicy::from_config`), `crates/zeroclaw-runtime/src/agent/agent.rs` (`from_config_with_session_cwd_and_mcp`)
-- OS-level sandbox detection/backends: `crates/zeroclaw-runtime/src/security/detect.rs`, `landlock.rs`, `bubblewrap.rs`, `seatbelt.rs`
+- ACP server: `crates/dx-agent-channels/src/orchestrator/acp_server.rs`
+- ACP back-channel: `crates/dx-agent-channels/src/acp_channel.rs`
+- Session store (SQLite): `crates/dx-agent-infra/src/acp_session_store.rs`
+- Gateway ACP-over-WebSocket endpoint: `crates/dx-agent-gateway/src/acp.rs`
+- Per-session path enforcement: `crates/dx-agent-config/src/policy.rs` (`SecurityPolicy::from_config`), `crates/dx-agent-runtime/src/agent/agent.rs` (`from_config_with_session_cwd_and_mcp`)
+- OS-level sandbox detection/backends: `crates/dx-agent-runtime/src/security/detect.rs`, `landlock.rs`, `bubblewrap.rs`, `seatbelt.rs`
 
 ## See also
 

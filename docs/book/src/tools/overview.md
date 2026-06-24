@@ -34,13 +34,13 @@ Optional, feature-gated:
 
 ## Extension protocols
 
-Beyond built-in tools, ZeroClaw supports the **[MCP](./mcp.md)** (Model Context Protocol) extension surface. Connect any MCP server (Claude Code's filesystem, Playwright, your own) and the agent picks up its tools at startup.
+Beyond built-in tools, DX Agent supports the **[MCP](./mcp.md)** (Model Context Protocol) extension surface. Connect any MCP server (Claude Code's filesystem, Playwright, your own) and the agent picks up its tools at startup.
 
-For IDE-side integration where an editor drives ZeroClaw as a subprocess, see [ACP](../channels/acp.md) — Agent Client Protocol lives under channels since it's an inbound session-management surface, not a tool the agent invokes.
+For IDE-side integration where an editor drives DX Agent as a subprocess, see [ACP](../channels/acp.md) — Agent Client Protocol lives under channels since it's an inbound session-management surface, not a tool the agent invokes.
 
 ## Authoring a tool
 
-Implement the `Tool` trait in `zeroclaw-api`:
+Implement the `Tool` trait in `dx-agent-api`:
 
 ```rust
 pub trait Tool: Send + Sync {
@@ -57,7 +57,7 @@ Register via the runtime's tool factory. See [Developing → Plugin protocol](..
 
 Tool descriptions are [Mozilla Fluent](https://projectfluent.org/) strings — one per tool, localised per locale. This keeps tool descriptions terse in the model's context window while allowing UI localisation.
 
-Source of truth: `crates/zeroclaw-runtime/locales/en/tools.ftl`. Translations are generated and maintained via `cargo fluent fill --locale <code>` (see [Maintainers → Docs & Translations](../maintainers/docs-and-translations.md)).
+Source of truth: `crates/dx-agent-runtime/locales/en/tools.ftl`. Translations are generated and maintained via `cargo fluent fill --locale <code>` (see [Maintainers → Docs & Translations](../maintainers/docs-and-translations.md)).
 
 ## Risk and approval
 

@@ -11,7 +11,7 @@ use dx_agents::observability::{NoopObserver, Observer};
 use dx_agents::providers::{ChatResponse, ModelProvider, ToolCall};
 use dx_agents::tools::Tool;
 use std::sync::Arc;
-use zeroclaw_api::memory_traits::MemoryStrategy;
+use dx_agent_api::memory_traits::MemoryStrategy;
 
 /// Create an in-memory "none" backend for tests.
 pub fn make_memory() -> Arc<dyn Memory> {

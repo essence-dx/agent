@@ -27,7 +27,7 @@ pub fn take_screenshot() -> Result<ScreenshotResult, String> {
         }
 
         let tmp = std::env::temp_dir().join(format!(
-            "dx-agents-screenshot-{}-{}.png",
+            "dx-agent-screenshot-{}-{}.png",
             std::process::id(),
             chrono_ish_nanos()
         ));

@@ -1,4 +1,4 @@
-pub use zeroclaw_memory::*;
+pub use dx_agent_memory::*;
 
 // These stay in root (depend on root crate types).
 pub mod cli;

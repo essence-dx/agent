@@ -3,8 +3,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{Result, anyhow};
 use serde::Serialize;
-use zeroclaw_config::schema::{Config, ModelProviderConfig};
-use zeroclaw_providers::provider_catalog::ModelProviderCatalogListing;
+use dx_agent_config::schema::{Config, ModelProviderConfig};
+use dx_agent_providers::provider_catalog::ModelProviderCatalogListing;
 
 const LIVE_MODEL_LIST_TIMEOUT_SECS: u64 = 10;
 const LIVE_PROVIDER_TIMEOUT_SECS: u64 = 10;
@@ -253,7 +253,7 @@ async fn probe_provider_target(
     target: ProviderLiveProbeTarget,
 ) -> ProviderLiveProbeResult {
     let started = Instant::now();
-    let mut options = zeroclaw_providers::provider_runtime_options_for_alias(
+    let mut options = dx_agent_providers::provider_runtime_options_for_alias(
         config,
         &target.family,
         &target.alias,
@@ -261,7 +261,7 @@ async fn probe_provider_target(
     options.provider_timeout_secs = Some(LIVE_PROVIDER_TIMEOUT_SECS);
     options.provider_max_tokens = Some(LIVE_PROVIDER_MAX_TOKENS);
 
-    let provider = match zeroclaw_providers::create_model_provider_for_alias(
+    let provider = match dx_agent_providers::create_model_provider_for_alias(
         config,
         &target.family,
         &target.alias,
@@ -270,7 +270,7 @@ async fn probe_provider_target(
     ) {
         Ok(provider) => provider,
         Err(error) => {
-            let error_text = zeroclaw_providers::format_error_chain(error.as_ref());
+            let error_text = dx_agent_providers::format_error_chain(error.as_ref());
             let error_kind = classify_live_probe_error(&error_text);
             return ProviderLiveProbeResult::failed(
                 &target.alias,
@@ -301,7 +301,7 @@ async fn probe_provider_target(
             capabilities,
         ),
         Ok(Err(error)) => {
-            let error_text = zeroclaw_providers::format_error_chain(error.as_ref());
+            let error_text = dx_agent_providers::format_error_chain(error.as_ref());
             let error_kind = classify_live_probe_error(&error_text);
             ProviderLiveProbeResult::failed(
                 &target.alias,

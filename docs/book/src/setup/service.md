@@ -1,6 +1,6 @@
 # Service Management
 
-ZeroClaw ships with first-class service integration for systemd (Linux), launchctl (macOS), and Task Scheduler / Windows Service (Windows). All three are driven by one CLI surface:
+DX Agent ships with first-class service integration for systemd (Linux), launchctl (macOS), and Task Scheduler / Windows Service (Windows). All three are driven by one CLI surface:
 
 ```bash
 zeroclaw service install     # register the service
@@ -11,7 +11,7 @@ zeroclaw service status      # running / stopped, last exit code
 zeroclaw service uninstall   # remove it
 ```
 
-The platform-specific backends are implemented in `crates/zeroclaw-runtime/src/service/`. You don't have to think about them — but knowing what they produce helps when debugging.
+The platform-specific backends are implemented in `crates/dx-agent-runtime/src/service/`. You don't have to think about them — but knowing what they produce helps when debugging.
 
 ## Linux — systemd
 
@@ -43,7 +43,7 @@ journalctl --user -u zeroclaw --since "1h ago"
 
 ### System-scope (root) service
 
-If you need ZeroClaw to start before user login (headless SBCs, VPSes), run the install command as root:
+If you need DX Agent to start before user login (headless SBCs, VPSes), run the install command as root:
 
 ```bash
 sudo zeroclaw service install
@@ -64,15 +64,15 @@ rc-update add zeroclaw default    # start on boot
 
 ## macOS — LaunchAgent
 
-`zeroclaw service install` writes `~/Library/LaunchAgents/com.zeroclaw.daemon.plist` and loads it.
+`zeroclaw service install` writes `~/Library/LaunchAgents/com.dx_agent.daemon.plist` and loads it.
 
 ```bash
 launchctl list | grep zeroclaw
-launchctl unload ~/Library/LaunchAgents/com.zeroclaw.daemon.plist
-launchctl load ~/Library/LaunchAgents/com.zeroclaw.daemon.plist
+launchctl unload ~/Library/LaunchAgents/com.dx_agent.daemon.plist
+launchctl load ~/Library/LaunchAgents/com.dx_agent.daemon.plist
 ```
 
-Logs go to `~/Library/Logs/ZeroClaw/zeroclaw.log` (stdout) and `zeroclaw.err` (stderr).
+Logs go to `~/Library/Logs/DX Agent/zeroclaw.log` (stdout) and `zeroclaw.err` (stderr).
 
 ### Homebrew-managed
 
@@ -94,12 +94,12 @@ Don't mix `zeroclaw service` CLI commands with `brew services` — pick one. Bot
 - Condition: battery, idle, and power-save conditions are **all disabled** (otherwise the task would stop unexpectedly)
 - Action: run `zeroclaw daemon` hidden
 
-Verify in Task Scheduler GUI (`taskschd.msc`) under Task Scheduler Library → ZeroClaw.
+Verify in Task Scheduler GUI (`taskschd.msc`) under Task Scheduler Library → DX Agent.
 
-Logs go to `%LOCALAPPDATA%\ZeroClaw\logs\`:
+Logs go to `%LOCALAPPDATA%\DX Agent\logs\`:
 
 ```cmd
-type %LOCALAPPDATA%\ZeroClaw\logs\zeroclaw.log
+type %LOCALAPPDATA%\DX Agent\logs\zeroclaw.log
 ```
 
 ### Windows Service (system-scope)
@@ -114,19 +114,19 @@ zeroclaw service install
 Running elevated causes the installer to register a real Windows Service under `LocalSystem` instead of a user-scoped scheduled task. Control via `services.msc` or:
 
 ```cmd
-sc query ZeroClaw
-sc start ZeroClaw
-sc stop ZeroClaw
+sc query DX Agent
+sc start DX Agent
+sc stop DX Agent
 ```
 
 ## Config path resolution
 
 The service reads config from whichever workspace it was installed against. Order:
 
-1. `$ZEROCLAW_CONFIG_DIR/config.toml` if set
-2. `$ZEROCLAW_WORKSPACE/.zeroclaw/config.toml` if set
-3. `$HOMEBREW_PREFIX/var/zeroclaw/.zeroclaw/config.toml` if installed via Homebrew
-4. `~/.zeroclaw/config.toml` (Linux/macOS) or `%USERPROFILE%\.zeroclaw\config.toml` (Windows)
+1. `$DX_AGENT_CONFIG_DIR/config.toml` if set
+2. `$DX_AGENT_WORKSPACE/.dx_agent/config.toml` if set
+3. `$HOMEBREW_PREFIX/var/zeroclaw/.dx_agent/config.toml` if installed via Homebrew
+4. `~/.dx_agent/config.toml` (Linux/macOS) or `%USERPROFILE%\.dx_agent\config.toml` (Windows)
 
 If your service seems to ignore config changes, check which path the daemon is reading:
 

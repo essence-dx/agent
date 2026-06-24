@@ -1,6 +1,6 @@
 # Operations — Overview
 
-How to run ZeroClaw in production. The surface is intentionally small: one binary, one config file, one SQLite workspace. Most "operations" is "systemd and journald".
+How to run DX Agent in production. The surface is intentionally small: one binary, one config file, one SQLite workspace. Most "operations" is "systemd and journald".
 
 This section covers:
 
@@ -11,7 +11,7 @@ This section covers:
 
 ## The shape of a deployment
 
-A typical always-on ZeroClaw install is:
+A typical always-on DX Agent install is:
 
 ```
 zeroclaw service (systemd / launchctl / Windows Service)
@@ -21,9 +21,9 @@ zeroclaw service (systemd / launchctl / Windows Service)
   │   ├── channel listeners           — Discord / Slack / Matrix / WebSocket
   │   ├── cron scheduler              — scheduled SOPs and jobs
   │   └── agent loop (per session)    — provider call + tool execution
-  ├── SQLite workspace                — ~/.zeroclaw/workspace/
-  ├── config.toml                     — ~/.zeroclaw/config.toml
-  ├── tool-receipts log               — ~/.zeroclaw/workspace/receipts/
+  ├── SQLite workspace                — ~/.dx_agent/workspace/
+  ├── config.toml                     — ~/.dx_agent/config.toml
+  ├── tool-receipts log               — ~/.dx_agent/workspace/receipts/
   └── platform logs                   — journald / launchctl / Event Log
 ```
 
@@ -42,10 +42,10 @@ Is the process running?
 systemctl --user is-active zeroclaw
 
 # macOS
-launchctl list | grep -c com.zeroclaw.daemon
+launchctl list | grep -c com.dx_agent.daemon
 
 # Windows
-sc query ZeroClaw | findstr STATE
+sc query DX Agent | findstr STATE
 ```
 
 If it's dying repeatedly, check [Troubleshooting → Daemon keeps restarting](./troubleshooting.md).
@@ -99,7 +99,7 @@ Blocks and denials are worth looking at — if the agent is repeatedly hitting t
 
 ## Capacity
 
-A single ZeroClaw instance can handle:
+A single DX Agent instance can handle:
 
 - Multiple concurrent conversations across all channels
 - Tool calls at whatever rate the provider and sandbox allow
@@ -113,21 +113,21 @@ For multi-tenant hosting, see the proposal in #2765 (closed, historical — the 
 
 What to back up:
 
-- `~/.zeroclaw/config.toml` — contains channel credentials (encrypted if using secrets store)
-- `~/.zeroclaw/workspace/*.db` — SQLite conversation memory
-- `~/.zeroclaw/secrets.key` — master key for the encrypted secrets store (if used). **Without it, the config's secrets are unrecoverable.**
-- `~/.zeroclaw/workspace/receipts/` — tool-receipts log
+- `~/.dx_agent/config.toml` — contains channel credentials (encrypted if using secrets store)
+- `~/.dx_agent/workspace/*.db` — SQLite conversation memory
+- `~/.dx_agent/secrets.key` — master key for the encrypted secrets store (if used). **Without it, the config's secrets are unrecoverable.**
+- `~/.dx_agent/workspace/receipts/` — tool-receipts log
 
-A plain `tar czf zeroclaw-$(date +%F).tar.gz ~/.zeroclaw` covers everything. Restic, borg, or Duplicacy work fine for incremental backups.
+A plain `tar czf zeroclaw-$(date +%F).tar.gz ~/.dx_agent` covers everything. Restic, borg, or Duplicacy work fine for incremental backups.
 
-**Do not back up `~/.zeroclaw/workspace/cache/`** — it's regenerable and can be large.
+**Do not back up `~/.dx_agent/workspace/cache/`** — it's regenerable and can be large.
 
 ## Updates
 
 The service does not auto-update. Subscribe to the release feed (GitHub releases or the Discord `#releases` channel — see [Contributing → Communication](../contributing/communication.md)). Typical update cadence:
 
 1. Read the release notes
-2. Back up `~/.zeroclaw/`
+2. Back up `~/.dx_agent/`
 3. Update the binary (`brew upgrade`, bootstrap re-run, or `cargo install --force`)
 4. `zeroclaw service restart`
 5. Verify `/health/*` endpoints return green

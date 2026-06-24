@@ -17,8 +17,8 @@
 //! Safety always wins.
 
 // robot-kit is an independent hardware crate that does not depend on
-// `zeroclaw-spawn` (or any orchestrator crate), so it cannot use
-// `zeroclaw_spawn::spawn!`. Bump-recovery
+// `dx-agent-spawn` (or any orchestrator crate), so it cannot use
+// `dx_agent_spawn::spawn!`. Bump-recovery
 // tasks here run outside any orchestrator span. See clippy.toml.
 #![allow(clippy::disallowed_methods)]
 
@@ -158,10 +158,10 @@ impl SafetyMonitor {
                 ));
             }
             // Allow reduced distance
-            ::zeroclaw_log::record!(
+            ::dx_agent_log::record!(
                 WARN,
-                ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
-                    .with_outcome(::zeroclaw_log::EventOutcome::Unknown),
+                ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
+                    .with_outcome(::dx_agent_log::EventOutcome::Unknown),
                 &format!(
                     "Reducing {} distance from {:.2}m to {:.2}m due to obstacle",
                     direction, distance, safe_distance
@@ -203,10 +203,10 @@ impl SafetyMonitor {
 
     /// Trigger emergency stop
     pub async fn emergency_stop(&self, reason: &str) {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             ERROR,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Fail)
-                .with_outcome(::zeroclaw_log::EventOutcome::Failure),
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Fail)
+                .with_outcome(::dx_agent_log::EventOutcome::Failure),
             &format!("EMERGENCY STOP: {}", reason)
         );
         self.state.estop_active.store(true, Ordering::SeqCst);
@@ -220,9 +220,9 @@ impl SafetyMonitor {
 
     /// Reset emergency stop (requires explicit action)
     pub async fn reset_estop(&self) {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             INFO,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
             "E-STOP RESET"
         );
         self.state.estop_active.store(false, Ordering::SeqCst);
@@ -262,10 +262,10 @@ impl SafetyMonitor {
 
     /// Report bump sensor triggered
     pub async fn bump_detected(&self, sensor: &str) {
-        ::zeroclaw_log::record!(
+        ::dx_agent_log::record!(
             WARN,
-            ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
-                .with_outcome(::zeroclaw_log::EventOutcome::Unknown),
+            ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note)
+                .with_outcome(::dx_agent_log::EventOutcome::Unknown),
             &format!("BUMP DETECTED: {}", sensor)
         );
 
@@ -326,7 +326,7 @@ impl SafetyMonitor {
                 _ = tokio::time::sleep(Duration::from_secs(1)) => {
                     // Check for sensor timeout
                     if last_sensor_update.elapsed() > Duration::from_secs(5) {
-                        ::zeroclaw_log::record!(WARN, ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note).with_outcome(::zeroclaw_log::EventOutcome::Unknown), "Sensor data stale - blocking movement");
+                        ::dx_agent_log::record!(WARN, ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note).with_outcome(::dx_agent_log::EventOutcome::Unknown), "Sensor data stale - blocking movement");
                         self.state.can_move.store(false, Ordering::SeqCst);
                         *self.state.block_reason.write().await =
                             Some("Sensor data stale".to_string());
@@ -342,7 +342,7 @@ impl SafetyMonitor {
 
                         let elapsed = Duration::from_millis(now_ms - last_cmd_ms);
                         if elapsed > watchdog_timeout {
-                            ::zeroclaw_log::record!(INFO, ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note), &format!("Watchdog timeout - no commands for {:?}", elapsed));
+                            ::dx_agent_log::record!(INFO, ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note), &format!("Watchdog timeout - no commands for {:?}", elapsed));
                             let _ = self.event_tx.send(SafetyEvent::WatchdogTimeout);
                             // Don't block movement, just notify
                         }
@@ -411,9 +411,9 @@ impl crate::traits::Tool for SafeDrive {
                 modified_args["speed"] = serde_json::json!(original_speed * speed_mult);
 
                 if speed_mult < 1.0 {
-                    ::zeroclaw_log::record!(
+                    ::dx_agent_log::record!(
                         INFO,
-                        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note),
+                        ::dx_agent_log::Event::new(module_path!(), ::dx_agent_log::Action::Note),
                         &format!(
                             "Safety: Reducing speed to {:.0}% due to obstacle proximity",
                             speed_mult * 100.0

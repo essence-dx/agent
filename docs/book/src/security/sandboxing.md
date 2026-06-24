@@ -96,7 +96,7 @@ SUID-based sandbox. Older but widely available.
 sudo apt install firejail
 ```
 
-Firejail's default profile is fairly permissive; ZeroClaw applies a custom profile. Pass extra args with `firejail_args` on the risk profile.
+Firejail's default profile is fairly permissive; DX Agent applies a custom profile. Pass extra args with `firejail_args` on the risk profile.
 
 ### Docker
 
@@ -118,13 +118,13 @@ Pros: strong isolation, works on any OS. Cons: per-invocation container startup 
 
 ### Seatbelt (macOS)
 
-Native macOS sandbox (`sandbox-exec`). Profiles are SBPL — ZeroClaw bundles one for tool runs. Works on macOS 10.11+.
+Native macOS sandbox (`sandbox-exec`). Profiles are SBPL — DX Agent bundles one for tool runs. Works on macOS 10.11+.
 
 Limitation: some CLI tools (older `git`, some Homebrew-linked binaries) don't cooperate with Seatbelt's file-access rules. If you see "Operation not permitted" errors from the agent's shell calls on macOS, the tool needs broader filesystem access — consider switching to Docker.
 
 ### `none`
 
-No sandboxing. Tools run with the full privileges of the ZeroClaw service user. This is what YOLO mode enables. Loud, obvious, intentional.
+No sandboxing. Tools run with the full privileges of the DX Agent service user. This is what YOLO mode enables. Loud, obvious, intentional.
 
 ## Troubleshooting
 
@@ -134,6 +134,6 @@ No sandboxing. Tools run with the full privileges of the ZeroClaw service user. 
 
 ## Code reference
 
-- Detection: `crates/zeroclaw-runtime/src/security/detect.rs`
-- Backends: `crates/zeroclaw-runtime/src/security/sandbox/` (one file per backend)
-- Schema: `RiskProfileConfig` and `DockerRuntimeConfig` in `crates/zeroclaw-config/src/schema.rs`
+- Detection: `crates/dx-agent-runtime/src/security/detect.rs`
+- Backends: `crates/dx-agent-runtime/src/security/sandbox/` (one file per backend)
+- Schema: `RiskProfileConfig` and `DockerRuntimeConfig` in `crates/dx-agent-config/src/schema.rs`

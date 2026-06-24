@@ -1,6 +1,6 @@
 # zerocode
 
-zerocode is ZeroClaw's terminal interface for managing configuration,
+zerocode is DX Agent's terminal interface for managing configuration,
 chatting with agents, and monitoring your daemon. It connects over a local
 IPC stream — a Unix domain socket on Unix, a named pipe on Windows — or
 over WebSocket Secure (WSS) for remote use.
@@ -28,18 +28,18 @@ Connect zerocode on your workstation to a daemon running on another machine
 
    ```bash
    openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
-     -keyout ~/.zeroclaw/wss.key \
-     -out ~/.zeroclaw/wss.cert \
+     -keyout ~/.dx_agent/wss.key \
+     -out ~/.dx_agent/wss.cert \
      -days 3650 -nodes -subj '/CN=zeroclaw'
    ```
 
-2. **Enable WSS in `~/.zeroclaw/config.toml`:**
+2. **Enable WSS in `~/.dx_agent/config.toml`:**
 
    ```toml
    [wss]
    enabled = true
-   cert_path = "/home/youruser/.zeroclaw/wss.cert"
-   key_path = "/home/youruser/.zeroclaw/wss.key"
+   cert_path = "/home/youruser/.dx_agent/wss.cert"
+   key_path = "/home/youruser/.dx_agent/wss.key"
    ```
 
    Use absolute paths. The config does not expand `~`.

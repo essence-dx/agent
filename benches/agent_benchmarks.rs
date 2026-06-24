@@ -1,4 +1,4 @@
-//! Performance benchmarks for ZeroClaw hot paths.
+//! Performance benchmarks for DX Agent hot paths.
 //!
 //! Benchmarks cover:
 //!   - Tool dispatch (XML parsing, native parsing)

@@ -1,1 +1,1 @@
-pub use zeroclaw_infra::stall_watchdog::*;
+pub use dx_agent_infra::stall_watchdog::*;

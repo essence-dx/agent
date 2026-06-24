@@ -1,12 +1,12 @@
-# ZeroClaw on Nucleo-F401RE — Step-by-Step Guide
+# DX Agent on Nucleo-F401RE — Step-by-Step Guide
 
-Run ZeroClaw on your Mac or Linux host. Connect a Nucleo-F401RE via USB. Control GPIO (LED, pins) via Telegram or CLI.
+Run DX Agent on your Mac or Linux host. Connect a Nucleo-F401RE via USB. Control GPIO (LED, pins) via Telegram or CLI.
 
 ---
 
 ## Get Board Info via Telegram (No Firmware Needed)
 
-ZeroClaw can read chip info from the Nucleo over USB **without flashing any firmware**. Message your Telegram bot:
+DX Agent can read chip info from the Nucleo over USB **without flashing any firmware**. Message your Telegram bot:
 
 - *"What board info do I have?"*
 - *"Board info"*
@@ -29,12 +29,12 @@ zeroclaw hardware discover
 
 ## What's Included (No Code Changes Needed)
 
-ZeroClaw includes everything for Nucleo-F401RE:
+DX Agent includes everything for Nucleo-F401RE:
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | Firmware | `firmware/nucleo/` | Embassy Rust — USART2 (115200), gpio_read, gpio_write |
-| Serial peripheral | `crates/zeroclaw-hardware/src/peripherals/serial.rs` | JSON-over-serial protocol (same as Arduino/ESP32) |
+| Serial peripheral | `crates/dx-agent-hardware/src/peripherals/serial.rs` | JSON-over-serial protocol (same as Arduino/ESP32) |
 | Flash command | `zeroclaw peripheral flash-nucleo` | Builds firmware, flashes via probe-rs |
 
 Protocol: newline-delimited JSON. Request: `{"id":"1","cmd":"gpio_write","args":{"pin":13,"value":1}}`. Response: `{"id":"1","ok":true,"result":"done"}`.
@@ -56,7 +56,7 @@ Protocol: newline-delimited JSON. Request: `{"id":"1","cmd":"gpio_write","args":
 1. Connect Nucleo to your Mac/Linux via USB.
 2. The board appears as a USB device (ST-Link). No separate driver needed on modern systems.
 
-### 1.2 Flash via ZeroClaw
+### 1.2 Flash via DX Agent
 
 From the zeroclaw repo root:
 
@@ -85,7 +85,7 @@ USART2 (PA2/PA3) is bridged to the ST-Link's virtual COM port, so the host sees 
 
 ---
 
-## Phase 3: Configure ZeroClaw
+## Phase 3: Configure DX Agent
 
 Enable `[peripherals]` and add a `[[peripherals.boards]]` entry for the Nucleo (`board = "nucleo-f401re"`, `transport = "serial"`, `path = "/dev/cu.usbmodem101"` — adjust to your serial port). See the [Config reference](../reference/config.md) for all fields.
 

@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::mattermost::*;
+pub use dx_agent_channels::mattermost::*;

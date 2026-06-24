@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::reddit::*;
+pub use dx_agent_channels::reddit::*;

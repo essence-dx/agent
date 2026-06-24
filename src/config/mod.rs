@@ -1,10 +1,10 @@
 //! Binary-side config module. Pure re-export surface — the real types and
-//! helpers live in `zeroclaw-config`. Everything the binary needs (schema,
+//! helpers live in `dx-agent-config`. Everything the binary needs (schema,
 //! traits, property helpers) is pulled through here so `crate::config::*`
 //! continues to resolve for callers that predate the crate split.
 
-pub use zeroclaw_config::migration;
-pub use zeroclaw_config::providers;
+pub use dx_agent_config::migration;
+pub use dx_agent_config::providers;
 pub mod schema;
 pub mod traits;
 
@@ -42,7 +42,7 @@ pub use schema::{
 pub use schema::ModelProviderConfig;
 // Per-family model model_provider configs (typed split — #6273). Re-exported here
 // so tests + downstream binary callers can construct typed family entries
-// without reaching into `zeroclaw_config::schema` directly.
+// without reaching into `dx_agent_config::schema` directly.
 pub use schema::{
     Ai21ModelProviderConfig, AihubmixModelProviderConfig, AnthropicModelProviderConfig,
     AnyscaleModelProviderConfig, AstraiModelProviderConfig, AvianModelProviderConfig,
@@ -71,10 +71,10 @@ pub use traits::PropFieldInfo;
 pub use traits::PropKind;
 pub use traits::SecretFieldInfo;
 
-// Property helpers — single source of truth in zeroclaw-config.
+// Property helpers — single source of truth in dx-agent-config.
 #[cfg(feature = "schema-export")]
-pub use zeroclaw_config::helpers::enum_variants;
-pub use zeroclaw_config::helpers::{
+pub use dx_agent_config::helpers::enum_variants;
+pub use dx_agent_config::helpers::{
     make_prop_field, route_hashmap_path, serde_get_prop, serde_set_prop,
 };
 

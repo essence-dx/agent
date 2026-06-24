@@ -66,7 +66,7 @@ enabled = true
 webhook_key = "..."                 # key from the group bot webhook URL
 ```
 
-WeCom Bot Webhook is send-only through the group bot webhook API. Use it for simple outbound delivery into a WeCom group when ZeroClaw does not need to receive messages from WeCom.
+WeCom Bot Webhook is send-only through the group bot webhook API. Use it for simple outbound delivery into a WeCom group when DX Agent does not need to receive messages from WeCom.
 
 ## WeCom channel choices
 
@@ -93,13 +93,13 @@ max_file_size_mb = 20
 # proxy_url = "http://127.0.0.1:7890"  # optional per-channel override
 ```
 
-This channel connects to WeCom's AI Bot long-connection API over WebSocket. Use it when ZeroClaw needs to receive WeCom messages and reply as the AI Bot. For simple outbound-only group webhook delivery, use `[channels.wecom.<alias>]` instead.
+This channel connects to WeCom's AI Bot long-connection API over WebSocket. Use it when DX Agent needs to receive WeCom messages and reply as the AI Bot. For simple outbound-only group webhook delivery, use `[channels.wecom.<alias>]` instead.
 
 The WebSocket is only the transport. The channel still implements WeCom-specific subscription/auth, `msg_callback` parsing, `aibot_respond_msg` / `aibot_send_msg` replies, request acknowledgement handling, allowlists, group addressing, and encrypted attachment handling. Enabling `wecom_ws` does not change existing webhook behavior.
 
 Access control is explicit. If both `allowed_users` and `allowed_groups` are empty, inbound messages are denied. Use `"*"` only for controlled test deployments.
 
-Set `bot_name` to the visible WeCom robot name when using the channel in groups. This lets ZeroClaw recognize messages such as `@danya say hi` as addressed to the bot during reply-intent prechecks.
+Set `bot_name` to the visible WeCom robot name when using the channel in groups. This lets DX Agent recognize messages such as `@danya say hi` as addressed to the bot during reply-intent prechecks.
 
 Attachments sent by WeCom can be downloaded into the workspace cache and represented to the model as local markers such as `[IMAGE:/absolute/path.png]` or `[Document: /absolute/path.bin]`.
 

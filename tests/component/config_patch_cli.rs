@@ -8,9 +8,9 @@ use std::time::Duration;
 use tower::ServiceExt;
 use dx_agents::gateway::{self, AppState};
 use dx_agents::providers::Provider;
-use zeroclaw_config::schema::Config;
-use zeroclaw_memory::NoneMemory;
-use zeroclaw_runtime::security::PairingGuard;
+use dx_agent_config::schema::Config;
+use dx_agent_memory::NoneMemory;
+use dx_agent_runtime::security::PairingGuard;
 
 struct MockProvider;
 
@@ -52,7 +52,7 @@ fn test_state(config: Config) -> AppState {
         nextcloud_talk_webhook_secret: None,
         wati: None,
         gmail_push: None,
-        observer: Arc::new(zeroclaw_runtime::observability::NoopObserver),
+        observer: Arc::new(dx_agent_runtime::observability::NoopObserver),
         tools_registry: Arc::new(Vec::new()),
         cost_tracker: None,
         event_tx: tokio::sync::broadcast::channel(16).0,
@@ -66,7 +66,7 @@ fn test_state(config: Config) -> AppState {
         session_queue: Arc::new(gateway::session_queue::SessionActorQueue::new(8, 30, 600)),
         device_registry: None,
         pending_pairings: None,
-        canvas_store: zeroclaw_runtime::tools::CanvasStore::new(),
+        canvas_store: dx_agent_runtime::tools::CanvasStore::new(),
         #[cfg(feature = "webauthn")]
         webauthn: None,
         cancel_tokens: Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())),
@@ -76,7 +76,7 @@ fn test_state(config: Config) -> AppState {
 fn run_cli_patch(config_dir: &std::path::Path, patch_doc: &[u8]) -> serde_json::Value {
     let bin = env!("CARGO_BIN_EXE_zeroclaw");
     let output = Command::new(bin)
-        .env("ZEROCLAW_CONFIG_DIR", config_dir)
+        .env("DX_AGENT_CONFIG_DIR", config_dir)
         .env("RUST_LOG", "off")
         .args(["config", "patch", "--json", "-"])
         .stdin(Stdio::piped())

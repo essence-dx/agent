@@ -406,8 +406,8 @@ Examples:
 Environment:
   DX_AGENTS_INSTALL_DIR    Source checkout override (default: PREFIX/.dx-agents/src)
   DX_AGENTS_CARGO_FEATURES Extra cargo features (prefer --features)
-  ZEROCLAW_INSTALL_DIR     Legacy source checkout override
-  ZEROCLAW_CARGO_FEATURES  Legacy extra cargo features
+  DX_AGENT_INSTALL_DIR     Legacy source checkout override
+  DX_AGENT_CARGO_FEATURES  Legacy extra cargo features
 EOF
 }
 
@@ -435,7 +435,7 @@ do_uninstall() {
     info "Removed $tui_bin"
   fi
 
-  local config_dir="$PREFIX/.zeroclaw"
+  local config_dir="$PREFIX/.dx_agent"
   if [ -d "$config_dir" ]; then
     if [ -t 0 ]; then
       printf "  Remove config and data (%s)? [y/N] " "$config_dir"
@@ -494,7 +494,7 @@ config_has_runnable_agent() {
 }
 
 onboarding_needed() {
-  cfg="$PREFIX/.zeroclaw/config.toml"
+  cfg="$PREFIX/.dx_agent/config.toml"
   [ -f "$cfg" ] || return 0 # no config → onboard
   if config_has_model_provider "$cfg" && config_has_runnable_agent "$cfg"; then
     return 1 # configured agent route → skip
@@ -691,8 +691,8 @@ USER_APPS=""    # ""=unset (default apps), "none"=skip all, or comma list (e.g. 
 if [ -n "${DX_AGENTS_CARGO_FEATURES:-}" ]; then
   USER_FEATURES="${USER_FEATURES:+$USER_FEATURES,}$DX_AGENTS_CARGO_FEATURES"
 fi
-if [ -n "${ZEROCLAW_CARGO_FEATURES:-}" ]; then
-  USER_FEATURES="${USER_FEATURES:+$USER_FEATURES,}$ZEROCLAW_CARGO_FEATURES"
+if [ -n "${DX_AGENT_CARGO_FEATURES:-}" ]; then
+  USER_FEATURES="${USER_FEATURES:+$USER_FEATURES,}$DX_AGENT_CARGO_FEATURES"
 fi
 
 while [ $# -gt 0 ]; do
@@ -764,7 +764,7 @@ done
 
 CARGO_HOME="${CARGO_HOME:-$PREFIX/.cargo}"
 RUSTUP_HOME="${RUSTUP_HOME:-$PREFIX/.rustup}"
-INSTALL_DIR="${DX_AGENTS_INSTALL_DIR:-${ZEROCLAW_INSTALL_DIR:-$PREFIX/.dx-agents/src}}"
+INSTALL_DIR="${DX_AGENTS_INSTALL_DIR:-${DX_AGENT_INSTALL_DIR:-$PREFIX/.dx-agents/src}}"
 ORIGINAL_PATH="$PATH"
 PATH="$CARGO_HOME/bin:$PATH"
 export CARGO_HOME RUSTUP_HOME PATH
@@ -1178,7 +1178,7 @@ if [ "$SKIP_ONBOARD" = false ] && [ "$DRY_RUN" != true ] && [ -f "$BIN" ]; then
   # Skip the prompt entirely when the operator already has a configured
   # runtime config — re-installs should not re-prompt.
   if ! onboarding_needed; then
-    info "Existing runtime config detected at $PREFIX/.zeroclaw/config.toml — skipping setup prompt."
+    info "Existing runtime config detected at $PREFIX/.dx_agent/config.toml — skipping setup prompt."
     info "Run '$BIN_NAME quickstart' to reconfigure."
   elif [ -t 0 ]; then
     # 3-way setup choice. Bare Enter accepts the [1] CLI quickstart default;

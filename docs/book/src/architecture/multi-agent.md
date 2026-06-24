@@ -4,7 +4,7 @@ This page documents the architecture and operator-facing surface of the multi-ag
 
 ## Vocabulary
 
-- **Install dir** — the directory holding everything ZeroClaw owns on a host. Typically `~/.zeroclaw/`. Equivalent to the dir containing `config.toml`.
+- **Install dir** — the directory holding everything DX Agent owns on a host. Typically `~/.dx_agent/`. Equivalent to the dir containing `config.toml`.
 - **Agent** — a configured `[agents.<alias>]` block: a join table of references (`risk_profile`, `model_provider`, `channels`), a per-agent workspace dir, and a per-agent memory backend selection. Each agent picks one memory backend at creation; that choice is immutable for the agent's lifetime.
 - **Aliased workspace** — `<install>/agents/<alias>/workspace/`. One per agent. Holds the agent's identity files (`AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`, `BOOTSTRAP.md`, `MEMORY.md`) and any operator data the agent owns.
 - **SubAgent** — a runtime-spawned ephemeral child run that inherits its parent's identity, security policy, and memory allowlist. See [SubAgents](./subagents.md) for the full surface (lifecycle, spawn sites, the depth-1 cap, what gets returned to the parent).
@@ -27,7 +27,7 @@ SubAgent spawns enforce the rule that a child cannot escalate beyond its parent.
 
 ## Memory model
 
-Each agent has its own `Arc<dyn Memory>` instance. The factory (`zeroclaw_memory::create_memory_for_agent`) dispatches by backend kind:
+Each agent has its own `Arc<dyn Memory>` instance. The factory (`dx_agent_memory::create_memory_for_agent`) dispatches by backend kind:
 
 - **SQLite / Postgres / Lucid**: shared install-wide store. The `agents` table maps alias → UUID, and the `memories` table carries `agent_id` referencing that UUID. The factory wraps the inner backend in `AgentScopedMemory`, which stamps the bound agent's UUID on every store via `store_with_agent` and filters every recall via `recall_for_agents` with the resolved allowlist.
 - **Markdown**: per-agent dir. Each agent's `MarkdownMemory` writes to `<install>/agents/<alias>/workspace/MEMORY.md` and `memory/YYYY-MM-DD.md`. Cross-agent recall is composed by `AgentScopedMarkdownMemory`, which holds the bound agent's `MarkdownMemory` plus a peer set of `(alias, MarkdownMemory)` pairs and unions their results with `[<alias>] ` attribution prefixes on each row.

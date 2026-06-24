@@ -16,17 +16,17 @@ same machine do not collide.
 | macOS | `<data_dir>/daemon.sock` (Unix domain socket) |
 | Windows | `\\.\pipe\zeroclaw-<hash>` where `<hash>` is derived from `data_dir` |
 
-Override with the `ZEROCLAW_SOCKET` environment variable on either platform:
+Override with the `DX_AGENT_SOCKET` environment variable on either platform:
 
 ```bash
 # Unix
-export ZEROCLAW_SOCKET=/tmp/my-zeroclaw.sock
+export DX_AGENT_SOCKET=/tmp/my-zeroclaw.sock
 zeroclaw daemon
 ```
 
 ```powershell
 # Windows
-$env:ZEROCLAW_SOCKET = '\\.\pipe\my-zeroclaw'
+$env:DX_AGENT_SOCKET = '\\.\pipe\my-zeroclaw'
 zeroclaw daemon
 ```
 
@@ -135,7 +135,7 @@ On Windows, use any named-pipe client (PowerShell `[System.IO.Pipes.NamedPipeCli
 
 ## Internals
 
-The dispatch layer lives in `crates/zeroclaw-runtime/src/rpc/`:
+The dispatch layer lives in `crates/dx-agent-runtime/src/rpc/`:
 
 | File | Role |
 |---|---|

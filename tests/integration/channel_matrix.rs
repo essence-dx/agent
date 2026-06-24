@@ -4,7 +4,7 @@
 //! contract, covering: identity semantics, threading, default methods,
 //! capability declarations, cross-channel parity, and edge cases.
 //!
-//! This matrix ensures ZeroClaw channels are fully tested to maintain
+//! This matrix ensures DX Agent channels are fully tested to maintain
 //! competitive feature parity across all supported platforms.
 
 use async_trait::async_trait;
@@ -106,10 +106,10 @@ impl MatrixTestChannel {
     }
 }
 
-impl ::zeroclaw_api::attribution::Attributable for MatrixTestChannel {
-    fn role(&self) -> ::zeroclaw_api::attribution::Role {
-        ::zeroclaw_api::attribution::Role::Channel(
-            ::zeroclaw_api::attribution::ChannelKind::Webhook,
+impl ::dx_agent_api::attribution::Attributable for MatrixTestChannel {
+    fn role(&self) -> ::dx_agent_api::attribution::Role {
+        ::dx_agent_api::attribution::Role::Channel(
+            ::dx_agent_api::attribution::ChannelKind::Webhook,
         )
     }
     fn alias(&self) -> &str {
@@ -1081,7 +1081,7 @@ async fn concurrent_sends_all_recorded() {
 
     for i in 0..20 {
         let ch = Arc::clone(&ch);
-        handles.push(zeroclaw_spawn::spawn!(async move {
+        handles.push(dx_agent_spawn::spawn!(async move {
             ch.send(&SendMessage::new(format!("msg_{i}"), format!("user_{i}")))
                 .await
                 .unwrap();
@@ -1102,7 +1102,7 @@ async fn concurrent_typing_events_all_recorded() {
 
     for i in 0..10 {
         let ch = Arc::clone(&ch);
-        handles.push(zeroclaw_spawn::spawn!(async move {
+        handles.push(dx_agent_spawn::spawn!(async move {
             ch.start_typing(&format!("user_{i}")).await.unwrap();
             ch.stop_typing(&format!("user_{i}")).await.unwrap();
         }));
@@ -1130,7 +1130,7 @@ async fn concurrent_reactions_all_recorded() {
     for (i, emoji) in emojis.iter().enumerate() {
         let ch = Arc::clone(&ch);
         let emoji = emoji.to_string();
-        handles.push(zeroclaw_spawn::spawn!(async move {
+        handles.push(dx_agent_spawn::spawn!(async move {
             ch.add_reaction("chan_1", &format!("msg_{i}"), &emoji)
                 .await
                 .unwrap();
@@ -1363,10 +1363,10 @@ async fn capability_matrix_spec() {
 /// Minimal channel with ONLY required methods — validates all defaults work.
 struct MinimalChannel;
 
-impl ::zeroclaw_api::attribution::Attributable for MinimalChannel {
-    fn role(&self) -> ::zeroclaw_api::attribution::Role {
-        ::zeroclaw_api::attribution::Role::Channel(
-            ::zeroclaw_api::attribution::ChannelKind::Webhook,
+impl ::dx_agent_api::attribution::Attributable for MinimalChannel {
+    fn role(&self) -> ::dx_agent_api::attribution::Role {
+        ::dx_agent_api::attribution::Role::Channel(
+            ::dx_agent_api::attribution::ChannelKind::Webhook,
         )
     }
     fn alias(&self) -> &str {

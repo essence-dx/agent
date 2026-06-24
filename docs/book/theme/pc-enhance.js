@@ -1,4 +1,4 @@
-/* ZeroClaw docs enhancement layer (Tier B PoC).
+/* DX Agent docs enhancement layer (Tier B PoC).
    - Right-hand "On this page" TOC built from content headings, with scroll-spy.
    - Hero banner injected on the landing page (introduction).
    - Reading-progress bar under the menu bar.
@@ -110,7 +110,7 @@
     hero.innerHTML =
       '<div class="pc-hero-glow"></div>' +
       '<div class="pc-hero-inner">' +
-      '<div class="pc-hero-badge">ZeroClaw</div>' +
+      '<div class="pc-hero-badge">DX Agent</div>' +
       '<h1 class="pc-hero-title"></h1>' +
       // Subtitle is intentionally hardcoded here: it is product positioning,
       // not page content, and changes rarely. If it needs to vary per build,

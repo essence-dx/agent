@@ -1,10 +1,10 @@
 # Browser Automation
 
-This guide covers setting up browser automation capabilities in ZeroClaw, including both headless automation and GUI access via VNC.
+This guide covers setting up browser automation capabilities in DX Agent, including both headless automation and GUI access via VNC.
 
 ## Overview
 
-ZeroClaw supports multiple browser access methods:
+DX Agent supports multiple browser access methods:
 
 | Method | Use Case | Requirements |
 |--------|----------|--------------|
@@ -25,7 +25,7 @@ agent-browser install --with-deps  # Linux (includes system deps)
 agent-browser install              # macOS/Windows
 ```
 
-### 2. Verify ZeroClaw Config
+### 2. Verify DX Agent Config
 
 The browser tool is enabled by default with `allowed_domains = ["*"]`. Restrict domains or disable it via `zeroclaw config set`:
 
@@ -146,7 +146,7 @@ agent-browser screenshot /tmp/test.png
 agent-browser close
 ```
 
-### ZeroClaw Integration Tests
+### DX Agent Integration Tests
 
 ```bash
 # Content extraction

@@ -4,8 +4,8 @@ This workspace belongs to essencefromexistence. Codex is the temporary coding pa
 
 ## Product Direction
 
-- The active product is `dx-agents`, forked from latest ZeroClaw.
-- Public branding should say DX Agents, not ZeroClaw.
+- The active product is `dx-agents`, forked from latest DX Agent.
+- Public branding should say DX Agents, not DX Agent.
 - Keep migration and compatibility readers for old `zeroclaw`, archived `agent`, OpenClaw, and Hermes data.
 - Internal `zeroclaw-*` workspace crates may remain to preserve upstream mergeability.
 - Prefer real runtime features over mock UI, fake state, or decorative scaffolding.
@@ -42,17 +42,17 @@ Forbidden patterns:
 
 - `src/main.rs` - CLI entrypoint and command routing.
 - `src/lib.rs` - module re-exports and CLI command enum definitions.
-- `crates/zeroclaw-api` - public trait definitions.
-- `crates/zeroclaw-config` - schema, config loading, migration, and env override logic.
-- `crates/zeroclaw-log` - unified log events and persistence.
-- `crates/zeroclaw-providers` - model providers and routing.
-- `crates/zeroclaw-channels` - messaging platform integrations.
-- `crates/zeroclaw-tools` - tool execution surface.
-- `crates/zeroclaw-runtime` - agent loop, security, cron, SOP, skills, observability, and runtime services.
-- `crates/zeroclaw-memory` - memory backends.
-- `crates/zeroclaw-infra` - shared infrastructure.
-- `crates/zeroclaw-gateway` - HTTP/WebSocket gateway.
-- `crates/zeroclaw-hardware` - peripherals, serial, GPIO, and hardware support.
+- `crates/dx-agent-api` - public trait definitions.
+- `crates/dx-agent-config` - schema, config loading, migration, and env override logic.
+- `crates/dx-agent-log` - unified log events and persistence.
+- `crates/dx-agent-providers` - model providers and routing.
+- `crates/dx-agent-channels` - messaging platform integrations.
+- `crates/dx-agent-tools` - tool execution surface.
+- `crates/dx-agent-runtime` - agent loop, security, cron, SOP, skills, observability, and runtime services.
+- `crates/dx-agent-memory` - memory backends.
+- `crates/dx-agent-infra` - shared infrastructure.
+- `crates/dx-agent-gateway` - HTTP/WebSocket gateway.
+- `crates/dx-agent-hardware` - peripherals, serial, GPIO, and hardware support.
 - `apps/zerocode` - upstream TUI onboarding application.
 - `apps/tauri` - desktop shell.
 - `docs` - documentation and parity notes.
@@ -97,7 +97,7 @@ Subagents inherit the parent identity and permissions but run in isolated sessio
 - Never revert user changes unless explicitly asked.
 - Keep commits focused when the user asks for commits.
 - Leave unrelated dirty files alone.
-- Do not push to upstream ZeroClaw. Upstream is fetch-only for this fork.
+- Do not push to upstream DX Agent. Upstream is fetch-only for this fork.
 
 ## Localization
 

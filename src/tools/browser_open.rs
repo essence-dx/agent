@@ -1,1 +1,1 @@
-pub use zeroclaw_tools::browser_open::*;
+pub use dx_agent_tools::browser_open::*;

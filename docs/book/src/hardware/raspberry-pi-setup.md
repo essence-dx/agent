@@ -1,6 +1,6 @@
 # Raspberry Pi Setup
 
-This guide covers installing and running ZeroClaw on Raspberry Pi (Pi 3, Pi 4, Pi 5, Pi Zero 2 W).
+This guide covers installing and running DX Agent on Raspberry Pi (Pi 3, Pi 4, Pi 5, Pi Zero 2 W).
 
 The README's "runs on <$10 hardware with <5 MB RAM" claim is true for the **runtime**. Build-time is a different story — Rust's compiler and linker need significantly more RAM than the resulting binary, so the on-device build path needs swap and a tuned profile to avoid OOM-kills during link.
 
@@ -19,7 +19,7 @@ For most Pi users, the **pre-built binary is the path of least resistance**.
 | Pi 3 (1 GB) | 1 GB | ✅ | ❌ Not recommended |
 | Pi Zero 2 W | 512 MB | ✅ | ❌ |
 
-**Runtime memory is minimal.** Even on a Pi Zero 2 W, the core agent runs in well under 5 MB RSS once it's started. The hardware ladder above is about whether you can compile on the device, not whether ZeroClaw can run on it.
+**Runtime memory is minimal.** Even on a Pi Zero 2 W, the core agent runs in well under 5 MB RSS once it's started. The hardware ladder above is about whether you can compile on the device, not whether DX Agent can run on it.
 
 ## Option 1: Pre-built Binary (Recommended)
 
@@ -164,7 +164,7 @@ If you want to use Pi GPIO peripherals from skills, enable the relevant feature 
 
 ## Containerized deployment (Podman recommended over Docker)
 
-**Pis are memory-constrained, and that's the operating reality this section is written against.** The 2 GB Pi 4 is the low-bar test unit for this guide — if a setup doesn't leave headroom on a 2 GB box, it's not a setup we recommend. ZeroClaw itself runs in well under 5 MB RSS at runtime, but everything you stack alongside it (channel transports, browser-control, MCP servers, an adjacent agent or two, plus the OS) competes for the same fixed pool. Memory you don't spend on container infrastructure is memory ZeroClaw and its tools get to use.
+**Pis are memory-constrained, and that's the operating reality this section is written against.** The 2 GB Pi 4 is the low-bar test unit for this guide — if a setup doesn't leave headroom on a 2 GB box, it's not a setup we recommend. DX Agent itself runs in well under 5 MB RSS at runtime, but everything you stack alongside it (channel transports, browser-control, MCP servers, an adjacent agent or two, plus the OS) competes for the same fixed pool. Memory you don't spend on container infrastructure is memory DX Agent and its tools get to use.
 
 Concrete budget on a 2 GB Pi 4 running Raspberry Pi OS Bookworm/Trixie headless:
 
@@ -172,12 +172,12 @@ Concrete budget on a 2 GB Pi 4 running Raspberry Pi OS Bookworm/Trixie headless:
 |---|---|
 | Kernel + base userspace + sshd | ~150-250 MB |
 | `dockerd` (idle, no containers) | ~150-200 MB |
-| ZeroClaw runtime (gateway only) | ~5 MB |
+| DX Agent runtime (gateway only) | ~5 MB |
 | One agent container (e.g. ghcr.io/zeroclaw-labs/zeroclaw) | ~30-80 MB |
 | **Available with Docker** | ~1.3-1.5 GB |
 | **Available with Podman (no daemon)** | ~1.5-1.7 GB |
 
-The Podman delta is on the order of ~150-200 MB freed up — small in absolute terms, large as a percentage of what's left over after the OS gets its share. On a 2 GB unit that's the difference between comfortably running ZeroClaw + a heavy channel transport (Matrix with media, browser-automation skills) and OOM-killing under load.
+The Podman delta is on the order of ~150-200 MB freed up — small in absolute terms, large as a percentage of what's left over after the OS gets its share. On a 2 GB unit that's the difference between comfortably running DX Agent + a heavy channel transport (Matrix with media, browser-automation skills) and OOM-killing under load.
 
 **Three reasons Podman is the better fit on Pi than Docker:**
 
@@ -185,7 +185,7 @@ The Podman delta is on the order of ~150-200 MB freed up — small in absolute t
 2. **systemd-native via Quadlets → operational simplicity.** Podman ships `.container` unit files that systemd manages directly — same lifecycle, logging, and dependency model as any other unit. No separate `docker.service` to babysit, no separate logging layer.
 3. **No daemon RSS → memory headroom.** Skipping `dockerd`'s persistent ~150-200 MB is the single biggest knob you can turn on a 2 GB Pi without sacrificing isolation.
 
-The trade-off: Podman's rootless network model uses slirp4netns (or pasta on newer versions), which is slower than the bridge that Docker's daemon sets up. For workloads that move a lot of HTTP traffic between containers on the same Pi, that's worth measuring. For ZeroClaw's typical "one or two long-running agent containers" pattern, the difference is negligible — and on memory-constrained hardware, the daemon-RSS savings dominate the calculation anyway.
+The trade-off: Podman's rootless network model uses slirp4netns (or pasta on newer versions), which is slower than the bridge that Docker's daemon sets up. For workloads that move a lot of HTTP traffic between containers on the same Pi, that's worth measuring. For DX Agent's typical "one or two long-running agent containers" pattern, the difference is negligible — and on memory-constrained hardware, the daemon-RSS savings dominate the calculation anyway.
 
 ### Quick install (Raspberry Pi OS Bookworm/Trixie)
 
@@ -195,7 +195,7 @@ sudo apt-get install -y podman
 sudo apt-get install -y podman-compose
 ```
 
-### Running ZeroClaw under Podman
+### Running DX Agent under Podman
 
 The published OCI image works under Podman without modification:
 
@@ -205,12 +205,12 @@ podman pull ghcr.io/zeroclaw-labs/zeroclaw:latest
 podman run --rm -d \
   --name zeroclaw \
   -p 42617:42617 \
-  -v ~/.zeroclaw:/root/.zeroclaw \
+  -v ~/.dx_agent:/root/.dx_agent \
   ghcr.io/zeroclaw-labs/zeroclaw:latest \
   daemon --host 0.0.0.0 --port 42617
 ```
 
-> **Bind gotcha:** ZeroClaw defaults to `127.0.0.1` for the gateway. Inside a container that means the gateway is unreachable from the host. Always pass `--host 0.0.0.0` (or set `ZEROCLAW_BIND=0.0.0.0`) when running in a container.
+> **Bind gotcha:** DX Agent defaults to `127.0.0.1` for the gateway. Inside a container that means the gateway is unreachable from the host. Always pass `--host 0.0.0.0` (or set `DX_AGENT_BIND=0.0.0.0`) when running in a container.
 
 ### Running as a systemd unit via Quadlet
 
@@ -219,7 +219,7 @@ Drop a `.container` file in `/etc/containers/systemd/` (system) or `~/.config/co
 ```ini
 # ~/.config/containers/systemd/zeroclaw.container
 [Unit]
-Description=ZeroClaw gateway
+Description=DX Agent gateway
 After=network-online.target
 Wants=network-online.target
 
@@ -227,9 +227,9 @@ Wants=network-online.target
 Image=ghcr.io/zeroclaw-labs/zeroclaw:latest
 ContainerName=zeroclaw
 PublishPort=42617:42617
-Environment=ZEROCLAW_BIND=0.0.0.0
+Environment=DX_AGENT_BIND=0.0.0.0
 Exec=daemon --host 0.0.0.0 --port 42617
-Volume=zeroclaw-data:/root/.zeroclaw
+Volume=dx-agent-data:/root/.dx_agent
 
 [Service]
 Restart=always
@@ -248,13 +248,13 @@ For rootless setups, also run `loginctl enable-linger $USER` so the service star
 
 ## Post-Install: Native (non-container) setup
 
-### 1. Initialize ZeroClaw
+### 1. Initialize DX Agent
 
 ```bash
 zeroclaw onboard
 ```
 
-This walks you through provider auth, gateway config, and creates `~/.zeroclaw/config.toml`.
+This walks you through provider auth, gateway config, and creates `~/.dx_agent/config.toml`.
 
 ### 2. Verify it works
 
@@ -284,7 +284,7 @@ zeroclaw daemon --host 0.0.0.0 --port 42617
 
 ### 5. Enable channels
 
-ZeroClaw can connect to chat platforms (Matrix, Mattermost, Discord, Telegram, etc.). See [Channels → Overview](../channels/overview.md). Most channel transports work fine on a Pi; the heaviest is the WebRTC stack used by some voice channels, which can spike CPU during call setup.
+DX Agent can connect to chat platforms (Matrix, Mattermost, Discord, Telegram, etc.). See [Channels → Overview](../channels/overview.md). Most channel transports work fine on a Pi; the heaviest is the WebRTC stack used by some voice channels, which can spike CPU during call setup.
 
 ## GPIO and Hardware Peripherals
 
@@ -334,7 +334,7 @@ loginctl enable-linger $USER
 
 ### Container can't reach gateway from host
 
-ZeroClaw binds `127.0.0.1` by default — inside a container that means localhost-of-the-container. Pass `--host 0.0.0.0` (or `ZEROCLAW_BIND=0.0.0.0`) when running in Podman/Docker.
+DX Agent binds `127.0.0.1` by default — inside a container that means localhost-of-the-container. Pass `--host 0.0.0.0` (or `DX_AGENT_BIND=0.0.0.0`) when running in Podman/Docker.
 
 ## Performance tips
 

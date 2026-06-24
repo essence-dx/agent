@@ -1,6 +1,6 @@
 # Docker & Containers
 
-Run ZeroClaw in Docker, Podman, Kubernetes, or any OCI runtime.
+Run DX Agent in Docker, Podman, Kubernetes, or any OCI runtime.
 
 ## Official images
 
@@ -19,12 +19,12 @@ Multi-arch: `linux/amd64`, `linux/arm64`.
 ```bash
 docker run -d \
   --name zeroclaw \
-  -v zeroclaw-data:/zeroclaw-data \
+  -v dx-agent-data:/dx-agent-data \
   -p 42617:42617 \
   ghcr.io/zeroclaw-labs/zeroclaw:latest
 ```
 
-The image expects persistent state at `/zeroclaw-data`. On first run, it bootstraps a default config — you still need to onboard before it's useful:
+The image expects persistent state at `/dx-agent-data`. On first run, it bootstraps a default config — you still need to onboard before it's useful:
 
 ```bash
 docker exec -it zeroclaw zeroclaw onboard
@@ -42,9 +42,9 @@ services:
     ports:
       - "42617:42617"      # gateway
     volumes:
-      - ./data:/zeroclaw-data
+      - ./data:/dx-agent-data
     environment:
-      ZEROCLAW_ALLOW_PUBLIC_BIND: "1"   # only if the gateway must be reachable on the LAN
+      DX_AGENT_ALLOW_PUBLIC_BIND: "1"   # only if the gateway must be reachable on the LAN
 ```
 
 After the container starts, run onboarding:
@@ -53,21 +53,21 @@ After the container starts, run onboarding:
 docker compose exec zeroclaw zeroclaw onboard
 ```
 
-Drop `ZEROCLAW_ALLOW_PUBLIC_BIND` if you only need local access.
+Drop `DX_AGENT_ALLOW_PUBLIC_BIND` if you only need local access.
 
 ## Config inside containers
 
-The image expects config at `/zeroclaw-data/.zeroclaw/config.toml`. Mount your local config in:
+The image expects config at `/dx-agent-data/.dx_agent/config.toml`. Mount your local config in:
 
 ```bash
 docker run -d --name zeroclaw \
-  -v $(pwd)/my-config.toml:/zeroclaw-data/.zeroclaw/config.toml:ro \
-  -v zeroclaw-state:/zeroclaw-data/workspace \
+  -v $(pwd)/my-config.toml:/dx-agent-data/.dx_agent/config.toml:ro \
+  -v zeroclaw-state:/dx-agent-data/workspace \
   -p 42617:42617 \
   ghcr.io/zeroclaw-labs/zeroclaw:latest
 ```
 
-For container workloads, set `uri` on each `[providers.models.<type>.<alias>]` to a container-reachable address (e.g. `http://host.docker.internal:11434` for an Ollama server on the Docker Desktop host). The `ZEROCLAW_providers__models__<type>__<alias>__uri=...` env override can do the same at runtime without editing `config.toml`.
+For container workloads, set `uri` on each `[providers.models.<type>.<alias>]` to a container-reachable address (e.g. `http://host.docker.internal:11434` for an Ollama server on the Docker Desktop host). The `DX_AGENT_providers__models__<type>__<alias>__uri=...` env override can do the same at runtime without editing `config.toml`.
 
 ## Channels that poll (Telegram, email) — just work
 
@@ -94,7 +94,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    type: Recreate         # ZeroClaw is single-instance per workspace
+    type: Recreate         # DX Agent is single-instance per workspace
   template:
     spec:
       containers:
@@ -104,17 +104,17 @@ spec:
             - containerPort: 42617
           volumeMounts:
             - name: data
-              mountPath: /zeroclaw-data
+              mountPath: /dx-agent-data
           env:
-            - name: ZEROCLAW_ALLOW_PUBLIC_BIND
+            - name: DX_AGENT_ALLOW_PUBLIC_BIND
               value: "1"
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: zeroclaw-data
+            claimName: dx-agent-data
 ```
 
-**Scaling:** ZeroClaw is single-writer per workspace. Don't scale horizontally — run one instance per agent.
+**Scaling:** DX Agent is single-writer per workspace. Don't scale horizontally — run one instance per agent.
 
 ## Re-authenticating after logout
 
@@ -134,8 +134,8 @@ docker compose exec zeroclaw zeroclaw gateway get-paircode --new
 
 - **macOS hostname quirks (Docker Desktop, colima, Rancher Desktop).** `host.docker.internal` works out of the box on **Docker Desktop** for macOS. On **colima**, it is only reachable if you installed with `colima start --network-address` (otherwise the container can't see the host at all — connect via the VM's gateway IP, usually `192.168.5.2`, or tunnel through a shared network). **Rancher Desktop** behaves like Docker Desktop for recent versions but has had `host.docker.internal` resolve-failures on older releases. If provider calls fail with `connection refused` to `host.docker.internal`, verify with `docker run --rm alpine getent hosts host.docker.internal` — empty output means the hostname isn't resolvable and you need an explicit IP.
 - **Host-side services.** If a provider is Ollama on the host, `uri = "http://host.docker.internal:11434"` (under `[providers.models.ollama.<alias>]`) works on Docker Desktop. On Linux Docker you may need `--add-host=host.docker.internal:host-gateway`.
-- **Memory persistence.** The SQLite memory file sits inside `/zeroclaw-data/workspace/`. If you don't mount that volume, every restart loses conversation history.
-- **Bind-mounting `/zeroclaw-data`.** A host bind mount on `/zeroclaw-data` replaces the entire image directory, including the default `config.toml` and (previously) the dashboard bundle. The dashboard is now installed at `/usr/share/zeroclawlabs/web/dist` — outside the mount — so a bind mount no longer hides it. On first run, mount an empty host directory and the container bootstraps a fresh config; the gateway auto-detects the dashboard from its image path.
+- **Memory persistence.** The SQLite memory file sits inside `/dx-agent-data/workspace/`. If you don't mount that volume, every restart loses conversation history.
+- **Bind-mounting `/dx-agent-data`.** A host bind mount on `/dx-agent-data` replaces the entire image directory, including the default `config.toml` and (previously) the dashboard bundle. The dashboard is now installed at `/usr/share/zeroclawlabs/web/dist` — outside the mount — so a bind mount no longer hides it. On first run, mount an empty host directory and the container bootstraps a fresh config; the gateway auto-detects the dashboard from its image path.
 - **No hardware passthrough by default.** GPIO / USB need explicit `--device` flags (`--device /dev/ttyUSB0`), and the container user needs matching GID for `dialout`/`gpio` groups.
 
 ## Next

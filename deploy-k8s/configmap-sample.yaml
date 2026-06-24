@@ -15,7 +15,7 @@ data:
     [providers.models.anthropic.cloud]   # type = anthropic; alias = cloud
     model = "claude-sonnet-4-20250514"
     temperature = 0.7                    # omit this line entirely to not pass temperature to the provider
-    # api_key is injected from Secret via ZEROCLAW_providers__models__anthropic__cloud__api_key
+    # api_key is injected from Secret via DX_AGENT_providers__models__anthropic__cloud__api_key
 
     # Alternate entry: claude-opus-4-7 rejects any temperature setting, so the
     # `temperature` line is left out. Point `agents.assistant.model_provider`

@@ -1,1 +1,1 @@
-pub use zeroclaw_channels::dingtalk::*;
+pub use dx_agent_channels::dingtalk::*;

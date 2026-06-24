@@ -21,7 +21,7 @@ struct Args {
     #[arg(long)]
     model_provider: String,
     /// Config directory holding config.toml and .secret-key (default:
-    /// ~/.zeroclaw). Mirrors `zeroclaw --config-dir`.
+    /// ~/.dx-agent). Mirrors `zeroclaw --config-dir`.
     #[arg(long)]
     config_dir: Option<String>,
     /// Path for appending full input/output on every failure (default: {po}.failures.log)
@@ -339,7 +339,7 @@ fn fail(err: anyhow::Error, raw_response: impl Into<String>) -> BatchFailure {
 /// builds no HTTP. One request per source string keeps the per-entry mapping
 /// unambiguous (the .po model is one msgid -> one msgstr).
 async fn translate_batch(
-    provider: &dyn zeroclaw_api::model_provider::ModelProvider,
+    provider: &dyn dx_agent_api::model_provider::ModelProvider,
     model: &str,
     locale: &str,
     batch: &[&str],

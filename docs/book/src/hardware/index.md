@@ -1,6 +1,6 @@
 # Hardware — Overview
 
-ZeroClaw's hardware subsystem lets the agent control microcontrollers, SBCs, and peripherals directly. Enable with `--features hardware`.
+DX Agent's hardware subsystem lets the agent control microcontrollers, SBCs, and peripherals directly. Enable with `--features hardware`.
 
 ## What's supported
 
@@ -97,7 +97,7 @@ Per-board pin maps and electrical characteristics:
 
 ## Adding new hardware
 
-See [Adding boards & tools](./adding-boards-and-tools.md) for the step-by-step. TL;DR: implement the `Peripheral` trait from `crates/zeroclaw-hardware/src/`, add a board-specific feature flag, write a probe routine that identifies the board from USB descriptors or serial handshake.
+See [Adding boards & tools](./adding-boards-and-tools.md) for the step-by-step. TL;DR: implement the `Peripheral` trait from `crates/dx-agent-hardware/src/`, add a board-specific feature flag, write a probe routine that identifies the board from USB descriptors or serial handshake.
 
 ## See also
 
