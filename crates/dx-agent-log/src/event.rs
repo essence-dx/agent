@@ -316,8 +316,8 @@ pub struct LogEvent {
     pub span_id: Option<String>,
 
     /// All the alias-bound attribution fields live here.
-    #[serde(default)]
-    pub zeroclaw: DxAgentAttribution,
+    #[serde(default, rename = "zeroclaw")]
+    pub dx_agent: DxAgentAttribution,
 
     /// Human-readable short message. The structured fields above carry the
     /// machine-readable detail; `message` is what a terminal-formatter
@@ -362,7 +362,7 @@ impl LogEvent {
             service: ServiceDescriptor::default(),
             trace_id: None,
             span_id: None,
-            zeroclaw: DxAgentAttribution::default(),
+            dx_agent: DxAgentAttribution::default(),
             message: None,
             attributes: Value::Null,
             schema_version: LogEvent::SCHEMA_VERSION,
