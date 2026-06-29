@@ -1080,7 +1080,7 @@ mod catalog_model_provider_tests {
                 .as_ref()
                 .expect("opencode freemium metadata")
                 .free_model_ids
-                .contains(&"deepseek-v4-flash-free".to_string())
+                .contains(&"xhigh".to_string())
         );
     }
 

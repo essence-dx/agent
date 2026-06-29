@@ -222,7 +222,7 @@ mod quickstart_metadata_tests {
                 "auth": ["public_key", "api_key"],
                 "env_vars": [],
                 "note": "OpenCode Zen free tier exposes selected public models.",
-                "free_model_ids": ["big-pickle", "deepseek-v4-flash-free"]
+                "free_model_ids": ["high", "xhigh"]
             }
         }))
         .expect("quickstart provider metadata row must deserialize");
@@ -231,7 +231,7 @@ mod quickstart_metadata_tests {
         assert_eq!(encoded["identity"]["canonical_id"], "opencode-zen");
         assert_eq!(
             encoded["freemium"]["free_model_ids"][1],
-            "deepseek-v4-flash-free"
+            "xhigh"
         );
     }
 }

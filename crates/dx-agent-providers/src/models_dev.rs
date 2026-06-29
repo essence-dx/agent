@@ -153,7 +153,7 @@ mod tests {
             "opencode": {
                 "models": {
                     "free": {
-                        "id": "deepseek-v4-flash-free",
+                        "id": "xhigh",
                         "cost": { "input": 0, "output": 0 }
                     },
                     "paid": {
@@ -161,7 +161,7 @@ mod tests {
                         "cost": { "input": 2, "output": 8 }
                     },
                     "accessible-deprecated": {
-                        "id": "nemotron-3-super-free",
+                        "id": "medium",
                         "status": "deprecated",
                         "cost": { "input": 0, "output": 0 }
                     },
@@ -179,7 +179,7 @@ mod tests {
         let catalog = parse_catalog(raw.as_bytes()).unwrap();
         let ids = filter_models(&catalog, "opencode").unwrap();
 
-        assert_eq!(ids, vec!["deepseek-v4-flash-free", "nemotron-3-super-free"]);
+        assert_eq!(ids, vec!["xhigh", "medium"]);
     }
 
     #[test]

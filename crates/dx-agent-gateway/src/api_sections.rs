@@ -1595,7 +1595,7 @@ mod tests {
 
         assert_eq!(
             description,
-            "OpenCode Zen: free models big-pickle, deepseek-v4-flash-free, mimo-v2.5-free +4 more."
+            "OpenCode Zen: free models xhigh, high, default +3 more."
         );
         assert!(
             !description.contains("OPENCODE_API_KEY"),
@@ -1606,7 +1606,7 @@ mod tests {
             "picker description should stay compact and avoid long policy notes"
         );
         assert!(
-            !description.contains("nemotron-3-ultra-free"),
+            !description.contains("xlow"),
             "picker description should summarize long free-model lists"
         );
     }

@@ -3114,7 +3114,7 @@ mod tests {
                 .freemium()
                 .expect("opencode freemium metadata")
                 .free_model_ids
-                .contains(&"deepseek-v4-flash-free".to_string())
+                .contains(&"xhigh".to_string())
         );
     }
 

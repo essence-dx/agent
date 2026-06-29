@@ -2430,12 +2430,12 @@ mod tests {
                     env_vars: Vec::new(),
                     note: "OpenCode Zen free tier exposes selected public models.".into(),
                     free_model_ids: vec![
-                        "big-pickle".into(),
-                        "deepseek-v4-flash-free".into(),
-                        "mimo-v2.5-free".into(),
-                        "minimax-m3-free".into(),
-                        "nemotron-3-super-free".into(),
-                        "nemotron-3-ultra-free".into(),
+                        "xhigh".into(),
+                        "high".into(),
+                        "default".into(),
+                        "medium".into(),
+                        "low".into(),
+                        "xlow".into(),
                     ],
                 }),
             }],
@@ -2454,7 +2454,7 @@ mod tests {
 
         assert_eq!(
             opencode.help,
-            "OpenCode Zen: free models big-pickle, deepseek-v4-flash-free, mimo-v2.5-free +3 more."
+            "OpenCode Zen: free models xhigh, high, default +3 more."
         );
     }
 }

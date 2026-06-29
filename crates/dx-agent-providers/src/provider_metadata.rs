@@ -281,12 +281,12 @@ static PROVIDER_METADATA: &[ProviderMetadata] = &[
         env_vars: &["OPENCODE_API_KEY", "OPENCODE_ZEN_API_KEY"],
         freemium_note: "Public free-model access works without a private key; paid Zen models require an OpenCode API key.",
         free_model_ids: &[
-            "big-pickle",
-            "deepseek-v4-flash-free",
-            "mimo-v2.5-free",
-            "minimax-m3-free",
-            "nemotron-3-super-free",
-            "nemotron-3-ultra-free",
+            "xhigh",
+            "high",
+            "default",
+            "medium",
+            "low",
+            "xlow",
         ],
     },
     ProviderMetadata {
@@ -556,8 +556,8 @@ mod tests {
         assert_eq!(metadata.canonical_id, "opencode-zen");
         assert_eq!(metadata.access, AccessKind::FreeTier);
         assert!(metadata.auth.contains(&AuthKind::PublicKey));
-        assert!(metadata.free_model_ids.contains(&"deepseek-v4-flash-free"));
-        assert!(metadata.free_model_ids.contains(&"big-pickle"));
+        assert!(metadata.free_model_ids.contains(&"xhigh"));
+        assert!(metadata.free_model_ids.contains(&"high"));
     }
 
     #[test]
