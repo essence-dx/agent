@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "crates/dx-agent-api", "crates/dx-agent-infra", "crates/dx-agent-config", "crates/dx-agent-log", "crates/dx-agent-spawn", "crates/dx-agent-providers", "crates/dx-agent-memory", "crates/dx-agent-channels", "crates/dx-agent-tools", "crates/dx-agent-runtime", "apps/agentcode", "crates/dx-agent-plugins", "crates/dx-agent-gateway", "crates/dx-agent-hardware", "crates/dx-agent-tool-call-parser", "crates/robot-kit", "crates/aardvark-sys", "crates/dx-agent-macros", "apps/tauri", "tools/fill-translations", "xtask"]
+members = [".", "crates/dx-agent-api", "crates/dx-agent-infra", "crates/dx-agent-config", "crates/dx-agent-log", "crates/dx-agent-spawn", "crates/dx-agent-providers", "crates/dx-agent-memory", "crates/dx-agent-channels", "crates/dx-agent-tools", "crates/dx-agent-runtime", "apps/agentcode", "crates/dx-agent-plugins", "crates/dx-agent-gateway", "crates/dx-agent-hardware", "crates/dx-agent-tool-call-parser", "crates/robot-kit", "crates/aardvark-sys", "crates/dx-agent-macros", "apps/tauri", "tools/fill-translations", "xtask", "crates/dx-agent-sidecars"]
 resolver = "2"
 exclude = ["plugins/image-gen-fal"]
 
@@ -27,6 +27,7 @@ dx-agent-hardware = { path = "crates/dx-agent-hardware", version = "0.8.0-beta-2
 dx-agent-tool-call-parser = { path = "crates/dx-agent-tool-call-parser", version = "0.8.0-beta-2" }
 dx-agent-macros = { path = "crates/dx-agent-macros", version = "0.8.0-beta-2" }
 aardvark-sys = { path = "crates/aardvark-sys", version = "0.1.0" }
+dx-agent-sidecars = { path = "crates/dx-agent-sidecars", version = "0.8.0-beta-2", default-features = false }
 directories = "6.0"
 
 [package]
@@ -88,6 +89,7 @@ dx-agent-gateway = { workspace = true, optional = true }
 dx-agent-hardware = { workspace = true, optional = true }
 dx-agent-tool-call-parser.workspace = true
 dx-agent-macros.workspace = true
+dx-agent-sidecars = { workspace = true, optional = true }
 # CLI - minimal and fast
 clap = { version = "4.5", features = ["derive"] }
 clap_complete = "4.5"
@@ -355,6 +357,12 @@ embedded-web = ["dx-agent-gateway/embedded-web"]
 fantoccini = ["browser-native"]
 landlock = ["sandbox-landlock"]
 metrics = ["observability-prometheus"]
+
+# Sidecar features — wire external forks into dx-agent
+sidecar-openclaw = ["dx-agent-sidecars/openclaw"]
+sidecar-hermes = ["dx-agent-sidecars/hermes"]
+sidecar-deerflow = ["dx-agent-sidecars/deerflow"]
+sidecar-all = ["sidecar-openclaw", "sidecar-hermes", "sidecar-deerflow"]
 
 # CI meta-feature
 ci-all = [
