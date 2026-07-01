@@ -7,6 +7,7 @@ use anyhow::{Context, Result, bail};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::Instant;
+use dx_agent_api::model_provider::ModelProvider;
 use dx_agent_config::schema::SkillImprovementConfig;
 
 /// Manages skill self-improvement with cooldown tracking.
@@ -124,6 +125,63 @@ impl SkillImprover {
     fn skills_dir(&self) -> PathBuf {
         self.workspace_dir.join("skills")
     }
+}
+
+/// Generate improved skill content using the LLM.
+///
+/// Calls the model provider with a system prompt that asks it to improve
+/// a SKILL.toml based on how it was used. Returns the LLM's response text
+/// which should be a valid SKILL.toml.
+pub async fn llm_generate_improved_skill(
+    model_provider: &dyn ModelProvider,
+    model_name: &str,
+    current_content: &str,
+    execution_context: &str,
+) -> Result<String> {
+    let prompt = format!(
+        "You are a skill improvement assistant. Improve the following SKILL.toml \
+         based on how it was actually used.\n\
+         \n\
+         Rules:\n\
+         - Return ONLY the improved SKILL.toml, no explanations, no markdown fences.\n\
+         - Preserve the [skill] section and all [[tools]] sections.\n\
+         - Improve descriptions, add missing parameters, fix commands.\n\
+         - Keep the name field unchanged.\n\
+         - Bump the version if you make meaningful changes.\n\
+         \n\
+         Current SKILL.toml:\n\
+         {}\n\
+         \n\
+         Execution context (how this skill was actually used):\n\
+         {}\n\
+         \n\
+         Improved SKILL.toml:",
+        current_content,
+        execution_context,
+    );
+
+    let improved = model_provider
+        .chat_with_system(
+            Some(
+                "You are a skill improvement engine. Output ONLY valid TOML, nothing else.",
+            ),
+            &prompt,
+            model_name,
+            Some(0.3),
+        )
+        .await?;
+
+    // Strip any markdown fences the LLM might add
+    let cleaned = improved
+        .trim()
+        .strip_prefix("```toml")
+        .or_else(|| improved.trim().strip_prefix("```"))
+        .map(|s| s.strip_suffix("```").unwrap_or(s))
+        .unwrap_or(&improved)
+        .trim()
+        .to_string();
+
+    Ok(cleaned)
 }
 
 /// Validate skill content: must be non-empty, valid UTF-8 (already a &str),

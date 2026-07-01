@@ -3991,6 +3991,99 @@ pub async fn run(
                                 .with_attrs(::serde_json::json!({"slug": slug})),
                                 "Auto-created skill from execution"
                             );
+
+                            // After creation, attempt LLM-based improvement.
+                            if config.skills.skill_improvement.enabled {
+                                let skill_path = config
+                                    .data_dir
+                                    .join("skills")
+                                    .join(&slug)
+                                    .join("SKILL.toml");
+                                match tokio::fs::read_to_string(&skill_path).await {
+                                    Ok(content) => {
+                                        match crate::skills::improver::llm_generate_improved_skill(
+                                            model_provider.as_ref(),
+                                            &model_name,
+                                            &content,
+                                            &msg,
+                                        )
+                                        .await
+                                        {
+                                            Ok(improved) => {
+                                                let mut improver = crate::skills::improver::SkillImprover::new(
+                                                    config.data_dir.clone(),
+                                                    config.skills.skill_improvement.clone(),
+                                                );
+                                                match improver
+                                                    .improve_skill(
+                                                        &slug,
+                                                        &improved,
+                                                        "LLM-based improvement after execution",
+                                                    )
+                                                    .await
+                                                {
+                                                    Ok(Some(_)) => {
+                                                        ::dx_agent_log::record!(
+                                                            INFO,
+                                                            ::dx_agent_log::Event::new(
+                                                                module_path!(),
+                                                                ::dx_agent_log::Action::Note
+                                                            )
+                                                            .with_attrs(
+                                                                ::serde_json::json!({"slug": slug}),
+                                                            ),
+                                                            "LLM-improved skill"
+                                                        );
+                                                    }
+                                                    Ok(None) => {}
+                                                    Err(e) => {
+                                                        ::dx_agent_log::record!(
+                                                            WARN,
+                                                            ::dx_agent_log::Event::new(
+                                                                module_path!(),
+                                                                ::dx_agent_log::Action::Note
+                                                            )
+                                                            .with_attrs(::serde_json::json!({
+                                                                "slug": slug,
+                                                                "error": format!("{}", e)
+                                                            })),
+                                                            "LLM skill improvement skipped"
+                                                        );
+                                                    }
+                                                }
+                                            }
+                                            Err(e) => {
+                                                ::dx_agent_log::record!(
+                                                    WARN,
+                                                    ::dx_agent_log::Event::new(
+                                                        module_path!(),
+                                                        ::dx_agent_log::Action::Note
+                                                    )
+                                                    .with_attrs(::serde_json::json!({
+                                                        "slug": slug,
+                                                        "error": format!("{}", e)
+                                                    })),
+                                                    "LLM skill improvement generation failed"
+                                                );
+                                            }
+                                        }
+                                    }
+                                    Err(e) => {
+                                        ::dx_agent_log::record!(
+                                            WARN,
+                                            ::dx_agent_log::Event::new(
+                                                module_path!(),
+                                                ::dx_agent_log::Action::Note
+                                            )
+                                            .with_attrs(::serde_json::json!({
+                                                "slug": slug,
+                                                "error": format!("{}", e)
+                                            })),
+                                            "Could not read skill file for improvement"
+                                        );
+                                    }
+                                }
+                            }
                         }
                         Ok(None) => {
                             ::dx_agent_log::record!(
