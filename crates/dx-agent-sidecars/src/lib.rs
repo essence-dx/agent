@@ -1,12 +1,16 @@
 pub mod protocol;
 
-#[cfg(feature = "openclaw")]
-pub mod openclaw;
+// TODO(openclaw): re-enable when openclaw sidecar is ready for shipping
+// #[cfg(feature = "openclaw")]
+// pub mod openclaw;
 
+// Native Rust hermes auto-update — replaces the Python sidecar.
 #[cfg(feature = "hermes")]
 pub mod hermes;
 
-#[cfg(feature = "deerflow")]
-pub mod deerflow;
+// TODO(deerflow): re-enable when deer-flow sidecar is ready for shipping
+// #[cfg(feature = "deerflow")]
+// pub mod deerflow;
 
-pub use protocol::SidecarProcess;
+// TODO(sidecars): re-export once any sidecar module is un-commented
+// pub use protocol::SidecarProcess;

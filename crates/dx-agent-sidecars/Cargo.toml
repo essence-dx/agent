@@ -7,11 +7,12 @@ license.workspace = true
 description = "Sidecar process management for dx-agent — spawns, manages, and communicates with external service forks via JSON-RPC 2.0 over stdin/stdout."
 
 [features]
-default = []
+default = ["native-update"]
 openclaw = []
-hermes = []
+hermes = ["native-update"]
 deerflow = []
-all = ["openclaw", "hermes", "deerflow"]
+native-update = ["dep:reqwest", "dep:semver", "dep:zip", "dep:flate2", "dep:tar", "dep:chrono"]
+all = ["openclaw", "hermes", "deerflow", "native-update"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -25,11 +26,3 @@ zip = { version = "2.2", optional = true }
 flate2 = { version = "1.0", optional = true }
 tar = { version = "0.4", optional = true }
 chrono = { version = "0.4", optional = true }
-
-[features]
-default = ["native-update"]
-openclaw = []
-hermes = []
-deerflow = []
-native-update = ["dep:reqwest", "dep:semver", "dep:zip", "dep:flate2", "dep:tar", "dep:chrono"]
-all = ["openclaw", "hermes", "deerflow", "native-update"]

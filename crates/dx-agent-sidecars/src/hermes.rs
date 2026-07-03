@@ -1,7 +1,10 @@
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, SystemTime};
+use tokio::sync::Mutex;
 use tracing::{debug, info, warn};
 
 /// Status returned by an update check.
@@ -44,11 +47,12 @@ struct UpdateCache {
 }
 
 const UPDATE_CHECK_CACHE_SECS: u64 = 21_600; // 6 hours
+const BACKGROUND_CHECK_INTERVAL: Duration = Duration::from_secs(3600); // 1 hour
 
 /// Native Rust Hermes auto-update implementation.
 ///
-/// Replaces the previous Python sidecar approach — performs git-based
-/// and ZIP-fallback updates directly without spawning an external process.
+/// Performs git-based and ZIP-fallback updates directly without
+/// spawning an external Python process.
 pub struct HermesUpdate {
     repo_path: PathBuf,
     cache_path: PathBuf,
@@ -71,7 +75,7 @@ impl HermesUpdate {
     /// Check whether an update is available via git rev-list.
     ///
     /// Returns `UpdateStatus` with the commit count behind `origin/main`.
-    /// Results are cached for 6 hours.
+    /// Results are cached on disk for 6 hours.
     pub async fn check_update(&self) -> Result<UpdateStatus> {
         let current = self.git_head_hash()?;
 
@@ -123,7 +127,6 @@ impl HermesUpdate {
         // Count commits behind
         let behind = self.git_behind_count("origin/main");
         let upstream = behind.as_ref().ok().map(|_| self.git_upstream_hash());
-
         let available = behind.as_deref().copied().map(|b| b > 0).unwrap_or(false);
 
         // Write cache
@@ -197,101 +200,6 @@ impl HermesUpdate {
             previous_version: Some(current),
             new_version: Some(new_hash),
         })
-    }
-
-    /// Download the latest release ZIP from GitHub and replace the repo.
-    async fn zip_update_fallback(&self, current: &str) -> Result<UpdateResult> {
-        info!("Attempting ZIP-based update for {}", self.repo_path.display());
-
-        #[cfg(feature = "native-update")]
-        {
-            let url = format!(
-                "https://github.com/NousResearch/hermes-agent/archive/refs/heads/main.zip"
-            );
-            let client = reqwest::Client::builder()
-                .timeout(Duration::from_secs(120))
-                .build()?;
-            let resp = client.get(&url).send().await?;
-            if !resp.status().is_success() {
-                bail!("ZIP download failed: HTTP {}", resp.status());
-            }
-            let bytes = resp.bytes().await?;
-
-            let tmp = self.repo_path.with_extension("tmp_update");
-            if tmp.exists() {
-                std::fs::remove_dir_all(&tmp)?;
-            }
-            std::fs::create_dir_all(&tmp)?;
-
-            let reader = std::io::Cursor::new(&bytes);
-            let mut archive = zip::ZipArchive::new(reader)?;
-
-            // Extract to parent, then rename into place
-            let parent = self.repo_path.parent().unwrap_or(Path::new("."));
-            for i in 0..archive.len() {
-                let mut file = archive.by_index(i)?;
-                let outpath = parent.join(file.name());
-                if file.is_dir() {
-                    std::fs::create_dir_all(&outpath)?;
-                } else {
-                    if let Some(p) = outpath.parent() {
-                        std::fs::create_dir_all(p)?;
-                    }
-                    let mut outfile = std::fs::File::create(&outpath)?;
-                    std::io::copy(&mut file, &mut outfile)?;
-                }
-            }
-
-            // The ZIP contains a top-level dir like "hermes-agent-main/"
-            let extracted = parent.join("hermes-agent-main");
-            if extracted.exists() {
-                // Remove old repo contents (keeping .git)
-                let git_dir = self.repo_path.join(".git");
-                for entry in std::fs::read_dir(&self.repo_path)? {
-                    let entry = entry?;
-                    let path = entry.path();
-                    if path != git_dir {
-                        if path.is_dir() {
-                            std::fs::remove_dir_all(&path)?;
-                        } else {
-                            std::fs::remove_file(&path)?;
-                        }
-                    }
-                }
-                // Copy extracted files (but not .git)
-                for entry in std::fs::read_dir(&extracted)? {
-                    let entry = entry?;
-                    let path = entry.path();
-                    let name = path.file_name().unwrap();
-                    if name != ".git" {
-                        let dest = self.repo_path.join(name);
-                        if path.is_dir() {
-                            copy_dir(&path, &dest)?;
-                        } else {
-                            std::fs::copy(&path, &dest)?;
-                        }
-                    }
-                }
-                std::fs::remove_dir_all(&extracted)?;
-            }
-
-            let new_hash = self.git_head_hash().unwrap_or_else(|_| "unknown".into());
-            std::fs::remove_dir_all(&tmp)?;
-
-            info!("ZIP update complete");
-            Ok(UpdateResult {
-                success: true,
-                message: format!("Updated via ZIP: {} -> {}", &current[..8], &new_hash[..8]),
-                previous_version: Some(current.to_string()),
-                new_version: Some(new_hash),
-            })
-        }
-
-        #[cfg(not(feature = "native-update"))]
-        {
-            let _ = current;
-            bail!("ZIP update requires the 'native-update' feature");
-        }
     }
 
     /// Get the list of available update "phases" (informational).
@@ -389,6 +297,116 @@ impl HermesUpdate {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Background auto-update check loop
+//
+// Mirrors the Python pattern from hermes-agent/hermes_cli/banner.py:
+//   prefetch_update_check() → daemon thread → check_for_updates()
+//   get_update_result(timeout) → cached result
+//
+// Spawns a background task that periodically checks for updates and
+// stores the result in an Arc<Mutex<Option<UpdateStatus>>>.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// A background auto-update checker that runs on an interval.
+///
+/// Call [`BackgroundUpdater::spawn`] to start the background loop,
+/// then [`BackgroundUpdater::latest`] to get the most recent result.
+pub struct BackgroundUpdater {
+    inner: Arc<BackgroundInner>,
+}
+
+struct BackgroundInner {
+    updater: HermesUpdate,
+    latest: Mutex<Option<UpdateStatus>>,
+    running: AtomicBool,
+}
+
+impl BackgroundUpdater {
+    /// Create a new background updater backed by the given `HermesUpdate`.
+    pub fn new(updater: HermesUpdate) -> Self {
+        Self {
+            inner: Arc::new(BackgroundInner {
+                updater,
+                latest: Mutex::new(None),
+                running: AtomicBool::new(false),
+            }),
+        }
+    }
+
+    /// Spawn the background check loop.
+    ///
+    /// Runs immediately on spawn, then every `interval`.
+    /// The task is detached (runs until dropped).
+    pub fn spawn(&self, interval: Duration) {
+        let inner = self.inner.clone();
+        self.inner.running.store(true, Ordering::Relaxed);
+
+        tokio::spawn(async move {
+            info!("Background update checker started");
+
+            // Immediate first check
+            inner.run_check().await;
+
+            // Periodic checks
+            while inner.running.load(Ordering::Relaxed) {
+                tokio::time::sleep(interval).await;
+                if !inner.running.load(Ordering::Relaxed) {
+                    break;
+                }
+                inner.run_check().await;
+            }
+
+            info!("Background update checker stopped");
+        });
+    }
+
+    /// Stop the background loop (best-effort, signal-only).
+    pub fn stop(&self) {
+        self.inner.running.store(false, Ordering::Relaxed);
+    }
+
+    /// Get the latest cached check result, or run a fresh check if none exists.
+    pub async fn latest(&self) -> Option<UpdateStatus> {
+        let mut latest = self.inner.latest.lock().await;
+        if latest.is_some() {
+            return latest.clone();
+        }
+        // First-time: run a check synchronously
+        let result = self.inner.updater.check_update().await.ok();
+        *latest = result.clone();
+        result
+    }
+
+    /// Whether the background loop is running.
+    pub fn is_running(&self) -> bool {
+        self.inner.running.load(Ordering::Relaxed)
+    }
+}
+
+impl BackgroundInner {
+    async fn run_check(&self) {
+        debug!("Running background update check");
+        let status = self.updater.check_update().await;
+        match status {
+            Ok(s) => {
+                let mut latest = self.latest.lock().await;
+                if s.available {
+                    info!(
+                        "Update available: {} commits behind (current={})",
+                        s.behind_count.unwrap_or(0),
+                        s.current
+                    );
+                }
+                *latest = Some(s);
+            }
+            Err(e) => {
+                debug!("Background update check failed: {e:#}");
+            }
+        }
+    }
+}
+
 /// Recursively copy a directory.
 #[cfg(feature = "native-update")]
 fn copy_dir(src: &Path, dst: &Path) -> Result<()> {
@@ -408,58 +426,11 @@ fn copy_dir(src: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Legacy Hermes sidecar kept for backward compatibility.
-///
-/// Uses the native `HermesUpdate` internally instead of spawning Python.
-pub struct HermesSidecar {
-    updater: Option<HermesUpdate>,
-}
-
-impl HermesSidecar {
-    pub fn new() -> Self {
-        Self { updater: None }
-    }
-
-    /// Initialize with the repo path where Hermes is installed.
-    pub fn init(&mut self, repo_path: PathBuf, cache_dir: PathBuf) {
-        self.updater = Some(HermesUpdate::new(repo_path, cache_dir));
-    }
-
-    /// Check if an update is available.
-    pub async fn check_update(&self) -> Result<serde_json::Value> {
-        let Some(updater) = &self.updater else {
-            bail!("HermesSidecar not initialized — call init() first");
-        };
-        let status = updater.check_update().await?;
-        Ok(serde_json::to_value(status)?)
-    }
-
-    /// Perform a full update.
-    pub async fn perform_update(&self) -> Result<serde_json::Value> {
-        let Some(updater) = &self.updater else {
-            bail!("HermesSidecar not initialized — call init() first");
-        };
-        let result = updater.perform_update().await?;
-        Ok(serde_json::to_value(result)?)
-    }
-
-    /// List available update phases.
-    pub async fn list_update_phases(&self) -> Result<serde_json::Value> {
-        let Some(updater) = &self.updater else {
-            bail!("HermesSidecar not initialized — call init() first");
-        };
-        let phases = updater.list_update_phases();
-        Ok(serde_json::to_value(phases)?)
-    }
-
-    /// No-op — kept for API compatibility.
-    pub async fn shutdown(&mut self) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl Default for HermesSidecar {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+// ═══════════════════════════════════════════════════════════════════════════
+// HermesSidecar — COMMENTED OUT for shipping focus.
+//
+// This was the original Python sidecar proxy. The native HermesUpdate +
+// BackgroundUpdater above now replace it entirely. Re-enable only if a
+// consumer specifically needs the old JSON-RPC response shape.
+// ═══════════════════════════════════════════════════════════════════════════
+// pub struct HermesSidecar { ... }
