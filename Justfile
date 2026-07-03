@@ -8,16 +8,20 @@ build:
     @New-Item -ItemType Directory -Force -Path G:\Dx\bin | Out-Null
     @Copy-Item target\release\dx-agent.exe G:\Dx\bin\ -Force -ErrorAction SilentlyContinue
 
-# Build release with all channels + run interactively
+# Build release then run agent interactively
 # Usage: just run [agent_alias] -- [dx-agent args...]
-#        just run dx -- -m "Hello"
-run agent_alias="dx" *args: build
+#        just run test_agent -- -m "Hello"
+run agent_alias="test_agent" *args: build
     $a = "{{args}}" -replace "^-- ",""; .\target\release\dx-agent.exe agent -a {{agent_alias}} $(if ($a) { $a })
 
-# Run without building (uses existing binary)
-run-fast agent_alias="dx" *args:
+# Run without rebuilding (uses existing binary)
+run-fast agent_alias="test_agent" *args:
     $a = "{{args}}" -replace "^-- ",""; .\target\release\dx-agent.exe agent -a {{agent_alias}} $(if ($a) { $a })
+
+# Run dx-config self-test: verifies dx discovery, .sr write, .sr read
+test-config:
+    .\target\release\dx-agent.exe config get runtime.kind
 
 # Quick setup: enable delegation, skill_creation on existing agent
-setup agent_alias="dx":
+setup agent_alias="test_agent":
     .\setup.ps1 -Agent {{agent_alias}}
