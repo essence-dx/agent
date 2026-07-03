@@ -16,6 +16,20 @@ all = ["openclaw", "hermes", "deerflow"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tokio = { version = "1.50", features = ["io-util", "process", "sync", "time"] }
+tokio = { version = "1.50", features = ["io-util", "process", "sync", "time", "fs"] }
 tracing = "0.1"
 anyhow = "1.0"
+reqwest = { version = "0.12", features = ["json"], optional = true }
+semver = { version = "1.0", optional = true }
+zip = { version = "2.2", optional = true }
+flate2 = { version = "1.0", optional = true }
+tar = { version = "0.4", optional = true }
+chrono = { version = "0.4", optional = true }
+
+[features]
+default = ["native-update"]
+openclaw = []
+hermes = []
+deerflow = []
+native-update = ["dep:reqwest", "dep:semver", "dep:zip", "dep:flate2", "dep:tar", "dep:chrono"]
+all = ["openclaw", "hermes", "deerflow", "native-update"]
