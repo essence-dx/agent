@@ -2994,6 +2994,11 @@ async fn fetch_locales(locale: &str, catalog: Option<&str>) -> Result<()> {
 #[tokio::main]
 #[allow(clippy::too_many_lines)]
 async fn main() -> Result<()> {
+    let dx = dx_agents::dx_config::AgentDxConfig::load();
+    eprintln!("dx config loaded: workspace_root={}", dx.workspace_root.display());
+    let _ = std::fs::create_dir_all(&dx.sr_dir);
+    let _ = std::fs::create_dir_all(&dx.receipts_dir);
+
     // Install default crypto model_provider for Rustls TLS.
     // This prevents the error: "could not automatically determine the process-level CryptoProvider"
     // when both aws-lc-rs and ring features are available (or neither is explicitly selected).
@@ -4303,7 +4308,14 @@ async fn main() -> Result<()> {
             memory::cli::handle_command(memory_command, &config).await
         }
 
-        Commands::Auth { auth_command } => handle_auth_command(auth_command, &config).await,
+        Commands::Auth { auth_command } => {
+            let result = handle_auth_command(auth_command, &config).await;
+            let _ = dx.write_sr("agent", &[("tool", "agent"), ("action", "auth"), ("status", if result.is_ok() { "ok" } else { "err" })]);
+            if let Some(status) = dx.read_status("agent") {
+                eprintln!("[agent] sr cache verified: {} entries", status.len());
+            }
+            result
+        }
 
         Commands::Hardware { hardware_command } => {
             hardware::handle_command(hardware_command.clone(), &config)

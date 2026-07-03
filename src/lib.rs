@@ -49,6 +49,7 @@ pub mod cli_provider_health;
 pub(crate) mod cli_provider_health_live;
 pub mod commands;
 pub mod config;
+pub mod dx_config;
 #[cfg(feature = "agent-runtime")]
 pub(crate) mod cost;
 #[cfg(feature = "agent-runtime")]

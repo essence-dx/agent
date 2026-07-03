@@ -230,6 +230,9 @@ http-body-util = { version = "0.1", optional = true }
 # rust-embed removed — web dashboard served from filesystem via gateway.web_dist_dir
 mime_guess = { version = "2", optional = true }
 
+# DX Serializer (.sr / .machine format)
+serializer = { path = "../serializer", package = "dx-serializer", version = "0.1.0" }
+
 # Use the blocking HTTP exporter client to avoid Tokio-reactor panics in
 # non-Tokio contexts.
 
