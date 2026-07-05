@@ -5358,8 +5358,8 @@ async fn main() -> Result<()> {
             use std::time::Instant;
 
             let model_path = model.unwrap_or_else(|| {
-                flow::models::LocalLlm::model_path_for_key("minicpm5-1b")
-                    .unwrap_or_else(|| "C:\\Dx\\models\\llm\\minicpm5-1b.gguf".to_string())
+                flow::models::LocalLlm::model_path_for_key("vibethinker-3b")
+                    .unwrap_or_else(|| "C:\\Dx\\models\\llm\\vibethinker-3b.gguf".to_string())
             });
 
             if !Path::new(&model_path).exists() {
