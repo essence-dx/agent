@@ -12,8 +12,8 @@ const FALLBACK_MODEL_KEY: &str = "minicpm5-1b";
 pub struct FlowModelProvider {
     alias: String,
     model_path: String,
-    n_gpu_layers: u32,
-    num_ctx: Option<u32>,
+    _n_gpu_layers: u32,
+    _num_ctx: Option<u32>,
     llm: Arc<Mutex<Option<flow::models::LocalLlm>>>,
 }
 
@@ -31,8 +31,8 @@ impl FlowModelProvider {
         Self {
             alias: alias.to_string(),
             model_path: resolved_path,
-            n_gpu_layers: n_gpu_layers.unwrap_or(0),
-            num_ctx,
+            _n_gpu_layers: n_gpu_layers.unwrap_or(0),
+            _num_ctx: num_ctx,
             llm: Arc::new(Mutex::new(None)),
         }
     }

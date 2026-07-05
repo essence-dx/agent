@@ -940,6 +940,25 @@ Examples:
         plugin_command: PluginCommands,
     },
 
+    /// Run a local model via dx-flow in single-shot mode
+    #[cfg(feature = "provider-flow")]
+    Flow {
+        /// Prompt to send to the local model
+        prompt: String,
+        /// Optional path to a GGUF model file (default: MiniCPM5 1B)
+        #[arg(long)]
+        model: Option<String>,
+        /// Optional system prompt
+        #[arg(long)]
+        system: Option<String>,
+        /// Show generation metrics
+        #[arg(long)]
+        metrics: bool,
+        /// GPU layers to offload (0 = CPU only)
+        #[arg(long, default_value = "0")]
+        gpu_layers: u32,
+    },
+
     /// Fetch translated locale files (FTL) from upstream
     // i18n-exempt: clap derive help — framework requires a compile-time literal
     #[command(long_about = "\
@@ -5326,6 +5345,62 @@ async fn main() -> Result<()> {
                 Ok(())
             }
         },
+
+        #[cfg(feature = "provider-flow")]
+        Commands::Flow {
+            prompt,
+            model,
+            system,
+            metrics,
+            gpu_layers,
+        } => {
+            use std::path::Path;
+            use std::time::Instant;
+
+            let model_path = model.unwrap_or_else(|| {
+                flow::models::LocalLlm::model_path_for_key("minicpm5-1b")
+                    .unwrap_or_else(|| "C:\\Dx\\models\\llm\\minicpm5-1b.gguf".to_string())
+            });
+
+            if !Path::new(&model_path).exists() {
+                anyhow::bail!(
+                    "Model file not found at: {model_path}. \
+                     Make sure the model is placed correctly."
+                );
+            }
+
+            let mut config = flow::models::LocalLlmConfig::general();
+            config.n_gpu_layers = gpu_layers;
+            let llm = flow::models::LocalLlm::with_config(model_path, config);
+
+            let load_start = Instant::now();
+            llm.initialize().await?;
+            let load_time = load_start.elapsed();
+
+            let full_prompt = match &system {
+                Some(sys) if !sys.trim().is_empty() => format!("{}\n\n{}", sys.trim(), prompt),
+                _ => prompt.clone(),
+            };
+
+            let gen_start = Instant::now();
+            let (response, gen_metrics) = llm.generate_with_metrics(&full_prompt).await?;
+            let gen_time = gen_start.elapsed();
+
+            println!("{response}");
+
+            if metrics {
+                eprintln!(
+                    "[flow] load={:.1}s  gen={:.1}s  tokens={}  tok/s={:.1}  prompt_tokens={}",
+                    load_time.as_secs_f64(),
+                    gen_time.as_secs_f64(),
+                    gen_metrics.generated_tokens,
+                    gen_metrics.tokens_per_second,
+                    gen_metrics.prompt_tokens,
+                );
+            }
+
+            Ok(())
+        }
 
         Commands::Props { .. } => {
             anyhow::bail!(
