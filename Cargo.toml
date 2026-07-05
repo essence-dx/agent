@@ -28,6 +28,7 @@ dx-agent-tool-call-parser = { path = "crates/dx-agent-tool-call-parser", version
 dx-agent-macros = { path = "crates/dx-agent-macros", version = "0.8.0-beta-2" }
 aardvark-sys = { path = "crates/aardvark-sys", version = "0.1.0" }
 dx-agent-sidecars = { path = "crates/dx-agent-sidecars", version = "0.8.0-beta-2", default-features = false }
+flow = { path = "../flow", package = "dx-flow", version = "1.0.0" }
 directories = "6.0"
 
 [package]
@@ -90,6 +91,7 @@ dx-agent-hardware = { workspace = true, optional = true }
 dx-agent-tool-call-parser.workspace = true
 dx-agent-macros.workspace = true
 dx-agent-sidecars = { workspace = true, optional = true }
+flow = { workspace = true, optional = true }
 # CLI - minimal and fast
 clap = { version = "4.5", features = ["derive"] }
 clap_complete = "4.5"
@@ -252,6 +254,7 @@ default = [
     "gateway",
     "observability-prometheus",
     "schema-export",
+    "provider-flow",
 ]
 
 # The core agent runtime — agent loop, tools, persistence subsystems.
@@ -360,6 +363,9 @@ embedded-web = ["dx-agent-gateway/embedded-web"]
 fantoccini = ["browser-native"]
 landlock = ["sandbox-landlock"]
 metrics = ["observability-prometheus"]
+
+# Local model provider via dx-flow
+provider-flow = ["dep:flow", "dx-agent-providers/provider-flow"]
 
 # Sidecar features — wire external forks into dx-agent
 sidecar-openclaw = ["dx-agent-sidecars/openclaw"]

@@ -248,21 +248,21 @@ use dx_agent_config::schema::{
     CloudflareModelProviderConfig, CohereModelProviderConfig, CopilotModelProviderConfig,
     CustomModelProviderConfig, DeepinfraModelProviderConfig, DeepmystModelProviderConfig,
     DeepseekModelProviderConfig, DoubaoModelProviderConfig, FireworksModelProviderConfig,
-    FriendliModelProviderConfig, GeminiCliModelProviderConfig, GeminiModelProviderConfig,
-    GlmModelProviderConfig, GroqModelProviderConfig, HuggingfaceModelProviderConfig,
-    HunyuanModelProviderConfig, HyperbolicModelProviderConfig, KiloCliModelProviderConfig,
-    LeptonModelProviderConfig, LitellmModelProviderConfig, LlamacppModelProviderConfig,
-    LmstudioModelProviderConfig, MinimaxModelProviderConfig, MistralModelProviderConfig,
-    MoonshotEndpoint, MoonshotModelProviderConfig, NebiusModelProviderConfig,
-    NovitaModelProviderConfig, NscaleModelProviderConfig, NvidiaModelProviderConfig,
-    OllamaModelProviderConfig, OpenAIModelProviderConfig, OpenRouterModelProviderConfig,
-    OpencodeModelProviderConfig, OsaurusModelProviderConfig, OvhModelProviderConfig,
-    PerplexityModelProviderConfig, QianfanModelProviderConfig, QwenModelProviderConfig,
-    RekaModelProviderConfig, SambanovaModelProviderConfig, SglangModelProviderConfig,
-    SiliconflowModelProviderConfig, StepfunModelProviderConfig, SyntheticModelProviderConfig,
-    TelnyxModelProviderConfig, TogetherModelProviderConfig, VeniceModelProviderConfig,
-    VercelModelProviderConfig, VllmModelProviderConfig, XaiModelProviderConfig,
-    YiModelProviderConfig, ZaiModelProviderConfig,
+    FlowModelProviderConfig, FriendliModelProviderConfig, GeminiCliModelProviderConfig,
+    GeminiModelProviderConfig, GlmModelProviderConfig, GroqModelProviderConfig,
+    HuggingfaceModelProviderConfig, HunyuanModelProviderConfig, HyperbolicModelProviderConfig,
+    KiloCliModelProviderConfig, LeptonModelProviderConfig, LitellmModelProviderConfig,
+    LlamacppModelProviderConfig, LmstudioModelProviderConfig, MinimaxModelProviderConfig,
+    MistralModelProviderConfig, MoonshotEndpoint, MoonshotModelProviderConfig,
+    NebiusModelProviderConfig, NovitaModelProviderConfig, NscaleModelProviderConfig,
+    NvidiaModelProviderConfig, OllamaModelProviderConfig, OpenAIModelProviderConfig,
+    OpenRouterModelProviderConfig, OpencodeModelProviderConfig, OsaurusModelProviderConfig,
+    OvhModelProviderConfig, PerplexityModelProviderConfig, QianfanModelProviderConfig,
+    QwenModelProviderConfig, RekaModelProviderConfig, SambanovaModelProviderConfig,
+    SglangModelProviderConfig, SiliconflowModelProviderConfig, StepfunModelProviderConfig,
+    SyntheticModelProviderConfig, TelnyxModelProviderConfig, TogetherModelProviderConfig,
+    VeniceModelProviderConfig, VercelModelProviderConfig, VllmModelProviderConfig,
+    XaiModelProviderConfig, YiModelProviderConfig, ZaiModelProviderConfig,
 };
 
 // ── Pure-compat families ───────────────────────────────────────────────
@@ -1201,6 +1201,35 @@ impl FamilyProviderFactory for CustomModelProviderConfig {
             p = p.with_merge_system_into_user();
         }
         Ok(apply_compat_options(p, opts))
+    }
+}
+
+impl FamilyProviderFactory for FlowModelProviderConfig {
+    fn create_provider(
+        &self,
+        alias: &str,
+        _key: Option<&str>,
+        _api_url: Option<&str>,
+        _opts: &ModelProviderRuntimeOptions,
+    ) -> Result<Box<dyn ModelProvider>> {
+        #[cfg(not(feature = "provider-flow"))]
+        {
+            let _ = alias;
+            anyhow::bail!(
+                "Flow provider requires the `provider-flow` feature. \
+                 Rebuild with `--features provider-flow` or use a different model provider."
+            );
+        }
+        #[cfg(feature = "provider-flow")]
+        {
+            let p = crate::flow::FlowModelProvider::new(
+                alias,
+                self.model_path.clone(),
+                self.n_gpu_layers,
+                self.num_ctx,
+            );
+            Ok(Box::new(p))
+        }
     }
 }
 

@@ -239,6 +239,7 @@ pub enum ModelProviderKind {
     Lepton,
     Synthetic,
     Opencode,
+    Flow,
     Custom,
     Plugin,
 }

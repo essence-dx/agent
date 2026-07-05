@@ -4,6 +4,7 @@ use dx_agent_macros::Configurable;
 
 use super::schema::{
     Ai21ModelProviderConfig, AihubmixModelProviderConfig, AnthropicModelProviderConfig,
+    FlowModelProviderConfig,
     AnyscaleModelProviderConfig, AstraiModelProviderConfig, AtomicChatModelProviderConfig,
     AvianModelProviderConfig, AzureModelProviderConfig, BaichuanModelProviderConfig,
     BasetenModelProviderConfig, BedrockModelProviderConfig, CerebrasModelProviderConfig,
@@ -171,7 +172,7 @@ define_provider_ref!(ChannelRef, "channels");
 macro_rules! for_each_model_provider_slot {
     ($mac:ident) => {
         $mac! {
-            (openai, "openai", OpenAIModelProviderConfig),            (azure, "azure", AzureModelProviderConfig),
+            (openai, "openai", OpenAIModelProviderConfig),            (flow, "flow", FlowModelProviderConfig),            (azure, "azure", AzureModelProviderConfig),
             (anthropic, "anthropic", AnthropicModelProviderConfig),            (moonshot, "moonshot", MoonshotModelProviderConfig),
             (qwen, "qwen", QwenModelProviderConfig),
             (glm, "glm", GlmModelProviderConfig),

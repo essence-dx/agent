@@ -24,6 +24,8 @@ pub mod catalog;
 pub mod compatible;
 pub mod copilot;
 pub mod factory;
+#[cfg(feature = "provider-flow")]
+pub mod flow;
 pub mod gemini;
 pub mod gemini_cli;
 // glm.rs excluded — not compiled in upstream (dead code with known issues)
@@ -1761,6 +1763,11 @@ pub fn list_model_providers() -> Vec<ModelProviderInfo> {
             name: "azure",
             display_name: "Azure OpenAI",
             local: false,
+        },
+        ModelProviderInfo {
+            name: "flow",
+            display_name: "Flow (local LLM via llama.cpp)",
+            local: true,
         },
         ModelProviderInfo {
             name: "ollama",
